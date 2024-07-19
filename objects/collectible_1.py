@@ -1,1 +1,0 @@
-#code for collectible 1
