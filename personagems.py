@@ -1,15 +1,19 @@
 import pygame
 class Jogador(pygame.sprite.Sprite):
-    def __init__(self, pos_x_jogador, pos_y_jogador, escala, sprite_idle, sprite_andando, hp, ataque, defesa, velocidade, frame_rate):
+    def __init__(self, pos, escala, sprite_idle, sprite_andando, hp, ataque, defesa, velocidade, frame_rate):
         super().__init__()
-        self.escala = escala
+
+        # Sprite
+        self.escala = escala  # Dimensões do sprite (x, y)
         self.sprite_idle = pygame.transform.scale(pygame.image.load(sprite_idle), self.escala)
         self.sprite_andando = [pygame.transform.scale(pygame.image.load(sprite), self.escala) for sprite in sprite_andando]
-        self.image = self.sprite_idle
+        self.image = self.sprite_idle  # Imagem a ser desenhada na tela
+        self.direcao = "direita" # Direção para qual o sprite está indo
+
+        # Objeto
         self.rect = self.image.get_rect()
-        self.hitbox = pygame.Rect(pos_x_jogador/4, pos_y_jogador/4, 33, 33)
-        self.pos = pygame.math.Vector2(pos_x_jogador, pos_y_jogador)
-        self.direcao = "direita"
+        self.hitbox = pygame.Rect(pos.x / 4, pos.y / 4, self.escala.x / 2, self.escala.y / 2)  # Hitbox posicionada no centro do rect e com metade do tamanho
+        self.pos = pos
 
         # Stats
         self.hit_point_max = hp
@@ -21,11 +25,14 @@ class Jogador(pygame.sprite.Sprite):
         self.exp = 0
         self.exp_para_proximo_nivel = int(100 * (1 + self.nivel ** 1.1))
 
+        # Inventário
+        self.inventario = {'Poção': 0}
+
         # Animação
         self.andando = False
-        self.frame = 0
-        self.ultimo_tick = pygame.time.get_ticks()
-        self.frame_rate_animacao = frame_rate
+        self.frame = 0  # Frame Atual
+        self.ultimo_tick = pygame.time.get_ticks()  # Contagem de ticks quando o frame foi atualizado pela última vez
+        self.frame_rate_animacao = 1000 // frame_rate  # Frame rate da animação do sprite
 
     def movimento(self, dt):
         keys = pygame.key.get_pressed()
@@ -73,9 +80,16 @@ class Jogador(pygame.sprite.Sprite):
             self.nivel += 1
             self.exp_para_proximo_nivel = int(100 * (1 + self.nivel ** 1.1))
 
-class Chicote(Jogador):
-    def __init__(self, pos_x, pos_y):
-        escala = (66, 66)
+    def beber_pocao(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_q] and self.inventario['Poção'] > 0:
+            self.inventario['Poção'] -= 1
+            self.hit_points_atuais += 25
+            if self.hit_points_atuais > 100: self.hit_points_atuais = 100
+
+class BichoChicote(Jogador):
+    def __init__(self, pos):
+        escala = pygame.math.Vector2(66, 66)
         sprite_idle = "Sprites/Player_Idle.png"
         sprite_andando = [f"Sprites/Player_andando_{i+1}.png" for i in range(3)]
 
@@ -86,10 +100,7 @@ class Chicote(Jogador):
         velocidade_movimento = 3
 
         # Animação
-        frame_rate = 1000 // 9
+        frame_rate = 9
 
-        super().__init__(pos_x, pos_y, escala, sprite_idle, sprite_andando, hp, ataque, defesa, velocidade_movimento, frame_rate)
-
-
-
-
+        super().__init__(pos, escala, sprite_idle, sprite_andando, hp, ataque, defesa, velocidade_movimento, frame_rate)
+        
