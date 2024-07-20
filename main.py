@@ -25,11 +25,11 @@ class Camera:
         self.camera = pygame.Rect(x, y, self.largura, self.altura)
 
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, pos):
+    def __init__(self, pos, sprite_loaded):
         super().__init__()
 
         # Sprite
-        self.image = pygame.image.load('Sprites/Grama_Tile.png')
+        self.image = sprite_loaded
         self.largura = self.image.get_width()
         self.altura = self.image.get_height()
 
@@ -68,6 +68,9 @@ BRANCO = (255, 255, 255)
 tela = pygame.display.set_mode((LARGURA, ALTURA))
 pygame.display.set_caption('Vampiro Sobreviventes')
 
+# Imagens
+Grama_Tile = pygame.image.load('Sprites/Grama_Tile.png').convert_alpha()
+
 # Fontes
 fonte_none = pygame.font.Font(None, 30)
 
@@ -80,7 +83,7 @@ inimigos = pygame.sprite.Group()
 moedas = pygame.sprite.Group()
 pocoes = pygame.sprite.Group()
 cristais = pygame.sprite.Group()
-tiles = pygame.sprite.Group(Tile(pygame.math.Vector2(0, 0)))
+tiles = pygame.sprite.Group(Tile(pygame.math.Vector2(0, 0), Grama_Tile))
 
 # Sistema
 camera = Camera(LARGURA, ALTURA)
@@ -122,7 +125,7 @@ while True:
     # Gerar background
     for tile in tiles:
         tiles_para_gerar = tile.player_presente(jogador)
-        new_tiles_group = pygame.sprite.Group(Tile(pygame.math.Vector2(coords[0], coords[1])) for coords in tiles_para_gerar)
+        new_tiles_group = pygame.sprite.Group(Tile(pygame.math.Vector2(coords[0], coords[1]), Grama_Tile) for coords in tiles_para_gerar)
         if new_tiles_group:
             break
 
@@ -178,3 +181,4 @@ while True:
 
     # Atualiza a tela
     pygame.display.update()
+
