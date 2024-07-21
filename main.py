@@ -165,7 +165,7 @@ while True:
         cooldown_spawnar_inimigos += 10000
 
     # Spawnar items (Spawna 5 a cada 15 segundos) (Max = 20)
-    if pygame.time.get_ticks() >= cooldown_spawnar_items and len(inimigos) <= 20:
+    if pygame.time.get_ticks() >= cooldown_spawnar_items and len(items) <= 20:
         for i in range(5):
             item_tipo = random.choice([Moeda, Cura])
             item_spawnado = item_tipo(spawnar_ao_redor(jogador, 900))
