@@ -1,6 +1,7 @@
 from personagems import BichoChicote
 from inimigos import Texugo
 from coletaveis import Moeda, Cura, CristalXp
+from ataques import Slash
 import pygame
 import random
 
@@ -89,6 +90,9 @@ items.add(cura)
 jogador = BichoChicote(pygame.math.Vector2(600, 400))
 todos_sprites.add(jogador)
 
+ataque_chicote = Slash(jogador.pos + pygame.math.Vector2(150,0))
+todos_sprites.add(ataque_chicote)
+
 for i in range(10):
     obstagoon = Texugo(pygame.math.Vector2(random.randint(100, 1101), random.randint(100, 701)))
     todos_sprites.add(obstagoon)
@@ -104,6 +108,11 @@ while True:
     jogador.movimento(delta_time)
     jogador.animar_sprite()
     jogador.nivel_update()
+
+    # ataque chicote - seria bom relocar esse ataque para o jogador especifico ao inves de estar no arquivo main.py
+    ataque_chicote.animar_sprite()
+    ataque_chicote.atacar()
+    ataque_chicote.atualizar_posicao(jogador.pos, jogador.direcao, 150)
 
     camera.movimento(jogador)
 
@@ -125,6 +134,9 @@ while True:
         inimigo.movimento(jogador.pos, delta_time)
         inimigo.animar_sprite()
         jogador.hit_points_atuais -= inimigo.dar_dano(jogador)
+
+        #verificacao de dano contra o inimigo se o ataque for verdadeiro
+        inimigo.hit_points_atuais -= ataque_chicote.dar_dano(inimigo)
 
         # Drops dependendo do tipo de inimigo
         if isinstance(inimigo, Texugo):
@@ -172,4 +184,3 @@ while True:
 
     # Atualiza a tela
     pygame.display.update()
-
