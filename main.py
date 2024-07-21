@@ -134,7 +134,7 @@ while True:
 
         # Verificação de dano contra o inimigo se um ataque estiver sendo executado e tocando no inimigo
         for ataque in ataques:
-            inimigo.hit_points_atuais -= ataque_chicote.dar_dano(inimigo, jogador)
+            inimigo.hit_points_atuais -= ataque.dar_dano(inimigo, jogador)
 
         # Drops dependendo do tipo de inimigo
         if isinstance(inimigo, Texugo):
