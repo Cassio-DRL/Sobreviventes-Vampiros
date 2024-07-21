@@ -81,8 +81,7 @@ class Jogador(pygame.sprite.Sprite):
             self.exp_para_proximo_nivel = int(100 * (1 + self.nivel ** 1.1))
 
     def beber_pocao(self):
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_q] and self.inventario['Poção'] > 0:
+        if self.inventario['Poção'] > 0:
             self.inventario['Poção'] -= 1
             self.hit_points_atuais += 25
             if self.hit_points_atuais > 100: self.hit_points_atuais = 100
