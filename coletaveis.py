@@ -32,12 +32,21 @@ class coletavel(pygame.sprite.Sprite):
             return self.qt_recurso  # Retorna o valor a ser adicionado a contagem do item coletado
         return 0
 
-    def deletar_se_longe(self, jogador):  # Se o jogador estiver muito longe do item, deleta o item
+    def magnetismo(self, jogador, dt):
         direcao_x = jogador.pos.x - self.pos.x
         direcao_y = jogador.pos.y - self.pos.y
         distancia = (direcao_x ** 2 + direcao_y ** 2) ** (1 / 2)
-        if distancia > 2000:
+        if distancia > 2000:  # Se o jogador estiver muito longe do item, deleta o item
             self.kill()
+        elif distancia < 150:   # Faz com que items dentro de uma certa distância se movam em direção ao jogador
+            # Normaliza
+            direcao_x /= distancia
+            direcao_y /= distancia
+
+            # Move o inimigo
+            self.pos.x += direcao_x * dt * jogador.velocidade_movimento * 2
+            self.pos.y += direcao_y * dt * jogador.velocidade_movimento * 2
+            self.rect.topleft = self.pos
 
 
 # Carregar sprites
@@ -67,4 +76,3 @@ class CristalXp(coletavel):
         xp = 10 if tipo == 'Blue' else 40 if tipo == 'Green' else 80
         frame_rate = 11
         super().__init__(pos, escala, sprites, xp, frame_rate)
-
