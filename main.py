@@ -125,6 +125,8 @@ while True:
         inimigo.movimento(jogador.pos, delta_time)
         inimigo.animar_sprite()
         jogador.hit_points_atuais -= inimigo.dar_dano(jogador)
+
+        # Drops dependendo do tipo de inimigo
         if isinstance(inimigo, Texugo):
             drop = CristalXp(inimigo.pos, random.choices(['Blue', 'Green', 'Red'], [40, 3, 1], k=1)[0])
             inimigo.checar_hp(drop, items, todos_sprites)
@@ -132,6 +134,8 @@ while True:
     # Items
     for item in items:
         item.animar_sprite()
+
+        # Recurso coletado dependendo do tipo de item
         if isinstance(item, Moeda):
             total_moedas += item.checar_colisao(jogador)
         elif isinstance(item, Cura):
