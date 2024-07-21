@@ -134,7 +134,7 @@ while True:
 
         # Verificação de dano contra o inimigo se um ataque estiver sendo executado e tocando no inimigo
         for ataque in ataques:
-            inimigo.hit_points_atuais -= ataque.dar_dano(inimigo, jogador)
+            inimigo.hit_points_atuais -= ataque_chicote.dar_dano(inimigo, jogador)
 
         # Drops dependendo do tipo de inimigo
         if isinstance(inimigo, Texugo):
@@ -144,7 +144,7 @@ while True:
     # Items
     for item in items:
         item.animar_sprite()
-        item.deletar_se_longe(jogador)
+        item.magnetismo(jogador, delta_time)
 
         # Recurso coletado dependendo do tipo de item
         if isinstance(item, Moeda):
@@ -187,7 +187,7 @@ while True:
     tela.blit(MOEDAS_ui, MOEDAS_ui.get_rect(topleft=(1050, 20)))
     tela.blit(HP_ui, HP_ui.get_rect(topleft=(20, 20)))
     tela.blit(LEVEL_ui, LEVEL_ui.get_rect(topleft=(20, 50)))
-    tela.blit(XP_ui,  XP_ui.get_rect(topleft=(20, 80)))
+    tela.blit(XP_ui, XP_ui.get_rect(topleft=(20, 80)))
     tela.blit(POCOES_ui, POCOES_ui.get_rect(topleft=(320, 20)))
     tela.blit(KILLCOUNT_ui, KILLCOUNT_ui.get_rect(topleft=(20, 760)))
 
@@ -205,4 +205,3 @@ while True:
 
     # Atualiza a tela
     pygame.display.update()
-
