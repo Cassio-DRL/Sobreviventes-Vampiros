@@ -16,38 +16,27 @@ class Camera:
         return objeto.rect.move(self.camera.topleft)
 
     def movimento(self, centro):
-        # Calcula a nova posição x da câmera de forma que o centro do objeto esteja no centro horizontal da tela
+        # Calcula a nova posição x da câmera de forma que o centro do jogador esteja no centro horizontal da tela
         x = -centro.rect.centerx + int(self.largura / 2)
-        # Calcula a nova posição y da câmera de forma que o centro do objeto esteja no centro vertical da tela
+        # Calcula a nova posição y da câmera de forma que o centro do jogador esteja no centro vertical da tela
         y = -centro.rect.centery + int(self.altura / 2)
 
-        # Atualiza a posição da câmera com as novas coordenadas.
+        # Atualiza a posição da câmera com as novas coordenadas
         self.camera = pygame.Rect(x, y, self.largura, self.altura)
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, pos, sprite_loaded):
         super().__init__()
-
-        # Sprite
         self.image = sprite_loaded
-        self.largura = self.image.get_width()
-        self.altura = self.image.get_height()
+        self.rect = self.image.get_rect(topleft=pos)
 
-        # Objeto
-        self.rect = self.image.get_rect()
-        self.pos = pos
-        self.rect.topleft = self.pos
-
-    def player_presente(self, jogador):
+    def jogador_presente(self, jogador):
         # Se o jogador estiver neste tile, encontra as coordenadas para desenhar tiles ao redor do tile
-        tiles_ao_redor = set()
         if self.rect.colliderect(jogador.rect):
-            coord_multiplicador = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1))
-            for index in range(9):
-                x = self.pos.x + self.largura * coord_multiplicador[index][0]
-                y = self.pos.y + self.altura * coord_multiplicador[index][1]
-                tiles_ao_redor.add((x, y))
-        return tiles_ao_redor
+            largura, altura = self.rect.size
+            coord_multiplicador = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1)]
+            return {(self.rect.x + largura * x, self.rect.y + altura * y) for x, y in coord_multiplicador}
+        return set()
 
 
 pygame.init()
@@ -80,9 +69,7 @@ total_moedas = 0
 # Grupos de sprite
 todos_sprites = pygame.sprite.Group()
 inimigos = pygame.sprite.Group()
-moedas = pygame.sprite.Group()
-pocoes = pygame.sprite.Group()
-cristais = pygame.sprite.Group()
+items = pygame.sprite.Group()
 tiles = pygame.sprite.Group(Tile(pygame.math.Vector2(0, 0), Grama_Tile))
 
 # Sistema
@@ -93,24 +80,23 @@ clock = pygame.time.Clock()
 for i in range(10):
     moeda = Moeda(pygame.math.Vector2(random.randint(100, 1101), random.randint(100, 701)))
     todos_sprites.add(moeda)
-    moedas.add(moeda)
+    items.add(moeda)
 
 cura = Cura(pygame.math.Vector2(550, 550))
 todos_sprites.add(cura)
-pocoes.add(cura)
+items.add(cura)
+
+jogador = BichoChicote(pygame.math.Vector2(600, 400))
+todos_sprites.add(jogador)
 
 for i in range(10):
     obstagoon = Texugo(pygame.math.Vector2(random.randint(100, 1101), random.randint(100, 701)))
     todos_sprites.add(obstagoon)
     inimigos.add(obstagoon)
-
-jogador = BichoChicote(pygame.math.Vector2(600, 400))
-todos_sprites.add(jogador)
 # ----------------------------------------------------------------------------------------------------------------------
 
 # Main Game Loop
 while True:
-    print(tiles)
     clock.tick(FPS)
     delta_time = clock.tick(FPS) / 10  # Para multiplicar velocidade de objetos para garantir que a velocidade não seja afetada pelo FPS
 
@@ -118,22 +104,19 @@ while True:
     jogador.movimento(delta_time)
     jogador.animar_sprite()
     jogador.nivel_update()
-    jogador.beber_pocao()
 
     camera.movimento(jogador)
 
     # Gerar background
     for tile in tiles:
-        tiles_para_gerar = tile.player_presente(jogador)
-        new_tiles_group = pygame.sprite.Group(Tile(pygame.math.Vector2(coords[0], coords[1]), Grama_Tile) for coords in tiles_para_gerar)
-        if new_tiles_group:
+        novo_tile_group = pygame.sprite.Group(Tile(pygame.math.Vector2(coords[0], coords[1]), Grama_Tile) for coords in tile.jogador_presente(jogador))
+        if novo_tile_group:
+            tiles = novo_tile_group
             break
 
-    tiles = new_tiles_group
+    # Desenha sprites
     for tile in tiles:
         tela.blit(tile.image, camera.mover_objeto(tile))
-
-    # Desenha sprites
     for sprite in todos_sprites:
         tela.blit(sprite.image, camera.mover_objeto(sprite))
 
@@ -142,21 +125,19 @@ while True:
         inimigo.movimento(jogador.pos, delta_time)
         inimigo.animar_sprite()
         jogador.hit_points_atuais -= inimigo.dar_dano(jogador)
-        inimigo.checar_hp(CristalXp(inimigo.pos, random.choices(['Blue', 'Green', 'Red'], [40, 3, 1], k=1)[0]), cristais, todos_sprites)
+        if isinstance(inimigo, Texugo):
+            drop = CristalXp(inimigo.pos, random.choices(['Blue', 'Green', 'Red'], [40, 3, 1], k=1)[0])
+            inimigo.checar_hp(drop, items, todos_sprites)
 
-    # Moedas
-    for coin in moedas:
-        coin.animar_sprite()
-        total_moedas += coin.checar_colisao(jogador)
-
-    # Pocao
-    for potion in pocoes:
-        jogador.inventario['Poção'] += potion.checar_colisao(jogador)
-
-    # Cristais
-    for cristal in cristais:
-        cristal.animar_sprite()
-        jogador.exp += cristal.checar_colisao(jogador)
+    # Items
+    for item in items:
+        item.animar_sprite()
+        if isinstance(item, Moeda):
+            total_moedas += item.checar_colisao(jogador)
+        elif isinstance(item, Cura):
+            jogador.inventario['Poção'] += item.checar_colisao(jogador)
+        elif isinstance(item, CristalXp):
+            jogador.exp += item.checar_colisao(jogador)
 
     # UI
     FPS_ui = fonte_none.render(f"FPS: {clock.get_fps():.1f}", False, BRANCO)
@@ -173,11 +154,17 @@ while True:
     tela.blit(XP_ui,  XP_ui.get_rect(center=(121, 70)))
     tela.blit(POCOES_ui, POCOES_ui.get_rect(center=(500, 20)))
 
-    # Fechar o jogo caso aperte X
     for evento in pygame.event.get():
+
+        # Fechar o jogo caso aperte o botão na janela
         if evento.type == pygame.QUIT:
             pygame.quit()
             exit()
+
+        # Checar se alguma tecla relevante foi apertada
+        if evento.type == pygame.KEYDOWN:
+            if evento.key == pygame.K_q:  # Beber poção caso aperte Q
+                jogador.beber_pocao()
 
     # Atualiza a tela
     pygame.display.update()
