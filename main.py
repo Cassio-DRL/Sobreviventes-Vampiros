@@ -1,5 +1,4 @@
 from personagems import BichoChicote
-from personagems import BichoChicote
 from inimigos import Texugo
 from coletaveis import Moeda, Cura, CristalXp
 from ataques import Slash
