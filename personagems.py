@@ -106,8 +106,3 @@ class BichoChicote(Jogador):
         frame_rate = 9
 
         super().__init__(pos, escala, sprite_idle, sprite_andando, hp, ataque, defesa, velocidade_movimento, frame_rate)
-
-
-
-
-
