@@ -151,14 +151,12 @@ def main():
         if not jogo_pausado:
             # Jogador
             jogador.movimento(delta_time)
-            jogador.animar_sprite()
             jogador.nivel_update()
 
             camera.movimento(jogador)
 
             # Ataques (No momento só existe 1 tipo de ataque mas é bom já ter essa estrutura pra adicionar mais depois)
             for ataque in ataques:
-                ataque.animar_sprite()
                 ataque.atacar()
                 ataque.atualizar_posicao(jogador)
 
@@ -169,15 +167,16 @@ def main():
                     tiles = novo_tile_group
                     break
 
-            # Desenha sprites
+            # Desenha e anima sprites
             for group in (tiles, todos_sprites):
                 for sprite in group:
                     TELA.blit(sprite.image, camera.mover_objeto(sprite))
+                    if sprite in todos_sprites:
+                        sprite.animar_sprite()
 
             # Inimigo
             for inimigo in inimigos:
                 inimigo.movimento(jogador, delta_time)
-                inimigo.animar_sprite()
                 jogador.hit_points_atuais -= inimigo.dar_dano(jogador)
 
                 # Verificação de dano contra o inimigo se um ataque estiver sendo executado e tocando no inimigo
@@ -191,7 +190,6 @@ def main():
 
             # Items
             for item in items:
-                item.animar_sprite()
                 item.magnetismo(jogador, delta_time)
 
                 # Recurso coletado dependendo do tipo de item
