@@ -47,7 +47,6 @@ class Ataque(pygame.sprite.Sprite):
         if tempo_atual - self.ultimo_hit >= self.cooldown_ataque:  # Checa se o tempo decorrido desde o último ataque >= cooldown
             # Checa se o ataque ainda está sendo executado
             self.ataque_executado = True if tempo_atual - self.ultimo_hit < self.duracao_ataque + self.cooldown_ataque else False
-
             if not self.ataque_executado:
                 self.ultimo_hit = tempo_atual
         else:
