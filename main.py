@@ -237,8 +237,11 @@ def iniciar_jogo():
                     if isinstance(inimigo, Texugo):
                         drop = CristalXp(inimigo.pos, random.choices(['Blue', 'Green', 'Red'], [40, 3, 1], k=1)[0])
                         total_inimigos_mortos += inimigo.checar_hp(drop, items, todos_sprites)
-
+                
                 # Items
+                #xp anterior (utilizado para manter registrado quando um cristal é coletado)
+                xp_anterior = jogador.exp
+
                 for item in items:
                     item.animar_sprite()
                     item.magnetismo(jogador, delta_time)
@@ -250,7 +253,9 @@ def iniciar_jogo():
                         jogador.inventario['Poção'] += item.checar_colisao(jogador)
                     elif isinstance(item, CristalXp):
                         jogador.exp += item.checar_colisao(jogador)
-                        total_cristais += 1
+                        if jogador.exp > xp_anterior:
+                            total_cristais += 1
+
 
                 # Spawnar inimigos (Spawna 10 a cada 10 segundos) (Max = 40)
                 if pygame.time.get_ticks() - cooldown_spawnar_inimigos >= 10000 and len(inimigos) <= 40:
