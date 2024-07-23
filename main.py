@@ -94,6 +94,21 @@ def iniciar_jogo():
         for botao in botoes:
             botao.desenhar(tela)
 
+    def tela_morte(largura, altura, tela, fonte, botoes, cor):
+        # Função para desenhar todos os elementos da tela de morte
+        camada = pygame.Surface((LARGURA, ALTURA), pygame.SRCALPHA)
+        pygame.draw.rect(camada, (20, 50, 50, 150), (0, 0, largura, altura))
+        tela.blit(camada, (0, 0))
+
+        # Texto grande no meio da tela
+        texto_pausa = fonte.render(f"MORTO", True, cor)
+        tela.blit(texto_pausa, texto_pausa.get_rect(center=(600, 200)))
+
+        # Desenha cada botão
+        for botao in botoes:
+            botao.desenhar(tela)
+
+
     def pontos_ao_redor(jogador, raio):
         # Função para achar pontos aleatórios na circunferência de um circulo ao redor do jogador
         angulo = math.radians(random.randint(0, 361))
@@ -126,16 +141,21 @@ def iniciar_jogo():
     FONTE_NONE_GRANDE = pygame.font.Font(None, 150)
 
     # Menu pausa
-    CONTINUAR_botao = Botao(pygame.math.Vector2(200, 700), 200, 50, "Continuar", FONTE_NONE, (100, 100, 100))
-    REINICIAR_botao = Botao(pygame.math.Vector2(500, 700), 200, 50, "Reiniciar", FONTE_NONE, (100, 100, 100))
+    CONTINUAR_botao_pausa = Botao(pygame.math.Vector2(200, 700), 200, 50, "Continuar", FONTE_NONE, (100, 100, 100))
+    REINICIAR_botao_pausa = Botao(pygame.math.Vector2(500, 700), 200, 50, "Reiniciar", FONTE_NONE, (100, 100, 100))
     MENU_PRINCIPAL_botao = Botao(pygame.math.Vector2(800, 700), 200, 50, "Menu Principal", FONTE_NONE, (100, 100, 100))
-    botoes_menu_pausa = (CONTINUAR_botao, REINICIAR_botao, MENU_PRINCIPAL_botao)
+    botoes_menu_pausa = (CONTINUAR_botao_pausa, REINICIAR_botao_pausa, MENU_PRINCIPAL_botao)
+
+    # Tela morte
+    REINICIAR_botao_morte = Botao(pygame.math.Vector2(200, 700), 200, 50, "Reiniciar", FONTE_NONE, (100, 100, 100))
+    MENU_PRINCIPAL_botao_morte = Botao(pygame.math.Vector2(800, 700), 200, 50, "Menu Principal", FONTE_NONE, (100, 100, 100))
+    botoes_tela_morte = (REINICIAR_botao_morte, MENU_PRINCIPAL_botao_morte)
 
     # Sistema
     camera = Camera(LARGURA, ALTURA)
     clock = pygame.time.Clock()
 
-    def main():
+    def jogo_de_fato():
         # Música do Nível
         pygame.mixer_music.load('Audio/Musica_de_batalha_muito_top_SOULKNIGHT.mp3')
         pygame.mixer_music.play(-1)
@@ -161,6 +181,7 @@ def iniciar_jogo():
         ataques.add(ataque_chicote)
 
         # Main Game Loop
+        jogo_tela_morte = False
         jogo_pausado = False
         jogo_rodando = True
         menu_principal_ativo = False
@@ -174,7 +195,7 @@ def iniciar_jogo():
 
             delta_time = clock.tick(FPS) / 20  # Para multiplicar velocidade de objetos para garantir que a velocidade não seja afetada pelo FPS
 
-            if not jogo_pausado:
+            if not (jogo_pausado or jogo_tela_morte):
                 # Jogador
                 jogador.movimento(delta_time)
                 jogador.animar_sprite()
@@ -263,15 +284,19 @@ def iniciar_jogo():
                 TELA.blit(POCOES_ui, POCOES_ui.get_rect(topleft=(320, 20)))
                 TELA.blit(KILLCOUNT_ui, KILLCOUNT_ui.get_rect(topleft=(20, 760)))
 
+            if jogador.hit_points_atuais <= 0 and not jogo_tela_morte:
+                jogo_tela_morte = True
+                tela_morte(LARGURA, ALTURA, TELA, FONTE_NONE_GRANDE, botoes_tela_morte, BRANCO)
+
             # Eventos
             for evento in pygame.event.get():
                 # Fechar o jogo caso aperte o botão na janela
                 if evento.type == pygame.QUIT:
                     pygame.quit()
-                    exit()
+                    sys.exit()
 
                 # Checar se alguma tecla relevante foi apertada
-                if evento.type == pygame.KEYDOWN:
+                if evento.type == pygame.KEYDOWN and not jogo_tela_morte:
                     if evento.key == pygame.K_ESCAPE:  # Pausar ou despausar jogo se apertar ESC
                         if not jogo_pausado:
                             jogo_pausado = True
@@ -280,25 +305,34 @@ def iniciar_jogo():
                             jogo_pausado = False
 
                     if not jogo_pausado:
-                        if evento.key == pygame.K_q: # Beber poção caso aperte Q
+                        if evento.key == pygame.K_q:  # Beber poção caso aperte Q
                             jogador.beber_pocao()
 
                 if jogo_pausado:
-                    for botao in botoes_menu_pausa: # Apertos de botão na tela de pausa
+                    for botao in botoes_menu_pausa:  # Apertos de botão na tela de pausa
                         if botao.mouse_interacao(evento):
-                            if botao == CONTINUAR_botao:
+                            if botao == CONTINUAR_botao_pausa:
                                 jogo_pausado = False
                             elif botao == MENU_PRINCIPAL_botao:
                                 menu_principal_ativo = True
                                 jogo_pausado = False
-                            elif botao == REINICIAR_botao:
+                            elif botao == REINICIAR_botao_pausa:
                                 jogo_rodando = False
+
+                if jogo_tela_morte:
+                    for botao in botoes_tela_morte:  # Apertos de botão na tela de morte
+                        if botao.mouse_interacao(evento):
+                            if botao == REINICIAR_botao_morte:
+                                jogo_rodando = False
+                            elif botao == MENU_PRINCIPAL_botao_morte:
+                                menu_principal_ativo = True
+                                jogo_tela_morte = False
 
             # Atualiza a tela
             pygame.display.update()
 
     while True:
-        main()
+        jogo_de_fato()
 
 # Função para abrir as configurações
 def abrir_configuracoes():
