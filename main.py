@@ -138,7 +138,7 @@ def iniciar_jogo():
     def main():
         # Música do Nível
         pygame.mixer_music.load('Audio/Musica_de_batalha_muito_top_SOULKNIGHT.mp3')
-        pygame.mixer_music.play(10000)
+        pygame.mixer_music.play(-1)
 
         # Stats do jogo
         total_moedas = 0
