@@ -1,6 +1,14 @@
+from personagems import BichoChicote
+from inimigos import Texugo
+from coletaveis import Moeda, Cura, CristalXp
+from ataques import Slash
 import pygame
+import random
+import math
 import sys
 
+# Inicializar pygame
+pygame.mixer.pre_init(44100, 16, 2, 4096)
 pygame.init()
 
 # Cores
@@ -8,152 +16,133 @@ BRANCO = (255, 255, 255)
 PRETO = (0, 0, 0)
 
 # Dimensões da tela
-LARGURA_TELA = 1280
-ALTURA_TELA = 800
+LARGURA = 1280
+ALTURA = 800
+FPS = 60
 
 # Inicializando a tela
-tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
-pygame.display.set_caption("Menu Principal")
+TELA = pygame.display.set_mode((LARGURA, ALTURA))
+pygame.display.set_caption('Vampiro Sobreviventes')
 
-# Fonte
-fonte = pygame.font.Font(None, 74)
+# Fontes
+FONTE_NONE = pygame.font.Font(None, 30)
+FONTE_NONE_MEDIA = pygame.font.Font(None, 74)
+FONTE_NONE_GRANDE = pygame.font.Font(None, 150)
 
-# Funções dos botões
+# Imagens
+GRAMA_TILE = pygame.image.load('Sprites/Grama_Tile.png').convert_alpha()
+
+
+class Camera:
+    # Cria um Rect representando a câmera
+    def __init__(self, largura, altura):
+        self.camera = pygame.Rect(0, 0, largura, altura)
+        self.largura = largura
+        self.altura = altura
+
+    def mover_objeto(self, objeto):
+        # Move um objeto em relação à posição atual da câmera e retorna a nova posição do objeto
+        return objeto.rect.move(self.camera.topleft)
+
+    def movimento(self, jogador):
+        # Calcula a nova posição x e y da câmera de forma que o centro do jogador esteja no centro da tela
+        x = int(self.largura / 2) - jogador.rect.centerx
+        y = int(self.altura / 2) - jogador.rect.centery
+        # Atualiza a posição da câmera com as novas coordenadas
+        self.camera = pygame.Rect(x, y, self.largura, self.altura)
+
+
+class Tile(pygame.sprite.Sprite):
+    def __init__(self, pos, sprite_loaded):
+        super().__init__()
+        self.image = sprite_loaded
+        self.rect = self.image.get_rect(topleft=pos)
+
+    def jogador_presente(self, jogador):
+        # Se o jogador estiver neste tile, encontra as coordenadas para desenhar tiles ao redor do tile
+        if self.rect.colliderect(jogador.rect):
+            largura, altura = self.rect.size
+            coord_multiplicador = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1))
+            return {(self.rect.x + largura * x, self.rect.y + altura * y) for x, y in coord_multiplicador}
+        return set()
+
+
+class Botao:
+    # Botão com texto que pode ser clicado pelo mouse
+    def __init__(self, pos, largura, altura, texto, fonte, cor):
+        self.rect = pygame.Rect(pos.x, pos.y, largura, altura)
+        self.fonte = fonte
+        self.texto = self.fonte.render(texto, False, (255, 255, 255))
+        self.cor = cor
+
+    def desenhar(self, tela):
+        pygame.draw.rect(tela, self.cor, self.rect)
+        tela.blit(self.texto, self.texto.get_rect(center=self.rect.center))
+
+    def mouse_interacao(self, evento):
+        if evento.type == pygame.MOUSEBUTTONDOWN:
+            if evento.button == 1 and self.rect.collidepoint(evento.pos):
+                return True
+        return False
+
+
+def menu_pausa(largura, altura, tela, fonte, botoes, cor):
+    # Função para desenhar todos os elementos da tela de pausa
+
+    # Camada sobre a tela que permite que coisas sejam desenhadas com opacidade reduzida
+    camada = pygame.Surface((LARGURA, ALTURA), pygame.SRCALPHA)
+    pygame.draw.rect(camada, (20, 50, 50, 150), (0, 0, largura, altura))
+    tela.blit(camada, (0, 0))
+
+    # Texto grande no meio da tela
+    texto_pausa = fonte.render(f"JOGO PAUSADO", False, cor)
+    tela.blit(texto_pausa, texto_pausa.get_rect(center=(600, 400)))
+
+    # Desenha cada botão
+    for botao in botoes:
+        botao.desenhar(tela)
+
+
+def tela_morte(largura, altura, tela, fonte, botoes, cor):
+    # Função para desenhar todos os elementos da tela de morte
+    camada = pygame.Surface((LARGURA, ALTURA), pygame.SRCALPHA)
+    pygame.draw.rect(camada, (20, 50, 50, 150), (0, 0, largura, altura))
+    tela.blit(camada, (0, 0))
+
+    # Texto grande no meio da tela
+    texto_morte = fonte.render(f"MORTO", True, cor)
+    tela.blit(texto_morte, (LARGURA // 2 - texto_morte.get_width() // 2, ALTURA // 2 - 100))
+
+    # Desenha cada botão
+    for botao in botoes:
+        botao.desenhar(tela)
+
+
+def pontos_ao_redor(jogador, raio):
+    # Função para achar pontos aleatórios na circunferência de um circulo ao redor do jogador
+    angulo = math.radians(random.randint(0, 361))
+    x = jogador.rect.centerx + raio * math.cos(angulo)
+    y = jogador.rect.centery + raio * math.sin(angulo)
+    return pygame.math.Vector2(x, y)
+
+
+# Menu pausa
+CONTINUAR_botao_pausa = Botao(pygame.math.Vector2(200, 700), 200, 50, "Continuar", FONTE_NONE, (100, 100, 100))
+REINICIAR_botao_pausa = Botao(pygame.math.Vector2(500, 700), 200, 50, "Reiniciar", FONTE_NONE, (100, 100, 100))
+MENU_PRINCIPAL_botao = Botao(pygame.math.Vector2(800, 700), 200, 50, "Menu Principal", FONTE_NONE, (100, 100, 100))
+botoes_menu_pausa = (CONTINUAR_botao_pausa, REINICIAR_botao_pausa, MENU_PRINCIPAL_botao)
+
+# Tela morte
+REINICIAR_botao_morte = Botao(pygame.math.Vector2(200, 700), 200, 50, "Reiniciar", FONTE_NONE, (100, 100, 100))
+MENU_PRINCIPAL_botao_morte = Botao(pygame.math.Vector2(900, 700), 200, 50, "Menu Principal", FONTE_NONE,
+                                   (100, 100, 100))
+botoes_tela_morte = (REINICIAR_botao_morte, MENU_PRINCIPAL_botao_morte)
+
+# Sistema
+camera = Camera(LARGURA, ALTURA)
+clock = pygame.time.Clock()
+
 def iniciar_jogo():
-    from personagems import BichoChicote
-    from inimigos import Texugo
-    from coletaveis import Moeda, Cura, CristalXp
-    from ataques import Slash
-    import pygame
-    import random
-    import math
-
-    class Camera:
-        # Cria um Rect representando a câmera
-        def __init__(self, largura, altura):
-            self.camera = pygame.Rect(0, 0, largura, altura)
-            self.largura = largura
-            self.altura = altura
-
-        def mover_objeto(self, objeto):
-            # Move um objeto em relação à posição atual da câmera e retorna a nova posição do objeto
-            return objeto.rect.move(self.camera.topleft)
-
-        def movimento(self, jogador):
-            # Calcula a nova posição x e y da câmera de forma que o centro do jogador esteja no centro da tela
-            x = int(self.largura / 2) - jogador.rect.centerx
-            y = int(self.altura / 2) - jogador.rect.centery
-            # Atualiza a posição da câmera com as novas coordenadas
-            self.camera = pygame.Rect(x, y, self.largura, self.altura)
-
-    class Tile(pygame.sprite.Sprite):
-        def __init__(self, pos, sprite_loaded):
-            super().__init__()
-            self.image = sprite_loaded
-            self.rect = self.image.get_rect(topleft=pos)
-
-        def jogador_presente(self, jogador):
-            # Se o jogador estiver neste tile, encontra as coordenadas para desenhar tiles ao redor do tile
-            if self.rect.colliderect(jogador.rect):
-                largura, altura = self.rect.size
-                coord_multiplicador = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1))
-                return {(self.rect.x + largura * x, self.rect.y + altura * y) for x, y in coord_multiplicador}
-            return set()
-
-    class Botao:
-        # Botão com texto que pode ser clicado pelo mouse
-        def __init__(self, pos, largura, altura, texto, fonte, cor):
-            self.rect = pygame.Rect(pos.x, pos.y, largura, altura)
-            self.fonte = fonte
-            self.texto = self.fonte.render(texto, False, (255, 255, 255))
-            self.cor = cor
-
-        def desenhar(self, tela):
-            pygame.draw.rect(tela, self.cor, self.rect)
-            tela.blit(self.texto, self.texto.get_rect(center=self.rect.center))
-
-        def mouse_interacao(self, evento):
-            if evento.type == pygame.MOUSEBUTTONDOWN:
-                if evento.button == 1 and self.rect.collidepoint(evento.pos):
-                    return True
-            return False
-
-    def menu_pausa(largura, altura, tela, fonte, botoes, cor):
-        # Função para desenhar todos os elementos da tela de pausa
-
-        # Camada sobre a tela que permite que coisas sejam desenhadas com opacidade reduzida
-        camada = pygame.Surface((LARGURA, ALTURA), pygame.SRCALPHA)
-        pygame.draw.rect(camada, (20, 50, 50, 150), (0, 0, largura, altura))
-        tela.blit(camada, (0, 0))
-
-        # Texto grande no meio da tela
-        texto_pausa = fonte.render(f"JOGO PAUSADO", False, cor)
-        tela.blit(texto_pausa, texto_pausa.get_rect(center=(600, 400)))
-
-        # Desenha cada botão
-        for botao in botoes:
-            botao.desenhar(tela)
-
-    def tela_morte(largura, altura, tela, fonte, botoes, cor):
-        # Função para desenhar todos os elementos da tela de morte
-        camada = pygame.Surface((LARGURA, ALTURA), pygame.SRCALPHA)
-        pygame.draw.rect(camada, (20, 50, 50, 150), (0, 0, largura, altura))
-        tela.blit(camada, (0, 0))
-
-        # Texto grande no meio da tela
-        texto_pausa = fonte.render(f"MORTO", True, cor)
-        tela.blit(texto_pausa, texto_pausa.get_rect(center=(600, 200)))
-
-        # Desenha cada botão
-        for botao in botoes:
-            botao.desenhar(tela)
-
-
-    def pontos_ao_redor(jogador, raio):
-        # Função para achar pontos aleatórios na circunferência de um circulo ao redor do jogador
-        angulo = math.radians(random.randint(0, 361))
-        x = jogador.rect.centerx + raio * math.cos(angulo)
-        y = jogador.rect.centery + raio * math.sin(angulo)
-        return pygame.math.Vector2(x, y)
-
-
-    # Inicializar pygame
-    pygame.mixer.pre_init(44100, 16, 2, 4096)
-    pygame.init()
-
-    # Constantes
-    LARGURA = 1280
-    ALTURA = 800
-    FPS = 120
-
-    # Cores
-    BRANCO = (255, 255, 255)
-
-    # Tela
-    TELA = pygame.display.set_mode((LARGURA, ALTURA))
-    pygame.display.set_caption('Vampire Survivors')
-
-    # Imagens
-    GRAMA_TILE = pygame.image.load('Sprites/Grama_Tile.png').convert_alpha()
-
-    # Fontes
-    FONTE_NONE = pygame.font.Font(None, 30)
-    FONTE_NONE_GRANDE = pygame.font.Font(None, 150)
-
-    # Menu pausa
-    CONTINUAR_botao_pausa = Botao(pygame.math.Vector2(200, 700), 200, 50, "Continuar", FONTE_NONE, (100, 100, 100))
-    REINICIAR_botao_pausa = Botao(pygame.math.Vector2(500, 700), 200, 50, "Reiniciar", FONTE_NONE, (100, 100, 100))
-    MENU_PRINCIPAL_botao = Botao(pygame.math.Vector2(800, 700), 200, 50, "Menu Principal", FONTE_NONE, (100, 100, 100))
-    botoes_menu_pausa = (CONTINUAR_botao_pausa, REINICIAR_botao_pausa, MENU_PRINCIPAL_botao)
-
-    # Tela morte
-    REINICIAR_botao_morte = Botao(pygame.math.Vector2(200, 700), 200, 50, "Reiniciar", FONTE_NONE, (100, 100, 100))
-    MENU_PRINCIPAL_botao_morte = Botao(pygame.math.Vector2(800, 700), 200, 50, "Menu Principal", FONTE_NONE, (100, 100, 100))
-    botoes_tela_morte = (REINICIAR_botao_morte, MENU_PRINCIPAL_botao_morte)
-
-    # Sistema
-    camera = Camera(LARGURA, ALTURA)
-    clock = pygame.time.Clock()
 
     def jogo_de_fato():
         # Música do Nível
@@ -166,6 +155,7 @@ def iniciar_jogo():
         total_inimigos_mortos = 0
         cooldown_spawnar_inimigos = -10000
         cooldown_spawnar_items = -15000
+        tempo_pausado_total = 0
 
         # Grupos de sprite
         todos_sprites = pygame.sprite.Group()
@@ -198,6 +188,10 @@ def iniciar_jogo():
             delta_time = clock.get_time() / 20  # Para multiplicar velocidade de objetos para garantir que a velocidade não seja afetada pelo FPS
 
             if not (jogo_pausado or jogo_tela_morte):
+                # Timer
+                ticks_passados = pygame.time.get_ticks() - start_ticks - tempo_pausado_total
+                segundos_passados = ticks_passados // 1000
+
                 # Jogador
                 jogador.movimento(delta_time)
                 jogador.animar_sprite()
@@ -237,9 +231,9 @@ def iniciar_jogo():
                     if isinstance(inimigo, Texugo):
                         drop = CristalXp(inimigo.pos, random.choices(['Blue', 'Green', 'Red'], [40, 3, 1], k=1)[0])
                         total_inimigos_mortos += inimigo.checar_hp(drop, items, todos_sprites)
-                
+
                 # Items
-                #xp anterior (utilizado para manter registrado quando um cristal é coletado)
+                # xp anterior (utilizado para manter registrado quando um cristal é coletado)
                 xp_anterior = jogador.exp
 
                 for item in items:
@@ -250,16 +244,15 @@ def iniciar_jogo():
                     if isinstance(item, Moeda):
                         total_moedas += item.checar_colisao(jogador)
                     elif isinstance(item, Cura):
-                        jogador.inventario['Poção'] += item.checar_colisao(jogador)
+                        jogador.inventario['Poção Cura'] += item.checar_colisao(jogador)
                     elif isinstance(item, CristalXp):
                         jogador.exp += item.checar_colisao(jogador)
                         if jogador.exp > xp_anterior:
                             total_cristais += 1
 
-
                 # Spawnar inimigos (Spawna 10 a cada 10 segundos) (Max = 40)
-                if pygame.time.get_ticks() - cooldown_spawnar_inimigos >= 10000 and len(inimigos) <= 40:
-                    cooldown_spawnar_inimigos = pygame.time.get_ticks()
+                if ticks_passados - cooldown_spawnar_inimigos >= 10000 and len(inimigos) <= 40:
+                    cooldown_spawnar_inimigos = ticks_passados
                     for i in range(10):
                         inimigo_tipo = random.choice([Texugo])
                         inimigo_spawanado = inimigo_tipo(pontos_ao_redor(jogador, 900))
@@ -267,8 +260,8 @@ def iniciar_jogo():
                         inimigos.add(inimigo_spawanado)
 
                 # Spawnar items (Spawna 5 a cada 15 segundos) (Max = 20)
-                if pygame.time.get_ticks() - cooldown_spawnar_items >= 15000 and len(items) <= 20:
-                    cooldown_spawnar_items = pygame.time.get_ticks()
+                if ticks_passados - cooldown_spawnar_items >= 15000 and len(items) <= 20:
+                    cooldown_spawnar_items = ticks_passados
                     for i in range(5):
                         item_tipo = random.choice([Moeda, Cura])
                         item_spawnado = item_tipo(pontos_ao_redor(jogador, 900))
@@ -282,8 +275,9 @@ def iniciar_jogo():
                 HP_ui = FONTE_NONE.render(f"Vida do Jogador: {jogador.hit_points_atuais}/{jogador.hit_point_max}", False, BRANCO)
                 LEVEL_ui = FONTE_NONE.render(f"Nível do Jogador: {jogador.nivel}", False, BRANCO)
                 XP_ui = FONTE_NONE.render(f"XP: {jogador.exp}/{jogador.exp_para_proximo_nivel}", False, BRANCO)
-                POCOES_ui = FONTE_NONE.render(f"Poções: {jogador.inventario['Poção']}", False, BRANCO)
+                POCOES_ui = FONTE_NONE.render(f"Poções: {jogador.inventario['Poção Cura']}", False, BRANCO)
                 KILLCOUNT_ui = FONTE_NONE.render(f"Inimigos Mortos: {total_inimigos_mortos}", False, BRANCO)
+                TIMER_ui = FONTE_NONE.render(f"{segundos_passados//60:02}:{segundos_passados%60:02}", False, BRANCO)
 
                 TELA.blit(FPS_ui, FPS_ui.get_rect(topleft=(880, 20)))
                 TELA.blit(MOEDAS_ui, MOEDAS_ui.get_rect(topleft=(1050, 20)))
@@ -293,6 +287,7 @@ def iniciar_jogo():
                 TELA.blit(XP_ui, XP_ui.get_rect(topleft=(20, 80)))
                 TELA.blit(POCOES_ui, POCOES_ui.get_rect(topleft=(320, 20)))
                 TELA.blit(KILLCOUNT_ui, KILLCOUNT_ui.get_rect(topleft=(20, 760)))
+                TELA.blit(TIMER_ui, TIMER_ui.get_rect(topleft=(20, 350)))
 
             if jogador.hit_points_atuais <= 0 and not jogo_tela_morte:
                 jogo_tela_morte = True
@@ -310,18 +305,28 @@ def iniciar_jogo():
                     if evento.key == pygame.K_ESCAPE:  # Pausar ou despausar jogo se apertar ESC
                         if not jogo_pausado:
                             jogo_pausado = True
+                            contar_tempo_pausado = pygame.time.get_ticks()
                             menu_pausa(LARGURA, ALTURA, TELA, FONTE_NONE_GRANDE, botoes_menu_pausa, BRANCO)
                         else:
+                            tempo_pausado_total += pygame.time.get_ticks() - contar_tempo_pausado
                             jogo_pausado = False
 
+
                     if not jogo_pausado:
-                        if evento.key == pygame.K_q:  # Beber poção caso aperte Q
+                        if evento.key == pygame.K_z:  # Beber poção de cura caso aperte Z
                             jogador.beber_pocao()
+                        if evento.key == pygame.K_x:  # Beber poção caso aperte X
+                            jogador.beber_pocao()
+                        if evento.key == pygame.K_c:  # Beber poção caso aperte C
+                            jogador.bomba(inimigos)
+                        if evento.key == pygame.K_v:  # Beber poção caso aperte V
+                            jogador.dobro_xp()
 
                 if jogo_pausado:
                     for botao in botoes_menu_pausa:  # Apertos de botão na tela de pausa
                         if botao.mouse_interacao(evento):
                             if botao == CONTINUAR_botao_pausa:
+                                tempo_pausado_total += pygame.time.get_ticks() - contar_tempo_pausado
                                 jogo_pausado = False
                             elif botao == MENU_PRINCIPAL_botao:
                                 menu_principal_ativo = True
@@ -342,6 +347,7 @@ def iniciar_jogo():
             pygame.display.update()
 
     while True:
+        start_ticks = pygame.time.get_ticks()
         jogo_de_fato()
 
 # Função para abrir as configurações
@@ -364,13 +370,13 @@ def abrir_configuracoes():
                     volume = max(0.0, volume - 0.1)
                     pygame.mixer.music.set_volume(volume)
 
-        tela.fill(PRETO)
-        texto = fonte.render("Configurações", True, BRANCO)
-        tela.blit(texto, (LARGURA_TELA//2 - texto.get_width()//2, ALTURA_TELA//2 - 100))
-        texto_volume = fonte.render(f"Volume: {int(volume * 100)}%", True, BRANCO)
-        tela.blit(texto_volume, (LARGURA_TELA//2 - texto_volume.get_width()//2, ALTURA_TELA//2))
-        texto_voltar = fonte.render("Pressione ESC para voltar", True, BRANCO)
-        tela.blit(texto_voltar, (LARGURA_TELA//2 - texto_voltar.get_width()//2, ALTURA_TELA//2 + 100))
+        TELA.fill(PRETO)
+        texto = FONTE_NONE_MEDIA.render("Configurações", True, BRANCO)
+        TELA.blit(texto, (LARGURA // 2 - texto.get_width() // 2, ALTURA // 2 - 100))
+        texto_volume = FONTE_NONE_MEDIA.render(f"Volume: {int(volume * 100)}%", True, BRANCO)
+        TELA.blit(texto_volume, (LARGURA // 2 - texto_volume.get_width() // 2, ALTURA // 2))
+        texto_voltar = FONTE_NONE_MEDIA.render("Pressione ESC para voltar", True, BRANCO)
+        TELA.blit(texto_voltar, (LARGURA // 2 - texto_voltar.get_width() // 2, ALTURA // 2 + 100))
         pygame.display.flip()
 
 # Função para sair do jogo
@@ -394,19 +400,19 @@ def menu_principal():
                 elif botao_sair.collidepoint(x, y):
                     sair_jogo()
 
-        tela.fill(PRETO)
+        TELA.fill(PRETO)
 
-        texto_iniciar = fonte.render("Iniciar Jogo", True, BRANCO)
-        botao_iniciar = texto_iniciar.get_rect(center=(LARGURA_TELA//2, ALTURA_TELA//2 - 100))
-        tela.blit(texto_iniciar, botao_iniciar.topleft)
+        texto_iniciar = FONTE_NONE_MEDIA.render("Iniciar Jogo", True, BRANCO)
+        botao_iniciar = texto_iniciar.get_rect(center=(LARGURA // 2, ALTURA // 2 - 100))
+        TELA.blit(texto_iniciar, botao_iniciar.topleft)
 
-        texto_configuracoes = fonte.render("Configurações", True, BRANCO)
-        botao_configuracoes = texto_configuracoes.get_rect(center=(LARGURA_TELA//2, ALTURA_TELA//2))
-        tela.blit(texto_configuracoes, botao_configuracoes.topleft)
+        texto_configuracoes = FONTE_NONE_MEDIA.render("Configurações", True, BRANCO)
+        botao_configuracoes = texto_configuracoes.get_rect(center=(LARGURA // 2, ALTURA // 2))
+        TELA.blit(texto_configuracoes, botao_configuracoes.topleft)
 
-        texto_sair = fonte.render("Sair do Jogo", True, BRANCO)
-        botao_sair = texto_sair.get_rect(center=(LARGURA_TELA//2, ALTURA_TELA//2 + 100))
-        tela.blit(texto_sair, botao_sair.topleft)
+        texto_sair = FONTE_NONE_MEDIA.render("Sair do Jogo", True, BRANCO)
+        botao_sair = texto_sair.get_rect(center=(LARGURA // 2, ALTURA // 2 + 100))
+        TELA.blit(texto_sair, botao_sair.topleft)
 
         pygame.display.flip()
 
