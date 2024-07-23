@@ -70,8 +70,7 @@ class Ataque(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=self.rect.center)
 
     def atualizar_posicao(self, jogador):  # funcao para adicionar um offset para ataques especificos
-        offset_vec = pygame.math.Vector2(self.offset, 0)
-        self.pos = jogador.pos + offset_vec if jogador.direcao == 'direita' else jogador.pos - offset_vec
+        self.pos = jogador.pos + self.offset if jogador.direcao == 'direita' else jogador.pos - offset_vec
 
         # Compara a direção do ataque com a direção do player e inverte o sprite se for diferente
         if self.direcao != jogador.direcao:
@@ -100,6 +99,6 @@ class Slash(Ataque):
         frame_rate = 8
 
         # Offset em relação ao jogador
-        offset = 100
+        offset = pygame.math.Vector2(100, 0)
 
         super().__init__(escala, dano, duracao_ataque, cooldown_ataque, sprite_invisivel, sprites_animacao, frame_rate, offset)
