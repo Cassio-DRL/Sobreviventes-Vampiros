@@ -193,7 +193,8 @@ def iniciar_jogo():
                 menu_principal_ativo = False
                 continue
 
-            delta_time = clock.tick(FPS) / 20  # Para multiplicar velocidade de objetos para garantir que a velocidade não seja afetada pelo FPS
+            clock.tick(FPS)
+            delta_time = clock.get_time() / 20  # Para multiplicar velocidade de objetos para garantir que a velocidade não seja afetada pelo FPS
 
             if not (jogo_pausado or jogo_tela_morte):
                 # Jogador
