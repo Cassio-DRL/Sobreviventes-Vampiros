@@ -162,6 +162,7 @@ def iniciar_jogo():
 
         # Stats do jogo
         total_moedas = 0
+        total_cristais = 0
         total_inimigos_mortos = 0
         cooldown_spawnar_inimigos = -10000
         cooldown_spawnar_items = -15000
@@ -193,7 +194,8 @@ def iniciar_jogo():
                 menu_principal_ativo = False
                 continue
 
-            delta_time = clock.tick(FPS) / 20  # Para multiplicar velocidade de objetos para garantir que a velocidade não seja afetada pelo FPS
+            clock.tick(FPS)
+            delta_time = clock.get_time() / 20  # Para multiplicar velocidade de objetos para garantir que a velocidade não seja afetada pelo FPS
 
             if not (jogo_pausado or jogo_tela_morte):
                 # Jogador
@@ -235,8 +237,11 @@ def iniciar_jogo():
                     if isinstance(inimigo, Texugo):
                         drop = CristalXp(inimigo.pos, random.choices(['Blue', 'Green', 'Red'], [40, 3, 1], k=1)[0])
                         total_inimigos_mortos += inimigo.checar_hp(drop, items, todos_sprites)
-
+                
                 # Items
+                #xp anterior (utilizado para manter registrado quando um cristal é coletado)
+                xp_anterior = jogador.exp
+
                 for item in items:
                     item.animar_sprite()
                     item.magnetismo(jogador, delta_time)
@@ -248,6 +253,9 @@ def iniciar_jogo():
                         jogador.inventario['Poção'] += item.checar_colisao(jogador)
                     elif isinstance(item, CristalXp):
                         jogador.exp += item.checar_colisao(jogador)
+                        if jogador.exp > xp_anterior:
+                            total_cristais += 1
+
 
                 # Spawnar inimigos (Spawna 10 a cada 10 segundos) (Max = 40)
                 if pygame.time.get_ticks() - cooldown_spawnar_inimigos >= 10000 and len(inimigos) <= 40:
@@ -270,6 +278,7 @@ def iniciar_jogo():
                 # UI
                 FPS_ui = FONTE_NONE.render(f"FPS: {clock.get_fps():.1f}", False, BRANCO)
                 MOEDAS_ui = FONTE_NONE.render(f"Moedas: {total_moedas}", False, BRANCO)
+                CRISTAIS_ui = FONTE_NONE.render(f"Cristais: {total_cristais}", False, BRANCO)
                 HP_ui = FONTE_NONE.render(f"Vida do Jogador: {jogador.hit_points_atuais}/{jogador.hit_point_max}", False, BRANCO)
                 LEVEL_ui = FONTE_NONE.render(f"Nível do Jogador: {jogador.nivel}", False, BRANCO)
                 XP_ui = FONTE_NONE.render(f"XP: {jogador.exp}/{jogador.exp_para_proximo_nivel}", False, BRANCO)
@@ -278,6 +287,7 @@ def iniciar_jogo():
 
                 TELA.blit(FPS_ui, FPS_ui.get_rect(topleft=(880, 20)))
                 TELA.blit(MOEDAS_ui, MOEDAS_ui.get_rect(topleft=(1050, 20)))
+                TELA.blit(CRISTAIS_ui, CRISTAIS_ui.get_rect(topleft=(1050, 50)))
                 TELA.blit(HP_ui, HP_ui.get_rect(topleft=(20, 20)))
                 TELA.blit(LEVEL_ui, LEVEL_ui.get_rect(topleft=(20, 50)))
                 TELA.blit(XP_ui, XP_ui.get_rect(topleft=(20, 80)))

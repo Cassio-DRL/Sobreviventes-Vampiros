@@ -65,12 +65,14 @@ class Ataque(pygame.sprite.Sprite):
 
         elif not self.ataque_executado:
             self.image = self.sprite_invisivel
+            #reseta a animacao e o frame
+            self.frame = 0
 
         # Atualizar hitbox
         self.rect = self.image.get_rect(center=self.rect.center)
 
     def atualizar_posicao(self, jogador):  # funcao para adicionar um offset para ataques especificos
-        self.pos = jogador.pos + self.offset if jogador.direcao == 'direita' else jogador.pos - offset_vec
+        self.pos = jogador.pos + self.offset if jogador.direcao == 'direita' else jogador.pos - self.offset
 
         # Compara a direção do ataque com a direção do player e inverte o sprite se for diferente
         if self.direcao != jogador.direcao:
