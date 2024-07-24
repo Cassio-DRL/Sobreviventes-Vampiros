@@ -21,11 +21,11 @@ class Jogador(pygame.sprite.Sprite):
         self.defesa = defesa
         self.velocidade_movimento = velocidade
         self.nivel = 1
-        self.exp = 0
-        self.exp_para_proximo_nivel = int(100 * (1 + self.nivel ** 1.1))
+        self.xp = 0
+        self.xp_para_proximo_nivel = int(100 * (1 + self.nivel ** 1.1))
 
         # Inventário
-        self.inventario = {'Poção': 0}
+        self.inventario = {'Poção Cura': 1, 'Poção Velocidade': 1, 'Bomba': 1, 'Dobro XP': 1}
 
         # Animação
         self.andando = False
@@ -33,12 +33,12 @@ class Jogador(pygame.sprite.Sprite):
         self.ultimo_tick = pygame.time.get_ticks()  # Contagem de ticks quando o frame foi atualizado pela última vez
         self.frame_rate_animacao = 1000 // frame_rate  # Frame rate da animação do sprite
 
-    def movimento(self, dt):
+    def movimento(self, dt, mod):
         keys = pygame.key.get_pressed()
         self.andando = False
 
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-            self.pos.x -= self.velocidade_movimento * dt
+            self.pos.x -= self.velocidade_movimento * dt * mod
             if self.direcao != 'esquerda':
                 self.direcao = 'esquerda'
                 self.sprite_idle = pygame.transform.flip(self.sprite_idle, True, False)
@@ -46,7 +46,7 @@ class Jogador(pygame.sprite.Sprite):
             self.andando = True
 
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-            self.pos.x += self.velocidade_movimento * dt
+            self.pos.x += self.velocidade_movimento * dt * mod
             if self.direcao != 'direita':
                 self.direcao = 'direita'
                 self.sprite_idle = pygame.transform.flip(self.sprite_idle, True, False)
@@ -54,10 +54,10 @@ class Jogador(pygame.sprite.Sprite):
             self.andando = True
 
         if keys[pygame.K_UP] or keys[pygame.K_w]:
-            self.pos.y -= self.velocidade_movimento * dt
+            self.pos.y -= self.velocidade_movimento * dt * mod
             self.andando = True
         if keys[pygame.K_DOWN] or keys[pygame.K_s]:
-            self.pos.y += self.velocidade_movimento * dt
+            self.pos.y += self.velocidade_movimento * dt * mod
             self.andando = True
 
     def animar_sprite(self):
@@ -74,16 +74,16 @@ class Jogador(pygame.sprite.Sprite):
         self.hitbox.center = self.pos
 
     def nivel_update(self):
-        if self.exp >= self.exp_para_proximo_nivel:
-            self.exp -= self.exp_para_proximo_nivel
+        if self.xp >= self.xp_para_proximo_nivel:
+            self.xp -= self.xp_para_proximo_nivel
             self.nivel += 1
-            self.exp_para_proximo_nivel = int(100 * (1 + self.nivel ** 1.1))
+            self.xp_para_proximo_nivel = int(100 * (1 + self.nivel ** 1.1))
 
-    def beber_pocao(self):
-        if self.inventario['Poção'] > 0:
-            self.inventario['Poção'] -= 1
-            self.hit_points_atuais += 25
-            self.hit_points_atuais = min(self.hit_points_atuais, self.hit_point_max)
+    def usar_item(self, item):
+        if self.inventario[item] > 0:
+            self.inventario[item] -= 1
+            return True
+        return False
 
 
 # Carregar sprites
@@ -106,3 +106,5 @@ class BichoChicote(Jogador):
         frame_rate = 9
 
         super().__init__(pos, escala, sprite_idle, sprite_andando, hp, ataque, defesa, velocidade_movimento, frame_rate)
+
+

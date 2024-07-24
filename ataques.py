@@ -65,13 +65,14 @@ class Ataque(pygame.sprite.Sprite):
 
         elif not self.ataque_executado:
             self.image = self.sprite_invisivel
+            #reseta a animacao e o frame
+            self.frame = 0
 
         # Atualizar hitbox
         self.rect = self.image.get_rect(center=self.rect.center)
 
     def atualizar_posicao(self, jogador):  # funcao para adicionar um offset para ataques especificos
-        offset_vec = pygame.math.Vector2(self.offset, 0)
-        self.pos = jogador.pos + offset_vec if jogador.direcao == 'direita' else jogador.pos - offset_vec
+        self.pos = jogador.pos + self.offset if jogador.direcao == 'direita' else jogador.pos - self.offset
 
         # Compara a direção do ataque com a direção do player e inverte o sprite se for diferente
         if self.direcao != jogador.direcao:
@@ -92,7 +93,7 @@ class Slash(Ataque):
         sprites_animacao = [sprite.convert_alpha() for sprite in Slash_Sprites]
 
         # Stats
-        dano = 10
+        dano = 20
         duracao_ataque = 1
         cooldown_ataque = 0.5
 
@@ -100,6 +101,6 @@ class Slash(Ataque):
         frame_rate = 8
 
         # Offset em relação ao jogador
-        offset = 100
+        offset = pygame.math.Vector2(100, 0)
 
         super().__init__(escala, dano, duracao_ataque, cooldown_ataque, sprite_invisivel, sprites_animacao, frame_rate, offset)

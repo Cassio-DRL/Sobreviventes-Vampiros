@@ -1,14 +1,15 @@
-from personagems import BichoChicote
-from inimigos import Texugo
-from coletaveis import Moeda, Cura, CristalXp
-from ataques import Slash
-import pygame
+from UIs import *
+from personagems import *
+from inimigos import *
+from coletaveis import *
+from ataques import *
 import random
 import math
+import sys
 
 class Camera:
+    # Cria um Rect representando a câmera
     def __init__(self, largura, altura):
-        # Cria um Rect representando a câmera
         self.camera = pygame.Rect(0, 0, largura, altura)
         self.largura = largura
         self.altura = altura
@@ -21,9 +22,9 @@ class Camera:
         # Calcula a nova posição x e y da câmera de forma que o centro do jogador esteja no centro da tela
         x = int(self.largura / 2) - jogador.rect.centerx
         y = int(self.altura / 2) - jogador.rect.centery
-
         # Atualiza a posição da câmera com as novas coordenadas
         self.camera = pygame.Rect(x, y, self.largura, self.altura)
+
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, pos, sprite_loaded):
@@ -39,40 +40,6 @@ class Tile(pygame.sprite.Sprite):
             return {(self.rect.x + largura * x, self.rect.y + altura * y) for x, y in coord_multiplicador}
         return set()
 
-class Botao:
-    # Botão com texto que pode ser clicado pelo mouse
-    def __init__(self, pos, largura, altura, texto, fonte, cor):
-        self.rect = pygame.Rect(pos.x, pos.y, largura, altura)
-        self.fonte = fonte
-        self.texto = self.fonte.render(texto, False, (255, 255, 255))
-        self.cor = cor
-
-    def desenhar(self, tela):
-        pygame.draw.rect(tela, self.cor, self.rect)
-        tela.blit(self.texto, self.texto.get_rect(center=self.rect.center))
-
-    def mouse_interacao(self, evento):
-        if evento.type == pygame.MOUSEBUTTONDOWN:
-            if evento.button == 1 and self.rect.collidepoint(evento.pos):
-                return True
-        return False
-
-def menu_pausa(largura, altura, tela, fonte, botoes, cor):
-    # Função para desenhar todos os elementos da tela de pausa
-
-    # Camada sobre a tela que permite que coisas sejam desenhadas com opacidade reduzida
-    camada = pygame.Surface((LARGURA, ALTURA), pygame.SRCALPHA)
-    pygame.draw.rect(camada, (20, 50, 50, 150), (0, 0, largura, altura))
-    tela.blit(camada, (0, 0))
-
-    # Texto grande no meio da tela
-    texto_pausa = fonte.render(f"JOGO PAUSADO", False, cor)
-    tela.blit(texto_pausa, texto_pausa.get_rect(center=(600, 400)))
-
-    # Desenha cada botão
-    for botao in botoes:
-        botao.desenhar(tela)
-
 def pontos_ao_redor(jogador, raio):
     # Função para achar pontos aleatórios na circunferência de um circulo ao redor do jogador
     angulo = math.radians(random.randint(0, 361))
@@ -80,50 +47,65 @@ def pontos_ao_redor(jogador, raio):
     y = jogador.rect.centery + raio * math.sin(angulo)
     return pygame.math.Vector2(x, y)
 
-
 # Inicializar pygame
-pygame.mixer.pre_init(44100, 16, 2, 4096)  # Aparentemente faz o áudio ser melhor
+pygame.mixer.pre_init(44100, 16, 2, 4096)
 pygame.init()
-
-# Constantes
-LARGURA = 1200
-ALTURA = 800
-FPS = 120
+pygame.mixer_music.load('Audio/0106 - Vempair Survaivors.mp3')
 
 # Cores
 BRANCO = (255, 255, 255)
+PRETO = (0, 0, 0)
 
-# Tela
+# Dimensões da tela
+LARGURA = 1280
+ALTURA = 800
+FPS = 60
+
+# Inicializando a tela
 TELA = pygame.display.set_mode((LARGURA, ALTURA))
 pygame.display.set_caption('Vampiro Sobreviventes')
+
+# Fontes
+FONTE_NONE = pygame.font.Font(None, 30)
+FONTE_NONE_MEDIA = pygame.font.Font(None, 74)
+FONTE_NONE_GRANDE = pygame.font.Font(None, 150)
 
 # Imagens
 GRAMA_TILE = pygame.image.load('Sprites/Grama_Tile.png').convert_alpha()
 
-# Fontes
-FONTE_NONE = pygame.font.Font(None, 30)
-FONTE_NONE_GRANDE = pygame.font.Font(None, 150)
-
 # Menu pausa
-CONTINUAR_botao = Botao(pygame.math.Vector2(200, 700), 200, 50, "Continuar", FONTE_NONE, (100, 100, 100))
-REINICIAR_botao = Botao(pygame.math.Vector2(500, 700), 200, 50, "Reiniciar", FONTE_NONE, (100, 100, 100))
+CONTINUAR_botao_pausa = Botao(pygame.math.Vector2(200, 700), 200, 50, "Continuar", FONTE_NONE, (100, 100, 100))
+REINICIAR_botao_pausa = Botao(pygame.math.Vector2(500, 700), 200, 50, "Reiniciar", FONTE_NONE, (100, 100, 100))
 MENU_PRINCIPAL_botao = Botao(pygame.math.Vector2(800, 700), 200, 50, "Menu Principal", FONTE_NONE, (100, 100, 100))
-botoes_menu_pausa = (CONTINUAR_botao, REINICIAR_botao, MENU_PRINCIPAL_botao)
+botoes_menu_pausa = (CONTINUAR_botao_pausa, REINICIAR_botao_pausa, MENU_PRINCIPAL_botao)
+
+# Tela morte
+REINICIAR_botao_morte = Botao(pygame.math.Vector2(200, 700), 200, 50, "Reiniciar", FONTE_NONE, (100, 100, 100))
+MENU_PRINCIPAL_botao_morte = Botao(pygame.math.Vector2(900, 700), 200, 50, "Menu Principal", FONTE_NONE, (100, 100, 100))
+botoes_tela_morte = (REINICIAR_botao_morte, MENU_PRINCIPAL_botao_morte)
 
 # Sistema
 camera = Camera(LARGURA, ALTURA)
 clock = pygame.time.Clock()
 
-def main():
-    # Música do Nível
-    pygame.mixer_music.load('Audio/Musica_de_batalha_muito_top_SOULKNIGHT.mp3')
-    pygame.mixer_music.play(10000)
+def iniciar_jogo(start_ticks):
 
-    # Stats do jogo
+    # Música do Nível
+    pygame.mixer_music.play(-1)
+
+    # Contagem
     total_moedas = 0
+    total_cristais = 0
     total_inimigos_mortos = 0
+
+    # Cooldowns
     cooldown_spawnar_inimigos = -10000
     cooldown_spawnar_items = -15000
+    dobro_xp_usado = -10000
+    pocao_velocidade_usada = -10000
+
+    # Tempo
+    tempo_pausado_total = 0
 
     # Grupos de sprite
     todos_sprites = pygame.sprite.Group()
@@ -134,23 +116,39 @@ def main():
 
     # Gerar jogador e ataque
     jogador = BichoChicote(pygame.math.Vector2(0, 0))
-    todos_sprites.add(jogador)
-
+    hp_bar = BarraVida(70, 10, (0, 50))
+    xp_bar = BarraExp(LARGURA, 30, (0, 0))
     ataque_chicote = Slash()
-    todos_sprites.add(ataque_chicote)
+    todos_sprites.add(jogador, ataque_chicote)
     ataques.add(ataque_chicote)
 
     # Main Game Loop
+    jogo_tela_morte = False
     jogo_pausado = False
     jogo_rodando = True
+    menu_principal_ativo = False
 
     while jogo_rodando:
-        clock.tick(FPS)
-        delta_time = clock.tick(FPS) / 10  # Para multiplicar velocidade de objetos para garantir que a velocidade não seja afetada pelo FPS
+        # Menu Principal
+        if menu_principal_ativo:
+            menu_principal()
+            menu_principal_ativo = False
+            continue
 
-        if not jogo_pausado:
+        clock.tick(FPS)
+        delta_time = clock.get_time() / 20  # Para multiplicar velocidade de objetos para garantir que a velocidade não seja afetada pelo FPS
+
+        if not (jogo_pausado or jogo_tela_morte):
+            # Timer
+            ticks_passados = pygame.time.get_ticks() - start_ticks - tempo_pausado_total
+            segundos_passados = ticks_passados // 1000
+
+            # Atualizar modificadores
+            modificador_player_speed = 3 if ticks_passados - pocao_velocidade_usada < 10000 else 1  # Dura 10 segundos
+            modificador_xp_yield = 2 if ticks_passados - dobro_xp_usado < 10000 else 1  # Dura 10 segundos
+
             # Jogador
-            jogador.movimento(delta_time)
+            jogador.movimento(delta_time, modificador_player_speed)
             jogador.animar_sprite()
             jogador.nivel_update()
 
@@ -174,6 +172,13 @@ def main():
                 for sprite in group:
                     TELA.blit(sprite.image, camera.mover_objeto(sprite))
 
+            TELA.blit(hp_bar.image, camera.mover_objeto(hp_bar))
+            TELA.blit(xp_bar.image, (0, 0))
+
+            if jogador.hit_points_atuais <= 0 and not jogo_tela_morte:
+                jogo_tela_morte = True
+                tela_morte(LARGURA, ALTURA, TELA, FONTE_NONE_GRANDE, botoes_tela_morte, BRANCO)
+
             # Inimigo
             for inimigo in inimigos:
                 inimigo.movimento(jogador, delta_time)
@@ -189,7 +194,6 @@ def main():
                     drop = CristalXp(inimigo.pos, random.choices(['Blue', 'Green', 'Red'], [40, 3, 1], k=1)[0])
                     total_inimigos_mortos += inimigo.checar_hp(drop, items, todos_sprites)
 
-            # Items
             for item in items:
                 item.animar_sprite()
                 item.magnetismo(jogador, delta_time)
@@ -197,80 +201,166 @@ def main():
                 # Recurso coletado dependendo do tipo de item
                 if isinstance(item, Moeda):
                     total_moedas += item.checar_colisao(jogador)
+
                 elif isinstance(item, Cura):
-                    jogador.inventario['Poção'] += item.checar_colisao(jogador)
+                    jogador.inventario['Poção Cura'] += item.checar_colisao(jogador)
+                elif isinstance(item, Velocidade):
+                    jogador.inventario['Poção Velocidade'] += item.checar_colisao(jogador)
+                elif isinstance(item, Bomba):
+                    jogador.inventario['Bomba'] += item.checar_colisao(jogador)
+                elif isinstance(item, DobroXp):
+                    jogador.inventario['Dobro XP'] += item.checar_colisao(jogador)
+
                 elif isinstance(item, CristalXp):
-                    jogador.exp += item.checar_colisao(jogador)
+                    jogador.xp += item.checar_colisao(jogador) * modificador_xp_yield
+                    total_cristais += item.checar_colisao(jogador)//max(item.checar_colisao(jogador), 1)
 
             # Spawnar inimigos (Spawna 10 a cada 10 segundos) (Max = 40)
-            if pygame.time.get_ticks() - cooldown_spawnar_inimigos >= 10000 and len(inimigos) <= 40:
-                cooldown_spawnar_inimigos = pygame.time.get_ticks()
+            if ticks_passados - cooldown_spawnar_inimigos >= 10000 and len(inimigos) <= 40:
+                cooldown_spawnar_inimigos = ticks_passados
                 for i in range(10):
                     inimigo_tipo = random.choice([Texugo])
                     inimigo_spawanado = inimigo_tipo(pontos_ao_redor(jogador, 900))
                     todos_sprites.add(inimigo_spawanado)
                     inimigos.add(inimigo_spawanado)
 
-            # Spawnar items (Spawna 5 a cada 15 segundos) (Max = 20)
-            if pygame.time.get_ticks() - cooldown_spawnar_items >= 15000 and len(items) <= 20:
-                cooldown_spawnar_items = pygame.time.get_ticks()
-                for i in range(5):
-                    item_tipo = random.choice([Moeda, Cura])
+            # Spawnar items (Spawna 15 a cada 15 segundos) (Max = 30)
+            if ticks_passados - cooldown_spawnar_items >= 15000 and len(items) <= 30:
+                cooldown_spawnar_items = ticks_passados
+                for i in range(15):
+                    item_tipo = random.choice([Moeda, Cura, Bomba, DobroXp, Velocidade])
                     item_spawnado = item_tipo(pontos_ao_redor(jogador, 900))
                     todos_sprites.add(item_spawnado)
                     items.add(item_spawnado)
 
             # UI
-            FPS_ui = FONTE_NONE.render(f"FPS: {clock.get_fps():.1f}", False, BRANCO)
-            MOEDAS_ui = FONTE_NONE.render(f"Moedas: {total_moedas}", False, BRANCO)
-            HP_ui = FONTE_NONE.render(f"Vida do Jogador: {jogador.hit_points_atuais}/{jogador.hit_point_max}", False, BRANCO)
-            LEVEL_ui = FONTE_NONE.render(f"Nível do Jogador: {jogador.nivel}", False, BRANCO)
-            XP_ui = FONTE_NONE.render(f"XP: {jogador.exp}/{jogador.exp_para_proximo_nivel}", False, BRANCO)
-            POCOES_ui = FONTE_NONE.render(f"Poções: {jogador.inventario['Poção']}", False, BRANCO)
-            KILLCOUNT_ui = FONTE_NONE.render(f"Inimigos Mortos: {total_inimigos_mortos}", False, BRANCO)
-
-            TELA.blit(FPS_ui, FPS_ui.get_rect(topleft=(880, 20)))
-            TELA.blit(MOEDAS_ui, MOEDAS_ui.get_rect(topleft=(1050, 20)))
-            TELA.blit(HP_ui, HP_ui.get_rect(topleft=(20, 20)))
-            TELA.blit(LEVEL_ui, LEVEL_ui.get_rect(topleft=(20, 50)))
-            TELA.blit(XP_ui, XP_ui.get_rect(topleft=(20, 80)))
-            TELA.blit(POCOES_ui, POCOES_ui.get_rect(topleft=(320, 20)))
-            TELA.blit(KILLCOUNT_ui, KILLCOUNT_ui.get_rect(topleft=(20, 760)))
+            if not jogo_tela_morte:
+                ui_jogo(total_moedas, total_cristais, jogador.nivel, jogador.xp, jogador.xp_para_proximo_nivel,
+                jogador.inventario['Poção Cura'], total_inimigos_mortos, segundos_passados,
+                FONTE_NONE, BRANCO, TELA, jogador.inventario['Poção Velocidade'], jogador.inventario['Bomba'],
+                jogador.inventario['Dobro XP'], xp_bar, jogador, hp_bar)
 
         # Eventos
         for evento in pygame.event.get():
             # Fechar o jogo caso aperte o botão na janela
             if evento.type == pygame.QUIT:
                 pygame.quit()
-                exit()
+                sys.exit()
 
             # Checar se alguma tecla relevante foi apertada
-            if evento.type == pygame.KEYDOWN:
+            if evento.type == pygame.KEYDOWN and not jogo_tela_morte:
                 if evento.key == pygame.K_ESCAPE:  # Pausar ou despausar jogo se apertar ESC
                     if not jogo_pausado:
                         jogo_pausado = True
+                        contar_tempo_pausado = pygame.time.get_ticks()
                         menu_pausa(LARGURA, ALTURA, TELA, FONTE_NONE_GRANDE, botoes_menu_pausa, BRANCO)
                     else:
+                        tempo_pausado_total += pygame.time.get_ticks() - contar_tempo_pausado
                         jogo_pausado = False
 
                 if not jogo_pausado:
-                    if evento.key == pygame.K_q:  # Beber poção caso aperte Q
-                        jogador.beber_pocao()
+                    if evento.key == pygame.K_z and jogador.usar_item('Poção Cura'): # Beber poção de cura caso aperte Z
+                        jogador.hit_points_atuais = min(jogador.hit_points_atuais + 25, jogador.hit_point_max)
+
+                    if evento.key == pygame.K_x and ticks_passados - pocao_velocidade_usada >= 10000 and jogador.usar_item('Poção Velocidade'):  # Beber poção de velocidade caso aperte X (Cooldown = 10s)
+                        pocao_velocidade_usada = ticks_passados
+
+                    if evento.key == pygame.K_c and jogador.usar_item('Bomba'):  # Usar bomba  caso aperte C
+                        for inimigo in inimigos:
+                            inimigo.hit_points_atuais = 0
+
+                    if evento.key == pygame.K_v and ticks_passados - dobro_xp_usado >= 10000:  # Usar dobro xp caso aperte V (Cooldown = 10s)
+                        if jogador.usar_item('Dobro XP'):
+                            dobro_xp_usado = ticks_passados
 
             if jogo_pausado:
                 for botao in botoes_menu_pausa:  # Apertos de botão na tela de pausa
                     if botao.mouse_interacao(evento):
-                        if botao == CONTINUAR_botao:
+                        if botao == CONTINUAR_botao_pausa:
+                            tempo_pausado_total += pygame.time.get_ticks() - contar_tempo_pausado
                             jogo_pausado = False
                         elif botao == MENU_PRINCIPAL_botao:
-                            pygame.quit()
-                            exit()
-                        elif botao == REINICIAR_botao:
-                            jogo_rodando = False
+                            menu_principal_ativo = True
+                            jogo_pausado = False
+                        elif botao == REINICIAR_botao_pausa:
+                            iniciar_jogo(pygame.time.get_ticks())
+                            jogo_pausado = False
+
+            if jogo_tela_morte:
+                for botao in botoes_tela_morte:  # Apertos de botão na tela de morte
+                    if botao.mouse_interacao(evento):
+                        if botao == REINICIAR_botao_morte:
+                            iniciar_jogo(pygame.time.get_ticks())
+                            jogo_tela_morte = False
+                        elif botao == MENU_PRINCIPAL_botao_morte:
+                            menu_principal_ativo = True
+                            jogo_tela_morte = False
 
         # Atualiza a tela
         pygame.display.update()
 
+# Função para abrir as configurações
+def abrir_configuracoes():
+    configuracoes = True
+    volume = 0.5
 
-while True:
-    main()
+    while configuracoes:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_ESCAPE:
+                    configuracoes = False
+                elif evento.key == pygame.K_UP:
+                    volume = min(1.0, volume + 0.1)
+                    pygame.mixer.music.set_volume(volume)
+                elif evento.key == pygame.K_DOWN:
+                    volume = max(0.0, volume - 0.1)
+                    pygame.mixer.music.set_volume(volume)
+
+        TELA.fill(PRETO)
+        texto = FONTE_NONE_MEDIA.render("Configurações", True, BRANCO)
+        TELA.blit(texto, (LARGURA // 2 - texto.get_width() // 2, ALTURA // 2 - 100))
+        texto_volume = FONTE_NONE_MEDIA.render(f"Volume: {int(volume * 100)}%", True, BRANCO)
+        TELA.blit(texto_volume, (LARGURA // 2 - texto_volume.get_width() // 2, ALTURA // 2))
+        texto_voltar = FONTE_NONE_MEDIA.render("Pressione ESC para voltar", True, BRANCO)
+        TELA.blit(texto_voltar, (LARGURA // 2 - texto_voltar.get_width() // 2, ALTURA // 2 + 100))
+        pygame.display.flip()
+
+# Função para mostrar o menu principal
+def menu_principal():
+    pygame.mixer_music.stop()
+    while True:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if evento.type == pygame.MOUSEBUTTONDOWN:
+                x, y = pygame.mouse.get_pos()
+                if botao_iniciar.collidepoint(x, y):
+                    iniciar_jogo(pygame.time.get_ticks())
+                elif botao_configuracoes.collidepoint(x, y):
+                    abrir_configuracoes()
+                elif botao_sair.collidepoint(x, y):
+                    pygame.quit()
+                    sys.exit()
+
+        TELA.fill(PRETO)
+
+        texto_iniciar = FONTE_NONE_MEDIA.render("Iniciar Jogo", True, BRANCO)
+        botao_iniciar = texto_iniciar.get_rect(center=(LARGURA // 2, ALTURA // 2 - 100))
+        TELA.blit(texto_iniciar, botao_iniciar.topleft)
+
+        texto_configuracoes = FONTE_NONE_MEDIA.render("Configurações", True, BRANCO)
+        botao_configuracoes = texto_configuracoes.get_rect(center=(LARGURA // 2, ALTURA // 2))
+        TELA.blit(texto_configuracoes, botao_configuracoes.topleft)
+
+        texto_sair = FONTE_NONE_MEDIA.render("Sair do Jogo", True, BRANCO)
+        botao_sair = texto_sair.get_rect(center=(LARGURA // 2, ALTURA // 2 + 100))
+        TELA.blit(texto_sair, botao_sair.topleft)
+
+        pygame.display.update()
+
+
+menu_principal()
