@@ -93,7 +93,7 @@ class Slash(Ataque):
         sprites_animacao = [sprite.convert_alpha() for sprite in Slash_Sprites]
 
         # Stats
-        dano = 10
+        dano = 20
         duracao_ataque = 1
         cooldown_ataque = 0.5
 

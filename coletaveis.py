@@ -52,6 +52,9 @@ class coletavel(pygame.sprite.Sprite):
 # Carregar sprites
 Moeda_Sprites = [pygame.image.load(f"Sprites/Moeda_girando_{i+1}.png") for i in range(7)]
 Cura_Sprites = [pygame.image.load("Sprites/pocao grande.png")]
+Velocidade_Sprites = [pygame.image.load("Sprites/pocao pequena.png")]
+Bomba_Sprites = [pygame.image.load("Sprites/bomba.png")]
+Dobro_Xp = [pygame.image.load("Sprites/banana_dobro_xp.png")]
 
 class Moeda(coletavel):
     def __init__(self, pos):
@@ -63,11 +66,35 @@ class Moeda(coletavel):
 
 class Cura(coletavel):
     def __init__(self, pos):
-        escala = (25, 25)
+        escala = (35, 35)
         sprites = [sprite.convert_alpha() for sprite in Cura_Sprites]
         pocoes = 1
         frame_rate = 1
         super().__init__(pos, escala, sprites, pocoes, frame_rate)
+
+class Velocidade(coletavel):
+    def __init__(self, pos):
+        escala = (25, 31)
+        sprites = [sprite.convert_alpha() for sprite in Velocidade_Sprites]
+        pocoes_rapidas = 1
+        frame_rate = 1
+        super().__init__(pos, escala, sprites, pocoes_rapidas, frame_rate)
+
+class Bomba(coletavel):
+    def __init__(self, pos):
+        escala = (25, 25)
+        sprites = [sprite.convert_alpha() for sprite in Bomba_Sprites]
+        bombas = 1
+        frame_rate = 1
+        super().__init__(pos, escala, sprites, bombas, frame_rate)
+
+class DobroXp(coletavel):
+    def __init__(self, pos):
+        escala = (25, 25)
+        sprites = [sprite.convert_alpha() for sprite in Dobro_Xp]
+        bananas = 1
+        frame_rate = 1
+        super().__init__(pos, escala, sprites, bananas, frame_rate)
 
 class CristalXp(coletavel):
     def __init__(self, pos, tipo):
@@ -76,3 +103,4 @@ class CristalXp(coletavel):
         xp = 10 if tipo == 'Blue' else 40 if tipo == 'Green' else 80
         frame_rate = 11
         super().__init__(pos, escala, sprites, xp, frame_rate)
+
