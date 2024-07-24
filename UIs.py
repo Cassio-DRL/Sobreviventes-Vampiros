@@ -1,5 +1,10 @@
 import pygame
+
 pygame.init()
+
+# Fontes
+FONTE_NONE_GRANDE = pygame.font.Font(None, 50)
+FONTE_NONE_MEDIA = pygame.font.Font(None, 50)
 
 # Images
 inventario = pygame.image.load('Sprites/UI/Inventário.png')
@@ -11,10 +16,10 @@ caveira = pygame.transform.scale(pygame.image.load('Sprites/UI/caveira.png'), (2
 cristal = pygame.transform.scale(pygame.image.load(f"Sprites/Cristais/Pink/pink_crystal_0000.png"), (34, 34))
 moeda = pygame.transform.scale(pygame.image.load(f"Sprites/Moeda_girando_1.png"), (25, 25))
 
-def ui_jogo(total_moedas, total_cristais, nivel, xp, xp_para_proximo_nivel, pocoes, inimigos_mortos, segundos, fonte, cor, tela,
-            pocoes_velocidade, bombas, dobro_xp, barraxp, jogador, barrahp):
-    FONTE_NONE_MEDIA = pygame.font.Font(None, 50)
 
+def ui_jogo(total_moedas, total_cristais, nivel, xp, xp_para_proximo_nivel, pocoes, inimigos_mortos, segundos, fonte,
+            cor, tela,
+            pocoes_velocidade, bombas, dobro_xp, barraxp, jogador, barrahp):
     LEVEL_ui = fonte.render(f"lvl {nivel}", False, cor)
     XP_ui = fonte.render(f"{xp}/{xp_para_proximo_nivel}", False, cor)
 
@@ -23,7 +28,6 @@ def ui_jogo(total_moedas, total_cristais, nivel, xp, xp_para_proximo_nivel, poco
 
     MOEDAS_ui = fonte.render(f"{total_moedas}", False, cor)
     CRISTAIS_ui = fonte.render(f"{total_cristais}", False, cor)
-
 
     tela.blit(inventario.convert_alpha(), inventario.get_rect(bottomleft=(0, 800)))
     tela.blit(pocao.convert_alpha(), pocao.get_rect(center=(45, 768)))
@@ -56,6 +60,7 @@ def ui_jogo(total_moedas, total_cristais, nivel, xp, xp_para_proximo_nivel, poco
 
     barrahp.atualizar(jogador)
     barraxp.atualizar(jogador)
+
 
 class Botao:
     # Botão com texto que pode ser clicado pelo mouse
@@ -93,7 +98,7 @@ def menu_pausa(largura, altura, tela, fonte, botoes, cor):
         botao.desenhar(tela)
 
 
-def tela_morte(largura, altura, tela, fonte, botoes, cor):
+def tela_morte(largura, altura, tela, fonte, botoes, cor, num_inimigos, num_cristais, num_moedas):
     # Função para desenhar todos os elementos da tela de morte
     camada = pygame.Surface((largura, altura), pygame.SRCALPHA)
     pygame.draw.rect(camada, (20, 50, 50, 150), (0, 0, largura, altura))
@@ -103,9 +108,36 @@ def tela_morte(largura, altura, tela, fonte, botoes, cor):
     texto_morte = fonte.render(f"MORTO", True, cor)
     tela.blit(texto_morte, (largura // 2 - texto_morte.get_width() // 2, altura // 2 - 100))
 
+    # Moedas ganhas
+    moedas_ganhas = FONTE_NONE_GRANDE.render(f"MOEDAS GANHAS", True, cor)
+    inimigos = FONTE_NONE_MEDIA.render(f"Inimigos Mortos: {num_inimigos}", True, cor)
+    cristais = FONTE_NONE_MEDIA.render(f"Cristais Coletados: {num_cristais}", True, cor)
+    moedas = FONTE_NONE_MEDIA.render(f"Moedas Coletadas: {num_moedas}", True, cor)
+
+    contagem_inimigos = FONTE_NONE_MEDIA.render(f"{num_inimigos // 2}", True, cor)
+    contagem_cristais = FONTE_NONE_MEDIA.render(f"{num_cristais // 4}", True, cor)
+    contagem_moedas = FONTE_NONE_MEDIA.render(f"{num_moedas}", True, cor)
+    total = FONTE_NONE_MEDIA.render(f"Moedas Totais: {num_moedas + num_cristais // 4 + num_inimigos // 2}", True, cor)
+
+    tela.blit(moedas_ganhas, moedas_ganhas.get_rect(topleft=(300, 400)))
+    tela.blit(inimigos, inimigos.get_rect(topleft=(300, 450)))
+    tela.blit(cristais, cristais.get_rect(topleft=(300, 500)))
+    tela.blit(moedas, moedas.get_rect(topleft=(300, 550)))
+
+    tela.blit(contagem_inimigos, contagem_inimigos.get_rect(topright=(800, 450)))
+    tela.blit(contagem_cristais, contagem_cristais.get_rect(topright=(800, 500)))
+    tela.blit(contagem_moedas, contagem_moedas.get_rect(topright=(800, 550)))
+    tela.blit(total, total.get_rect(topleft=(300, 600)))
+
+    for i in (450, 505, 555):
+        tela.blit(moeda.convert_alpha(), moeda.get_rect(topright=(840, i)))
+
     # Desenha cada botão
     for botao in botoes:
         botao.desenhar(tela)
+
+    return num_moedas + num_cristais // 4 + num_inimigos // 2
+
 
 class Barra(pygame.sprite.Sprite):
     def __init__(self, largura, altura, offset):
@@ -115,6 +147,7 @@ class Barra(pygame.sprite.Sprite):
         self.offset = offset
         self.image = pygame.Surface((self.largura, self.altura))
         self.rect = self.image.get_rect()
+
 
 class BarraVida(Barra):
     def __init__(self, largura, altura, offset):
@@ -139,7 +172,6 @@ class BarraExp(Barra):
         self.rect.topleft = posicao_fixa
 
     def atualizar(self, jogador):
-
         # Calcular proporção
         proporcao = jogador.xp / jogador.xp_para_proximo_nivel
 

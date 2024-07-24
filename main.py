@@ -87,8 +87,10 @@ botoes_tela_morte = (REINICIAR_botao_morte, MENU_PRINCIPAL_botao_morte)
 # Sistema
 camera = Camera(LARGURA, ALTURA)
 clock = pygame.time.Clock()
+moedas_acumuladas = 0
 
-def iniciar_jogo(start_ticks):
+
+def iniciar_jogo(start_ticks, moedas_acumuladas):
 
     # Música do Nível
     pygame.mixer_music.play(-1)
@@ -131,7 +133,7 @@ def iniciar_jogo(start_ticks):
     while jogo_rodando:
         # Menu Principal
         if menu_principal_ativo:
-            menu_principal()
+            menu_principal(moedas_acumuladas)
             menu_principal_ativo = False
             continue
 
@@ -175,9 +177,10 @@ def iniciar_jogo(start_ticks):
             TELA.blit(hp_bar.image, camera.mover_objeto(hp_bar))
             TELA.blit(xp_bar.image, (0, 0))
 
+            # Tela Morte
             if jogador.hit_points_atuais <= 0 and not jogo_tela_morte:
                 jogo_tela_morte = True
-                tela_morte(LARGURA, ALTURA, TELA, FONTE_NONE_GRANDE, botoes_tela_morte, BRANCO)
+                moedas_acumuladas += tela_morte(LARGURA, ALTURA, TELA, FONTE_NONE_GRANDE, botoes_tela_morte, BRANCO, total_inimigos_mortos, total_cristais, total_moedas)
 
             # Inimigo
             for inimigo in inimigos:
@@ -187,7 +190,7 @@ def iniciar_jogo(start_ticks):
 
                 # Verificação de dano contra o inimigo se um ataque estiver sendo executado e tocando no inimigo
                 for ataque in ataques:
-                    inimigo.hit_points_atuais -= ataque_chicote.dar_dano(inimigo, jogador)
+                    inimigo.hit_points_atuais -= ataque.dar_dano(inimigo, jogador)
 
                 # Drops dependendo do tipo de inimigo
                 if isinstance(inimigo, Texugo):
@@ -283,14 +286,14 @@ def iniciar_jogo(start_ticks):
                             menu_principal_ativo = True
                             jogo_pausado = False
                         elif botao == REINICIAR_botao_pausa:
-                            iniciar_jogo(pygame.time.get_ticks())
+                            iniciar_jogo(pygame.time.get_ticks(), moedas_acumuladas)
                             jogo_pausado = False
 
             if jogo_tela_morte:
-                for botao in botoes_tela_morte:  # Apertos de botão na tela de morte
+                for botao in botoes_tela_morte:  # Apertos de botão na tela de mortewa
                     if botao.mouse_interacao(evento):
                         if botao == REINICIAR_botao_morte:
-                            iniciar_jogo(pygame.time.get_ticks())
+                            iniciar_jogo(pygame.time.get_ticks(), moedas_acumuladas)
                             jogo_tela_morte = False
                         elif botao == MENU_PRINCIPAL_botao_morte:
                             menu_principal_ativo = True
@@ -329,7 +332,7 @@ def abrir_configuracoes():
         pygame.display.flip()
 
 # Função para mostrar o menu principal
-def menu_principal():
+def menu_principal(moedas_acumuladas):
     pygame.mixer_music.stop()
     while True:
         for evento in pygame.event.get():
@@ -339,7 +342,7 @@ def menu_principal():
             if evento.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
                 if botao_iniciar.collidepoint(x, y):
-                    iniciar_jogo(pygame.time.get_ticks())
+                    iniciar_jogo(pygame.time.get_ticks(), moedas_acumuladas)
                 elif botao_configuracoes.collidepoint(x, y):
                     abrir_configuracoes()
                 elif botao_sair.collidepoint(x, y):
@@ -347,6 +350,8 @@ def menu_principal():
                     sys.exit()
 
         TELA.fill(PRETO)
+        moedas_texto = FONTE_NONE_MEDIA.render(f'Moedas: {moedas_acumuladas}', True, BRANCO)
+        TELA.blit(moedas_texto, moedas_texto.get_rect(topleft=(0, 0)))
 
         texto_iniciar = FONTE_NONE_MEDIA.render("Iniciar Jogo", True, BRANCO)
         botao_iniciar = texto_iniciar.get_rect(center=(LARGURA // 2, ALTURA // 2 - 100))
@@ -363,4 +368,4 @@ def menu_principal():
         pygame.display.update()
 
 
-menu_principal()
+menu_principal(moedas_acumuladas)

@@ -97,7 +97,7 @@ class BichoChicote(Jogador):
         sprite_andando = [sprite.convert_alpha() for sprite in Sprite_BichoChicote_Andando]
 
         # Stats
-        hp = 100
+        hp = 40
         ataque = 5
         defesa = 5
         velocidade_movimento = 3
