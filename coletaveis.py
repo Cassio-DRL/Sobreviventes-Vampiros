@@ -43,9 +43,9 @@ class coletavel(pygame.sprite.Sprite):
             direcao_x /= distancia
             direcao_y /= distancia
 
-            # Move o coletavel com o dobro da velocidade do jogador
-            self.pos.x += direcao_x * dt * jogador.velocidade_movimento * 2
-            self.pos.y += direcao_y * dt * jogador.velocidade_movimento * 2
+            # Move o coletavel em direção ao jogador
+            self.pos.x += direcao_x * dt * 10
+            self.pos.y += direcao_y * dt * 10
             self.rect.topleft = self.pos
 
 

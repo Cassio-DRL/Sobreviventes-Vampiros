@@ -1,6 +1,6 @@
 import pygame
 class Jogador(pygame.sprite.Sprite):
-    def __init__(self, pos, escala, sprite_idle, sprite_andando, hp, ataque, defesa, velocidade, frame_rate):
+    def __init__(self, pos, escala, sprite_idle, sprite_andando, hp, ataque, defesa, velocidade, frame_rate, nome):
         super().__init__()
 
         # Sprite
@@ -14,7 +14,8 @@ class Jogador(pygame.sprite.Sprite):
         self.hitbox = pygame.Rect(pos.x / 4, pos.y / 4, escala.x / 2, escala.y / 2)  # Hitbox posicionada no centro do rect e com metade do tamanho
         self.pos = pos
 
-        # Stats
+        # Statss
+        self.nome = nome
         self.hit_point_max = hp
         self.hit_points_atuais = self.hit_point_max
         self.ataque = ataque
@@ -24,8 +25,9 @@ class Jogador(pygame.sprite.Sprite):
         self.xp = 0
         self.xp_para_proximo_nivel = int(100 * (1 + self.nivel ** 1.1))
 
-        # Inventário
-        self.inventario = {'Poção Cura': 1, 'Poção Velocidade': 1, 'Bomba': 1, 'Dobro XP': 1}
+        # Dicionários
+        self.inventario = {'Poção Cura': 0, 'Poção Velocidade': 0, 'Bomba': 0, 'Dobro XP': 0}
+        self.dicionario = {'Nome': nome, 'HP': hp, 'ATK': ataque, 'DEF': defesa, 'SPD': velocidade}  # Para mostrar os stats no menu inicial
 
         # Animação
         self.andando = False
@@ -87,8 +89,17 @@ class Jogador(pygame.sprite.Sprite):
 
 
 # Carregar sprites
-Sprite_BichoChicote_Idle = pygame.image.load("Sprites/Player_Idle.png")
-Sprite_BichoChicote_Andando = [pygame.image.load(f"Sprites/Player_andando_{i+1}.png") for i in range(3)]
+Sprite_BichoChicote_Idle = pygame.image.load("Sprites/bicho_chicote_idle.png")
+Sprite_BichoChicote_Andando = [pygame.image.load(f"Sprites/bicho_chicote_{i+1}.png") for i in range(3)]
+
+Sprite_BichoAdaga_Idle = pygame.image.load(f"Sprites/bicho_adaga_idle.png")
+Sprite_BichoAdaga_Andando = [pygame.image.load(f"Sprites/bicho_adaga_{i+1}.png") for i in range(3)]
+
+Sprite_BichoCajado_Idle = pygame.image.load(f"Sprites/bicho_cajado_idle.png")
+Sprite_BichoCajado_Andando = [pygame.image.load(f"Sprites/bicho_cajado_{i+1}.png") for i in range(3)]
+
+Sprite_BichoMachado_Idle = pygame.image.load(f"Sprites/bicho_machado_idle.png")
+Sprite_BichoMachado_Andando = [pygame.image.load(f"Sprites/bicho_machado_{i+1}.png") for i in range(3)]
 
 class BichoChicote(Jogador):
     def __init__(self, pos):
@@ -98,15 +109,70 @@ class BichoChicote(Jogador):
         sprite_andando = [sprite.convert_alpha() for sprite in Sprite_BichoChicote_Andando]
 
         # Stats
-        hp = 30
-        ataque = 5
-        defesa = 5
+        hp = 50
+        ataque = 6
+        defesa = 6
         velocidade_movimento = 3
 
         # Animação
         frame_rate = 9
 
-        self.dicionario = {'Nome': nome, 'HP': hp, 'ATK': ataque, 'DEF': defesa, 'SPD': velocidade_movimento}
-        super().__init__(pos, escala, sprite_idle, sprite_andando, hp, ataque, defesa, velocidade_movimento, frame_rate)
+        super().__init__(pos, escala, sprite_idle, sprite_andando, hp, ataque, defesa, velocidade_movimento, frame_rate, nome)
+
+class BichoAdaga(Jogador):
+    def __init__(self, pos):
+        nome = 'Bicho Adaga'
+        escala = pygame.math.Vector2(66, 66)
+        sprite_idle = Sprite_BichoAdaga_Idle.convert_alpha()
+        sprite_andando = [sprite.convert_alpha() for sprite in Sprite_BichoAdaga_Andando]
+
+        # Stats
+        hp = 50
+        ataque = 8
+        defesa = 4
+        velocidade_movimento = 4
+
+        # Animação
+        frame_rate = 9
+
+        super().__init__(pos, escala, sprite_idle, sprite_andando, hp, ataque, defesa, velocidade_movimento, frame_rate, nome)
+
+class BichoCajado(Jogador):
+    def __init__(self, pos):
+        nome = 'Bicho Cajado'
+        escala = pygame.math.Vector2(66, 66)
+        sprite_idle = Sprite_BichoCajado_Idle.convert_alpha()
+        sprite_andando = [sprite.convert_alpha() for sprite in Sprite_BichoCajado_Andando]
+
+        # Stats
+        hp = 20
+        ataque = 10
+        defesa = 3
+        velocidade_movimento = 5
+
+        # Animação
+        frame_rate = 9
+
+        super().__init__(pos, escala, sprite_idle, sprite_andando, hp, ataque, defesa, velocidade_movimento, frame_rate, nome)
+
+class BichoMachado(Jogador):
+    def __init__(self, pos):
+        nome = 'Bicho Machado'
+        escala = pygame.math.Vector2(66, 66)
+        sprite_idle = Sprite_BichoMachado_Idle.convert_alpha()
+        sprite_andando = [sprite.convert_alpha() for sprite in Sprite_BichoMachado_Andando]
+
+        # Stats
+        hp = 75
+        ataque = 8
+        defesa = 8
+        velocidade_movimento = 2
+
+        # Animação
+        frame_rate = 9
+
+        super().__init__(pos, escala, sprite_idle, sprite_andando, hp, ataque, defesa, velocidade_movimento, frame_rate, nome)
+
+
 
 

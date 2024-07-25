@@ -5,6 +5,7 @@ from coletaveis import *
 from ataques import *
 import random
 import math
+import pickle
 
 class Camera:
     # Cria um Rect representando a câmera
@@ -67,44 +68,49 @@ TELA = pygame.display.set_mode((LARGURA, ALTURA))
 pygame.display.set_caption('Vampiro Sobreviventes')
 pygame.display.set_icon(pygame.image.load('Sprites/morcego.png'))
 
-# Fontes
-FONTE_NONE = pygame.font.Font(None, 30)
-FONTE_NONE_MEDIA = pygame.font.Font(None, 74)
-FONTE_NONE_GRANDE = pygame.font.Font(None, 150)
-
 # Imagens
 GRAMA_TILE = pygame.image.load('Sprites/Grama_Tile.png').convert_alpha()
 BOTAO_VERDE = pygame.image.load('Sprites/UI/botao_verde.png').convert_alpha()
 BOTAO_VERMELHO = pygame.image.load('Sprites/UI/botao_vermelho.png').convert_alpha()
+BOTAO_AZUL = pygame.image.load('Sprites/UI/botao_azul.png').convert_alpha()
+BOTAO_CINZA = pygame.image.load('Sprites/UI/botao_cinza.png').convert_alpha()
 mais = pygame.transform.scale(pygame.image.load('Sprites/UI/mais_icone.png').convert_alpha(), (50, 50))
 menos = pygame.transform.scale(pygame.image.load('Sprites/UI/menos_icone.png').convert_alpha(), (50, 140))
 
 # Menu pausa
-CONTINUAR_botao_pausa = Botao(pygame.math.Vector2(200, 700), 200, 50, "Continuar", FONTE_NONE, (100, 100, 100))
-REINICIAR_botao_pausa = Botao(pygame.math.Vector2(500, 700), 200, 50, "Reiniciar", FONTE_NONE, (100, 100, 100))
-MENU_PRINCIPAL_botao = Botao(pygame.math.Vector2(800, 700), 200, 50, "Menu Principal", FONTE_NONE, (100, 100, 100))
+CONTINUAR_botao_pausa = Botao(pygame.math.Vector2(200, 700), 200, 50, "Continuar", pygame.font.Font(None, 30), (100, 100, 100))
+REINICIAR_botao_pausa = Botao(pygame.math.Vector2(500, 700), 200, 50, "Reiniciar", pygame.font.Font(None, 30), (100, 100, 100))
+MENU_PRINCIPAL_botao = Botao(pygame.math.Vector2(800, 700), 200, 50, "Menu Principal", pygame.font.Font(None, 30), (100, 100, 100))
 botoes_menu_pausa = (CONTINUAR_botao_pausa, REINICIAR_botao_pausa, MENU_PRINCIPAL_botao)
 
 # Tela morte
-REINICIAR_botao_morte = Botao(pygame.math.Vector2(200, 700), 200, 50, "Reiniciar", FONTE_NONE, (100, 100, 100))
-MENU_PRINCIPAL_botao_morte = Botao(pygame.math.Vector2(880, 700), 200, 50, "Menu Principal", FONTE_NONE, (100, 100, 100))
+REINICIAR_botao_morte = Botao(pygame.math.Vector2(200, 700), 200, 50, "Reiniciar", pygame.font.Font(None, 30), (100, 100, 100))
+MENU_PRINCIPAL_botao_morte = Botao(pygame.math.Vector2(880, 700), 200, 50, "Menu Principal", pygame.font.Font(None, 30), (100, 100, 100))
 botoes_tela_morte = (REINICIAR_botao_morte, MENU_PRINCIPAL_botao_morte)
 
 # Menu principal
-JOGAR_botao = Botao(pygame.math.Vector2(568, 347), BOTAO_VERDE.get_width(), BOTAO_VERDE.get_height(), "JOGAR", FONTE_NONE, cor=None, imagem=BOTAO_VERDE)
-SAIR_botao = Botao(pygame.math.Vector2(568, 437), BOTAO_VERMELHO.get_width(), BOTAO_VERMELHO.get_height(), "SAIR", FONTE_NONE, cor=None, imagem=BOTAO_VERMELHO)
-MAIS_botao = Botao(pygame.math.Vector2(780, 585), mais.get_width(), mais.get_height(), "", FONTE_NONE, cor=None, imagem=mais)
-MENOS_botao = Botao(pygame.math.Vector2(450, 540), menos.get_width(), menos.get_height(), "", FONTE_NONE, cor=None, imagem=menos)
-botoes_menu_principal = (JOGAR_botao, SAIR_botao)
+JOGAR_botao = Botao(pygame.math.Vector2(568, 347), BOTAO_VERDE.get_width(), BOTAO_VERDE.get_height(), "JOGAR", pygame.font.Font(None, 40), cor=None, imagem=BOTAO_VERDE)
+SAIR_botao = Botao(pygame.math.Vector2(568, 437), BOTAO_VERMELHO.get_width(), BOTAO_VERMELHO.get_height(), "SAIR", pygame.font.Font(None, 40), cor=None, imagem=BOTAO_VERMELHO)
+MAIS_botao = Botao(pygame.math.Vector2(780, 585), mais.get_width(), mais.get_height(), "", pygame.font.Font(None, 30), cor=None, imagem=mais)
+MENOS_botao = Botao(pygame.math.Vector2(450, 540), menos.get_width(), menos.get_height(), "", pygame.font.Font(None, 30), cor=None, imagem=menos)
+SALVAR_botao = Botao(pygame.math.Vector2(5, 740), BOTAO_AZUL.get_width(), BOTAO_AZUL.get_height(), "SALVAR", pygame.font.Font(None, 30), cor=None, imagem=BOTAO_AZUL)
+RESETAR_botao = Botao(pygame.math.Vector2(1129, 740), BOTAO_CINZA.get_width(), BOTAO_CINZA.get_height(), "RESET", pygame.font.Font(None, 30), cor=None, imagem=BOTAO_CINZA)
+botoes_menu_principal = (JOGAR_botao, SAIR_botao, MAIS_botao, MENOS_botao, SALVAR_botao, RESETAR_botao)
 
 # Sistema
 camera = Camera(LARGURA, ALTURA)
 clock = pygame.time.Clock()
-moedas_acumuladas = 0
+moedas_acumuladas = 4000
 
 # Personagens
-personagem_tupla = (BichoChicote(pygame.math.Vector2(0, 0)), BichoChicote(pygame.math.Vector2(0, 0)), BichoChicote(pygame.math.Vector2(0, 0)), BichoChicote(pygame.math.Vector2(0, 0)))
-def iniciar_jogo(start_ticks, moedas_acumuladas):
+personagem_tupla = (BichoChicote, BichoAdaga, BichoCajado, BichoMachado)
+personagems_comprados = [False for i in range(len(personagem_tupla))]
+
+# Carregar dados salvos
+with open('save.pkl', 'rb') as file:
+    moedas_acumuladas, personagems_comprados = pickle.load(file)
+
+def iniciar_jogo(start_ticks, personagem_selecionado):
 
     # Música do Nível
     pygame.mixer_music.play(-1)
@@ -131,7 +137,7 @@ def iniciar_jogo(start_ticks, moedas_acumuladas):
     tiles = pygame.sprite.Group(Tile(pygame.math.Vector2(0, 0), GRAMA_TILE))
 
     # Gerar jogador e ataque
-    jogador = BichoChicote(pygame.math.Vector2(0, 0))
+    jogador = personagem_selecionado(pygame.math.Vector2(0, 0))
     hp_bar = BarraVida(70, 10, (0, 50))
     xp_bar = BarraFixa(LARGURA, 30, (0, 0))
     ataque_chicote = Slash()
@@ -142,15 +148,8 @@ def iniciar_jogo(start_ticks, moedas_acumuladas):
     jogo_tela_morte = False
     jogo_pausado = False
     jogo_rodando = True
-    menu_principal_ativo = False
 
     while jogo_rodando:
-        # Menu Principal
-        if menu_principal_ativo:
-            menu_principal(TELA, BRANCO, moedas_acumuladas, iniciar_jogo, JOGAR_botao, SAIR_botao, MAIS_botao, MENOS_botao, personagem_tupla)
-            menu_principal_ativo = False
-            continue
-
         clock.tick(FPS)
         delta_time = clock.get_time() / 20  # Para multiplicar velocidade de objetos para garantir que a velocidade não seja afetada pelo FPS
 
@@ -191,11 +190,10 @@ def iniciar_jogo(start_ticks, moedas_acumuladas):
             TELA.blit(hp_bar.image, camera.mover_objeto(hp_bar))
             TELA.blit(xp_bar.image, (0, 0))
 
-
-            # Tela Morte
+            # Tela de morte se o hp do jogador chegar a 0
             if jogador.hit_points_atuais <= 0 and not jogo_tela_morte:
                 jogo_tela_morte = True
-                moedas_acumuladas += tela_morte(LARGURA, ALTURA, TELA, FONTE_NONE_GRANDE, botoes_tela_morte, BRANCO, total_inimigos_mortos, total_cristais, total_moedas)
+                moedas_ganhas = tela_morte(LARGURA, ALTURA, TELA, FONTE_NONE_GRANDE, botoes_tela_morte, BRANCO, total_inimigos_mortos, total_cristais, total_moedas)
 
             # Inimigo
             for inimigo in inimigos:
@@ -246,7 +244,7 @@ def iniciar_jogo(start_ticks, moedas_acumuladas):
             if ticks_passados - cooldown_spawnar_items >= 15000 and len(items) <= 30:
                 cooldown_spawnar_items = ticks_passados
                 for i in range(15):
-                    item_tipo = random.choice([Moeda, Cura, Bomba, DobroXp, Velocidade])
+                    item_tipo = random.choices([Moeda, Cura, Bomba, DobroXp, Velocidade], [50, 1, 1, 1, 1], k=1)[0]
                     item_spawnado = item_tipo(pontos_ao_redor(jogador, 900))
                     todos_sprites.add(item_spawnado)
                     items.add(item_spawnado)
@@ -255,7 +253,7 @@ def iniciar_jogo(start_ticks, moedas_acumuladas):
             if not jogo_tela_morte:
                 ui_jogo(total_moedas, total_cristais, jogador.nivel, jogador.xp, jogador.xp_para_proximo_nivel,
                 jogador.inventario['Poção Cura'], total_inimigos_mortos, segundos_passados,
-                FONTE_NONE, BRANCO, TELA, jogador.inventario['Poção Velocidade'], jogador.inventario['Bomba'],
+                pygame.font.Font(None, 30), BRANCO, TELA, jogador.inventario['Poção Velocidade'], jogador.inventario['Bomba'],
                 jogador.inventario['Dobro XP'])
 
                 hp_bar.atualizar(jogador)
@@ -301,24 +299,102 @@ def iniciar_jogo(start_ticks, moedas_acumuladas):
                             tempo_pausado_total += pygame.time.get_ticks() - contar_tempo_pausado
                             jogo_pausado = False
                         elif botao == MENU_PRINCIPAL_botao:
-                            menu_principal_ativo = True
-                            jogo_pausado = False
+                            return False, 0
                         elif botao == REINICIAR_botao_pausa:
-                            iniciar_jogo(pygame.time.get_ticks(), moedas_acumuladas)
-                            jogo_pausado = False
+                            return True, 0
 
             if jogo_tela_morte:
                 for botao in botoes_tela_morte:  # Apertos de botão na tela de mortewa
                     if botao.mouse_interacao(evento):
                         if botao == REINICIAR_botao_morte:
-                            iniciar_jogo(pygame.time.get_ticks(), moedas_acumuladas)
-                            jogo_tela_morte = False
+                            return True, moedas_ganhas
                         elif botao == MENU_PRINCIPAL_botao_morte:
-                            menu_principal_ativo = True
-                            jogo_tela_morte = False
+                            return False, moedas_ganhas
 
         # Atualiza a tela
+        pygame.display.flip()
+
+# Função para mostrar o menu principal
+def menu_principal(moedas_acumuladas, personagems_comprados):
+    pygame.mixer_music.stop()
+
+    volume_barra = BarraFixa(240, 30, (520, 595))
+
+    frames = []
+    for i, coord_x in enumerate((365, 505, 645, 785)):
+        frame = PersonagemFrame((coord_x, 124), personagem_tupla[i], 1000)
+        frames.append(frame)
+
+    personagem_selecionado = None
+
+    while True:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT or SAIR_botao.mouse_interacao(evento):
+                pygame.quit()
+                sys.exit()
+
+            if JOGAR_botao.mouse_interacao(evento) and personagem_selecionado:
+                return personagem_selecionado, moedas_acumuladas
+
+            if MAIS_botao.mouse_interacao(evento):
+                pygame.mixer.music.set_volume(min(1, pygame.mixer.music.get_volume() + 0.1))
+
+            if MENOS_botao.mouse_interacao(evento):
+                pygame.mixer.music.set_volume(max(0, pygame.mixer.music.get_volume() - 0.1))
+
+            if SALVAR_botao.mouse_interacao(evento):
+                with open('save.pkl', 'wb') as file:
+                    pickle.dump((moedas_acumuladas, personagems_comprados), file)
+
+            if RESETAR_botao.mouse_interacao(evento):
+                moedas_acumuladas = 4000
+                personagems_comprados = [False for i in range(len(personagem_tupla))]
+
+            for frame in frames:
+                moedas_acumuladas, personagem_selecionado, comprou = frame.comprar(moedas_acumuladas, personagem_selecionado, evento)
+                if comprou:
+                    personagems_comprados[frames.index(frame)] = True
+
+        TELA.blit(background.convert_alpha(), background.get_rect(topleft=(0, 0)))
+
+        # Caixa para barra de volume. Possivelmente opções de mudo e fullscreen?
+        TELA.blit(box_config.convert_alpha(), box_config.get_rect(topleft=(408, 538)))
+
+        for i in (365, 505, 645, 785):
+            TELA.blit(jogador_frame.convert_alpha(), jogador_frame.get_rect(topleft=(i, 124)))
+
+        # Barra de Volume
+        volume_texto = pygame.font.Font("C:/Windows/Fonts/pkmnrsi.ttf", 45).render(f"VOLUME", True, BRANCO)
+        TELA.blit(volume_texto, volume_texto.get_rect(center=(640, 568)))
+        volume_barra.atualizar(pygame.mixer.music.get_volume(), 1, (255, 255, 255))
+        TELA.blit(volume_barra.image, volume_barra.rect)
+
+        # Titulo do Jogo
+        titulo_texto = pygame.font.Font(None, 100).render(f"VAMPIRO SOBREVIVENTES", True, BRANCO)
+        TELA.blit(titulo_texto, titulo_texto.get_rect(center=(640, 85)))
+
+        # Contagem de moedas
+        TELA.blit(moedas_conta.convert_alpha(), moedas_conta.get_rect(topleft=(483, 0)))
+        moedas_texto = pygame.font.Font("C:/Windows/Fonts/pkmnrsi.ttf", 30).render(f"{moedas_acumuladas}", True, BRANCO)
+        TELA.blit(moedas_texto, moedas_texto.get_rect(center=(640, 20)))
+        TELA.blit(moeda.convert_alpha(), moeda.get_rect(topright=(570, 5)))
+
+        # Botões
+        for botao in botoes_menu_principal:
+            botao.desenhar(TELA)
+
+        # Desenhar frames de personagem de acordo se eles estão bloqueados ou não
+        for i, frame in enumerate(frames):
+            frame.desbloqueado_variavel = personagems_comprados[i]
+            frame.desenhar(TELA)
+
         pygame.display.update()
 
 
-menu_principal(TELA, BRANCO, moedas_acumuladas, iniciar_jogo, JOGAR_botao, SAIR_botao, MAIS_botao, MENOS_botao, personagem_tupla)
+while True:
+    personagem_selecionado, moedas_acumuladas = menu_principal(moedas_acumuladas, personagems_comprados)
+    while True:
+        reiniciar, moedas_ganhas = iniciar_jogo(pygame.time.get_ticks(), personagem_selecionado)
+        moedas_acumuladas += moedas_ganhas
+        if not reiniciar:
+            break

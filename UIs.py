@@ -14,6 +14,9 @@ moedas_conta = pygame.image.load('Sprites/UI/coin_count_frame.png')
 inventario = pygame.image.load('Sprites/UI/Inventário.png')
 box_config = pygame.image.load('Sprites/UI/box.png')
 
+# Player Frame
+cadeado = pygame.transform.scale(pygame.image.load('Sprites/cadeado.png'), (90, 90))
+
 # UI durante jogo
 pocao = pygame.transform.scale(pygame.image.load('Sprites/pocao grande.png'), (45, 45))
 velocidade = pygame.transform.scale(pygame.image.load('Sprites/pocao pequena.png'), (36, 45))
@@ -98,73 +101,56 @@ class BarraFixa(Barra):
 
 
 class PersonagemFrame(pygame.sprite.Sprite):
-    def __init__(self, pos, personagem):
+    """
+    Objeto no menu principal com a possibilidade de comprar ou selecionar personagens
+    """
+    def __init__(self, pos, personagem, preco):
         super().__init__()
         self.image = jogador_frame
         self.rect = self.image.get_rect(topleft=pos)
-        self.personagem = personagem
+        self.personagem_classe = personagem
+        self.personagem = personagem(pygame.math.Vector2(0, 0))
+        self.preco = preco
+        self.desbloqueado_variavel = False
+        self.botao_comprar = Botao(pygame.math.Vector2(self.rect.centerx - 60, self.rect.centery + 55), 120, 47, f"{preco}", pygame.font.Font(None, 35), cor=(130, 192, 86))
+        self.botao_selecionar = Botao(pygame.math.Vector2(self.rect.centerx - 60, self.rect.centery + 55), 120, 47, f"SELECIONAR", pygame.font.Font(None, 23), cor=(130, 192, 86))
 
     def desenhar(self, tela):
-        tela.blit(self.image, self.rect)
-        tela.blit(self.personagem.image, self.personagem.image.get_rect(center=(self.rect.centerx, self.rect.centery)))
 
+        if self.desbloqueado_variavel:
+            tela.blit(self.image, self.rect)
+            tela.blit(pygame.transform.scale(self.personagem.image, (88, 88)), self.personagem.image.get_rect(center=(self.rect.centerx, self.rect.centery-25)))
 
-# Função para mostrar o menu principal
-def menu_principal(TELA, BRANCO, moedas_acumuladas, iniciar_jogo, JOGAR_botao, SAIR_botao, MAIS_botao, MENOS_botao, personagem_tupla):
-    pygame.mixer_music.stop()
-    volume_barra = BarraFixa(240, 30, (520, 595))
-    frames = pygame.sprite.Group()
-    for i, coord_x in enumerate((365, 505, 645, 785)):
-        frame = PersonagemFrame((coord_x, 124), personagem_tupla[i])
-        frames.add(frame)
+            NOME = pygame.font.Font(None, 23).render(f"{self.personagem.dicionario['Nome']}", False, (255, 255, 255))
+            HP = pygame.font.Font(None, 20).render(f"HP: {self.personagem.dicionario['HP']}", False, (255, 255, 255))
+            ATK = pygame.font.Font(None, 20).render(f"ATK: {self.personagem.dicionario['ATK']}", False, (255, 255, 255))
+            DEF = pygame.font.Font(None, 20).render(f"DEF: {self.personagem.dicionario['DEF']}", False, (255, 255, 255))
+            SPD = pygame.font.Font(None, 20).render(f"SPEED: {self.personagem.dicionario['SPD']}", False, (255, 255, 255))
 
-    while True:
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT or SAIR_botao.mouse_interacao(evento):
-                pygame.quit()
-                sys.exit()
-            if JOGAR_botao.mouse_interacao(evento):
-                iniciar_jogo(pygame.time.get_ticks(), moedas_acumuladas)
-            if MAIS_botao.mouse_interacao(evento):
-                pygame.mixer.music.set_volume(min(1, pygame.mixer.music.get_volume() + 0.1))
-            if MENOS_botao.mouse_interacao(evento):
-                pygame.mixer.music.set_volume(max(0, pygame.mixer.music.get_volume() - 0.1))
+            tela.blit(NOME, NOME.get_rect(center=(self.rect.centerx, self.rect.centery-90)))
+            tela.blit(HP, HP.get_rect(topleft=(self.rect.centerx-56, self.rect.centery-15)))
+            tela.blit(ATK, ATK.get_rect(topleft=(self.rect.centerx - 56, self.rect.centery - 0)))
+            tela.blit(DEF, DEF.get_rect(topleft=(self.rect.centerx - 56, self.rect.centery + 15)))
+            tela.blit(SPD, SPD.get_rect(topleft=(self.rect.centerx - 56, self.rect.centery + 30)))
 
-        TELA.blit(background.convert_alpha(), background.get_rect(topleft=(0, 0)))
+            self.botao_selecionar.desenhar(tela)
 
-        # Caixa para barra de volume. Possivelmente opções de mudo e fullscreen?
-        TELA.blit(box_config.convert_alpha(), box_config.get_rect(topleft=(408, 538)))
+        else:
+            tela.blit(cadeado.convert_alpha(), cadeado.get_rect(center=(self.rect.centerx, self.rect.centery-25)))
+            self.botao_comprar.desenhar(tela)
 
-        for i in (365, 505, 645, 785):
-            TELA.blit(jogador_frame.convert_alpha(), jogador_frame.get_rect(topleft=(i, 124)))
+    def comprar(self, dinheiro, selecionado, evento):
+        comprado = False
+        if self.desbloqueado_variavel:
+            if self.botao_selecionar.mouse_interacao(evento):
+                selecionado = self.personagem_classe
+        else:
+            if self.botao_comprar.mouse_interacao(evento) and dinheiro >= self.preco:
+                dinheiro -= self.preco
+                self.desbloqueado_variavel = True
+                comprado = True
 
-        # Barra de Volume
-        volume_texto = FONTE_NONE_MEDIA.render(f"VOLUME", True, BRANCO)
-        TELA.blit(volume_texto, volume_texto.get_rect(center=(640, 570)))
-        volume_barra.atualizar(pygame.mixer.music.get_volume(), 1, (255, 255, 255))
-        TELA.blit(volume_barra.image, volume_barra.rect)
-
-        # Titulo do Jogo
-        titulo_texto = FONTE_NONE_GRANDE.render(f"VAMPIRO SOBREVIVENTES", True, BRANCO)
-        TELA.blit(titulo_texto, titulo_texto.get_rect(center=(640, 85)))
-
-        # Contagem de moedas
-        TELA.blit(moedas_conta.convert_alpha(), moedas_conta.get_rect(topleft=(483, 0)))
-        moedas_texto = FONTE_NONE_MEDIA.render(f"{moedas_acumuladas}", True, BRANCO)
-        TELA.blit(moedas_texto, moedas_texto.get_rect(center=(640, 20)))
-        TELA.blit(moeda.convert_alpha(), moeda.get_rect(topright=(570, 5)))
-
-        # Botões
-        JOGAR_botao.desenhar(TELA)
-        SAIR_botao.desenhar(TELA)
-        MAIS_botao.desenhar(TELA)
-        MENOS_botao.desenhar(TELA)
-
-        for frame in frames:
-            frame.desenhar(TELA)
-
-        pygame.display.update()
-
+        return dinheiro, selecionado, comprado
 
 def menu_pausa(largura, altura, tela, fonte, botoes, cor):
     # Função para desenhar todos os elementos da tela de pausa
