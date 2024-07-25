@@ -5,7 +5,6 @@ from coletaveis import *
 from ataques import *
 import random
 import math
-import sys
 
 class Camera:
     # Cria um Rect representando a câmera
@@ -47,10 +46,12 @@ def pontos_ao_redor(jogador, raio):
     y = jogador.rect.centery + raio * math.sin(angulo)
     return pygame.math.Vector2(x, y)
 
+
 # Inicializar pygame
 pygame.mixer.pre_init(44100, 16, 2, 4096)
 pygame.init()
 pygame.mixer_music.load('Audio/0106 - Vempair Survaivors.mp3')
+pygame.mixer.music.set_volume(0.5)
 
 # Cores
 BRANCO = (255, 255, 255)
@@ -64,6 +65,7 @@ FPS = 60
 # Inicializando a tela
 TELA = pygame.display.set_mode((LARGURA, ALTURA))
 pygame.display.set_caption('Vampiro Sobreviventes')
+pygame.display.set_icon(pygame.image.load('Sprites/morcego.png'))
 
 # Fontes
 FONTE_NONE = pygame.font.Font(None, 30)
@@ -72,6 +74,10 @@ FONTE_NONE_GRANDE = pygame.font.Font(None, 150)
 
 # Imagens
 GRAMA_TILE = pygame.image.load('Sprites/Grama_Tile.png').convert_alpha()
+BOTAO_VERDE = pygame.image.load('Sprites/UI/botao_verde.png').convert_alpha()
+BOTAO_VERMELHO = pygame.image.load('Sprites/UI/botao_vermelho.png').convert_alpha()
+mais = pygame.transform.scale(pygame.image.load('Sprites/UI/mais_icone.png').convert_alpha(), (50, 50))
+menos = pygame.transform.scale(pygame.image.load('Sprites/UI/menos_icone.png').convert_alpha(), (50, 140))
 
 # Menu pausa
 CONTINUAR_botao_pausa = Botao(pygame.math.Vector2(200, 700), 200, 50, "Continuar", FONTE_NONE, (100, 100, 100))
@@ -81,15 +87,23 @@ botoes_menu_pausa = (CONTINUAR_botao_pausa, REINICIAR_botao_pausa, MENU_PRINCIPA
 
 # Tela morte
 REINICIAR_botao_morte = Botao(pygame.math.Vector2(200, 700), 200, 50, "Reiniciar", FONTE_NONE, (100, 100, 100))
-MENU_PRINCIPAL_botao_morte = Botao(pygame.math.Vector2(900, 700), 200, 50, "Menu Principal", FONTE_NONE, (100, 100, 100))
+MENU_PRINCIPAL_botao_morte = Botao(pygame.math.Vector2(880, 700), 200, 50, "Menu Principal", FONTE_NONE, (100, 100, 100))
 botoes_tela_morte = (REINICIAR_botao_morte, MENU_PRINCIPAL_botao_morte)
+
+# Menu principal
+JOGAR_botao = Botao(pygame.math.Vector2(568, 347), BOTAO_VERDE.get_width(), BOTAO_VERDE.get_height(), "JOGAR", FONTE_NONE, cor=None, imagem=BOTAO_VERDE)
+SAIR_botao = Botao(pygame.math.Vector2(568, 437), BOTAO_VERMELHO.get_width(), BOTAO_VERMELHO.get_height(), "SAIR", FONTE_NONE, cor=None, imagem=BOTAO_VERMELHO)
+MAIS_botao = Botao(pygame.math.Vector2(780, 585), mais.get_width(), mais.get_height(), "", FONTE_NONE, cor=None, imagem=mais)
+MENOS_botao = Botao(pygame.math.Vector2(450, 540), menos.get_width(), menos.get_height(), "", FONTE_NONE, cor=None, imagem=menos)
+botoes_menu_principal = (JOGAR_botao, SAIR_botao)
 
 # Sistema
 camera = Camera(LARGURA, ALTURA)
 clock = pygame.time.Clock()
 moedas_acumuladas = 0
 
-
+# Personagens
+personagem_tupla = (BichoChicote(pygame.math.Vector2(0, 0)), BichoChicote(pygame.math.Vector2(0, 0)), BichoChicote(pygame.math.Vector2(0, 0)), BichoChicote(pygame.math.Vector2(0, 0)))
 def iniciar_jogo(start_ticks, moedas_acumuladas):
 
     # Música do Nível
@@ -119,7 +133,7 @@ def iniciar_jogo(start_ticks, moedas_acumuladas):
     # Gerar jogador e ataque
     jogador = BichoChicote(pygame.math.Vector2(0, 0))
     hp_bar = BarraVida(70, 10, (0, 50))
-    xp_bar = BarraExp(LARGURA, 30, (0, 0))
+    xp_bar = BarraFixa(LARGURA, 30, (0, 0))
     ataque_chicote = Slash()
     todos_sprites.add(jogador, ataque_chicote)
     ataques.add(ataque_chicote)
@@ -133,7 +147,7 @@ def iniciar_jogo(start_ticks, moedas_acumuladas):
     while jogo_rodando:
         # Menu Principal
         if menu_principal_ativo:
-            menu_principal(moedas_acumuladas)
+            menu_principal(TELA, BRANCO, moedas_acumuladas, iniciar_jogo, JOGAR_botao, SAIR_botao, MAIS_botao, MENOS_botao, personagem_tupla)
             menu_principal_ativo = False
             continue
 
@@ -176,6 +190,7 @@ def iniciar_jogo(start_ticks, moedas_acumuladas):
 
             TELA.blit(hp_bar.image, camera.mover_objeto(hp_bar))
             TELA.blit(xp_bar.image, (0, 0))
+
 
             # Tela Morte
             if jogador.hit_points_atuais <= 0 and not jogo_tela_morte:
@@ -241,7 +256,10 @@ def iniciar_jogo(start_ticks, moedas_acumuladas):
                 ui_jogo(total_moedas, total_cristais, jogador.nivel, jogador.xp, jogador.xp_para_proximo_nivel,
                 jogador.inventario['Poção Cura'], total_inimigos_mortos, segundos_passados,
                 FONTE_NONE, BRANCO, TELA, jogador.inventario['Poção Velocidade'], jogador.inventario['Bomba'],
-                jogador.inventario['Dobro XP'], xp_bar, jogador, hp_bar)
+                jogador.inventario['Dobro XP'])
+
+                hp_bar.atualizar(jogador)
+                xp_bar.atualizar(jogador.xp, jogador.xp_para_proximo_nivel, (0, 0, 255))
 
         # Eventos
         for evento in pygame.event.get():
@@ -302,70 +320,5 @@ def iniciar_jogo(start_ticks, moedas_acumuladas):
         # Atualiza a tela
         pygame.display.update()
 
-# Função para abrir as configurações
-def abrir_configuracoes():
-    configuracoes = True
-    volume = 0.5
 
-    while configuracoes:
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if evento.type == pygame.KEYDOWN:
-                if evento.key == pygame.K_ESCAPE:
-                    configuracoes = False
-                elif evento.key == pygame.K_UP:
-                    volume = min(1.0, volume + 0.1)
-                    pygame.mixer.music.set_volume(volume)
-                elif evento.key == pygame.K_DOWN:
-                    volume = max(0.0, volume - 0.1)
-                    pygame.mixer.music.set_volume(volume)
-
-        TELA.fill(PRETO)
-        texto = FONTE_NONE_MEDIA.render("Configurações", True, BRANCO)
-        TELA.blit(texto, (LARGURA // 2 - texto.get_width() // 2, ALTURA // 2 - 100))
-        texto_volume = FONTE_NONE_MEDIA.render(f"Volume: {int(volume * 100)}%", True, BRANCO)
-        TELA.blit(texto_volume, (LARGURA // 2 - texto_volume.get_width() // 2, ALTURA // 2))
-        texto_voltar = FONTE_NONE_MEDIA.render("Pressione ESC para voltar", True, BRANCO)
-        TELA.blit(texto_voltar, (LARGURA // 2 - texto_voltar.get_width() // 2, ALTURA // 2 + 100))
-        pygame.display.flip()
-
-# Função para mostrar o menu principal
-def menu_principal(moedas_acumuladas):
-    pygame.mixer_music.stop()
-    while True:
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if evento.type == pygame.MOUSEBUTTONDOWN:
-                x, y = pygame.mouse.get_pos()
-                if botao_iniciar.collidepoint(x, y):
-                    iniciar_jogo(pygame.time.get_ticks(), moedas_acumuladas)
-                elif botao_configuracoes.collidepoint(x, y):
-                    abrir_configuracoes()
-                elif botao_sair.collidepoint(x, y):
-                    pygame.quit()
-                    sys.exit()
-
-        TELA.fill(PRETO)
-        moedas_texto = FONTE_NONE_MEDIA.render(f'Moedas: {moedas_acumuladas}', True, BRANCO)
-        TELA.blit(moedas_texto, moedas_texto.get_rect(topleft=(0, 0)))
-
-        texto_iniciar = FONTE_NONE_MEDIA.render("Iniciar Jogo", True, BRANCO)
-        botao_iniciar = texto_iniciar.get_rect(center=(LARGURA // 2, ALTURA // 2 - 100))
-        TELA.blit(texto_iniciar, botao_iniciar.topleft)
-
-        texto_configuracoes = FONTE_NONE_MEDIA.render("Configurações", True, BRANCO)
-        botao_configuracoes = texto_configuracoes.get_rect(center=(LARGURA // 2, ALTURA // 2))
-        TELA.blit(texto_configuracoes, botao_configuracoes.topleft)
-
-        texto_sair = FONTE_NONE_MEDIA.render("Sair do Jogo", True, BRANCO)
-        botao_sair = texto_sair.get_rect(center=(LARGURA // 2, ALTURA // 2 + 100))
-        TELA.blit(texto_sair, botao_sair.topleft)
-
-        pygame.display.update()
-
-
-menu_principal(moedas_acumuladas)
+menu_principal(TELA, BRANCO, moedas_acumuladas, iniciar_jogo, JOGAR_botao, SAIR_botao, MAIS_botao, MENOS_botao, personagem_tupla)
