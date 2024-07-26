@@ -10,7 +10,7 @@ class Inimigo(pygame.sprite.Sprite):
 
         # Objeto
         self.rect = self.image.get_rect()
-        self.hitbox = pygame.Rect(pos.x / 4, pos.y / 4, escala.x / 2, escala.y / 2)  # Hitbox posicionada no centro do rect e com metade do tamanho
+        self.mask = pygame.mask.from_surface(self.image)  # Mask para ser usada como hitbox
         self.pos = pos
 
         # Stats
@@ -28,7 +28,7 @@ class Inimigo(pygame.sprite.Sprite):
         # Dano
         self.ultimo_hit = pygame.time.get_ticks()  # Contagem de ticks quando o inimigo deu dano pela última vez
 
-    def movimento(self, jogador, dt):
+    def movimento(self, jogador, grupo_inimigos, dt):
         # Calcula direção do jogador e distância entre inimigo e jogador
         direcao_x = jogador.pos.x - self.pos.x
         direcao_y = jogador.pos.y - self.pos.y
@@ -41,8 +41,35 @@ class Inimigo(pygame.sprite.Sprite):
         direcao_y /= distancia
 
         # Move o inimigo
-        self.pos.x += direcao_x * self.velocidade_movimento * dt
-        self.pos.y += direcao_y * self.velocidade_movimento * dt
+        nova_pos_x = self.pos.x + direcao_x * self.velocidade_movimento * dt
+        nova_pos_y = self.pos.y + direcao_y * self.velocidade_movimento * dt
+
+        # Verifica colisão com outros inimigos
+        for outro_inimigo in grupo_inimigos:
+
+            if outro_inimigo != self:  # Evita verificar colisão consigo mesmo
+
+                if self.mask.overlap(outro_inimigo.mask, (outro_inimigo.rect.left - self.rect.left, outro_inimigo.rect.top - self.rect.top)):
+                    # Se o inimigo atual colide com outro inimigo, empurra o inimigo atual na direção oposta
+                    empurra_x = nova_pos_x - outro_inimigo.pos.x
+                    empurra_y = nova_pos_y - outro_inimigo.pos.y
+                    empurra_dist = (empurra_x ** 2 + empurra_y ** 2) ** (1 / 2)
+
+                    if empurra_dist != 0:  # Evita divisão por zero caso dois inimigos estejam exatamente na mesma posição
+                        empurra_x /= empurra_dist
+                        empurra_y /= empurra_dist
+                    else:
+                        empurra_x /= 60
+                        empurra_y /= 60
+
+                    # Atualiza a nova posição
+                    nova_pos_x += empurra_x * self.velocidade_movimento * dt
+                    nova_pos_y += empurra_y * self.velocidade_movimento * dt
+
+
+        # Atualiza posição do inimigo
+        self.pos.x = nova_pos_x
+        self.pos.y = nova_pos_y
 
         if direcao_x > 0:  # Movendo pra direita
             if self.direcao != 'direita':
@@ -58,16 +85,16 @@ class Inimigo(pygame.sprite.Sprite):
         if tick_atual - self.ultimo_tick > self.frame_rate_animacao:  # Se já se passou o bastante para passar para o próximo frame
             self.ultimo_tick = tick_atual
             self.frame = (self.frame + 1) % len(self.sprite_andando)  # Incrementa o index do frame
-            self.image = self.sprite_andando[self.frame] # Atualiza a imagem a ser desenhada na tela
+            self.image = self.sprite_andando[self.frame]  # Atualiza a imagem a ser desenhada na tela
+            self.mask = pygame.mask.from_surface(self.image)  # Atualiza a mask
 
         # Atualiza posição do rect e da hitbox
         self.rect.center = self.pos
-        self.hitbox.center = self.pos
 
     def dar_dano(self, jogador):
         tick_atual = pygame.time.get_ticks()  # Contagem de ticks quando a função é chamada
         # Se o inimigo está encostando no jogador e já passou tempo o bastante do último ataque (cooldown de 1s)
-        if self.hitbox.colliderect(jogador.hitbox) and tick_atual - self.ultimo_hit >= 1000:
+        if self.mask.overlap(jogador.mask, (jogador.rect.left - self.rect.left, jogador.rect.top - self.rect.top)) and tick_atual - self.ultimo_hit >= 1000:
             self.ultimo_hit = tick_atual
             return max(self.dano // jogador.defesa, 1)  # Dano mínimo de 1
         return 0
@@ -87,12 +114,32 @@ class Inimigo(pygame.sprite.Sprite):
 
 
 # Carregar Sprites
-Texugo_Sprites = [pygame.image.load(f"Sprites/Texugo_Andando_{i+1}.png") for i in range(3)]
+Texugo_Sprites = [pygame.image.load(f"Sprites/Inimigos/Texugo_0{i}.png") for i in range(4)]
+Esqueleto_Sprites = [pygame.image.load(f"Sprites/Inimigos/Esqueleto_0{i}.png") for i in range(4)]
+Minhocao_Sprites = [pygame.image.load(f"Sprites/Inimigos/minhocao_0{i}.png") for i in range(4)]
+Lobo_Sprites = [pygame.image.load(f"Sprites/Inimigos/lobo_0{i}.png") for i in range(4)]
+Zumbi_Sprites = [pygame.image.load(f"Sprites/Inimigos/Zumbi_0{i}.png") for i in range(4)]
 
 class Texugo(Inimigo):
     def __init__(self, pos):
-        escala = pygame.math.Vector2(62, 64)
+        escala = pygame.math.Vector2(72, 72)
         sprite_andando = [sprite.convert_alpha() for sprite in Texugo_Sprites]
+
+        # Stats
+        hp = 35
+        dano = 70
+        defesa = 8
+        velocidade_movimento = 1.2
+
+        # Animação
+        frame_rate = 9
+
+        super().__init__(pos, sprite_andando, escala, hp, dano, defesa, velocidade_movimento, frame_rate)
+
+class Eisquelto(Inimigo):
+    def __init__(self, pos):
+        escala = pygame.math.Vector2(59, 72)
+        sprite_andando = [sprite.convert_alpha() for sprite in Esqueleto_Sprites]
 
         # Stats
         hp = 20
@@ -104,4 +151,53 @@ class Texugo(Inimigo):
         frame_rate = 9
 
         super().__init__(pos, sprite_andando, escala, hp, dano, defesa, velocidade_movimento, frame_rate)
+
+class Minhocao(Inimigo):
+    def __init__(self, pos):
+        escala = pygame.math.Vector2(128, 128)
+        sprite_andando = [sprite.convert_alpha() for sprite in Minhocao_Sprites]
+
+        # Stats
+        hp = 100
+        dano = 120
+        defesa = 15
+        velocidade_movimento = 1.2
+
+        # Animação
+        frame_rate = 9
+
+        super().__init__(pos, sprite_andando, escala, hp, dano, defesa, velocidade_movimento, frame_rate)
+
+class LoboPidao(Inimigo):
+    def __init__(self, pos):
+        escala = pygame.math.Vector2(84, 86)
+        sprite_andando = [sprite.convert_alpha() for sprite in Lobo_Sprites]
+
+        # Stats
+        hp = 80
+        dano = 105
+        defesa = 5
+        velocidade_movimento = 1.2
+
+        # Animação
+        frame_rate = 9
+
+        super().__init__(pos, sprite_andando, escala, hp, dano, defesa, velocidade_movimento, frame_rate)
+
+class Zumbi(Inimigo):
+    def __init__(self, pos):
+        escala = pygame.math.Vector2(65, 72)
+        sprite_andando = [sprite.convert_alpha() for sprite in Zumbi_Sprites]
+
+        # Stats
+        hp = 150
+        dano = 50
+        defesa = 5
+        velocidade_movimento = 1.2
+
+        # Animação
+        frame_rate = 9
+
+        super().__init__(pos, sprite_andando, escala, hp, dano, defesa, velocidade_movimento, frame_rate)
+
 

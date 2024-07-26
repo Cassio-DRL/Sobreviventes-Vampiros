@@ -1,6 +1,6 @@
 import pygame
 class Ataque(pygame.sprite.Sprite):
-    def __init__(self, escala, dano, duracao_ataque, cooldown_ataque, sprite_invisivel, sprites_animacao, frame_rate, offset):
+    def __init__(self, escala, dano, duracao_ataque, cooldown_ataque, sprite_invisivel, sprites_animacao, frame_rate, offset, knockback):
         super().__init__()
 
         # Sprite
@@ -12,12 +12,14 @@ class Ataque(pygame.sprite.Sprite):
         # Objeto
         self.pos = pygame.math.Vector2(0, 0)
         self.rect = self.image.get_rect(center=self.pos)
+        self.mask = pygame.mask.from_surface(self.image)  # Mask para ser usada como hitbox
         self.offset = offset
 
         # Stats
         self.dano = dano
         self.duracao_ataque = duracao_ataque * 1000  # convertendo para milisegundos
         self.cooldown_ataque = cooldown_ataque * 1000  # convertendo para milisegundos
+        self.knockback = knockback
 
         # Animação
         self.frame = 0
@@ -31,13 +33,29 @@ class Ataque(pygame.sprite.Sprite):
 
     def dar_dano(self, inimigo, jogador):
         tempo_atual = pygame.time.get_ticks()
+        dano = 0
         # verifica se o ataque atingiu o inimigo
-        if self.rect.colliderect(inimigo.hitbox) and self.ataque_executado:
+        if self.mask.overlap(inimigo.mask, (inimigo.rect.left - self.rect.left, inimigo.rect.top - self.rect.top)) and self.ataque_executado:
             # verifica se o inimigo reecbeu hit e se o tempo do ultimo ataque a ele foi + que 1 segundo
             if inimigo not in self.ultimo_ataque_a_inimigo or tempo_atual - self.ultimo_ataque_a_inimigo[inimigo] >= 1000:
                 # Aplica o dano e atualiza o tempo do último ataque a este inimigo
                 self.ultimo_ataque_a_inimigo[inimigo] = tempo_atual
-                return max(self.dano * jogador.ataque // inimigo.defesa, 1)  # Dano mínimo de 1
+                dano = max(self.dano * jogador.ataque // inimigo.defesa, 1)  # Dano mínimo de 1
+
+            # Calcular Knockback
+            direction_x = inimigo.pos.x - jogador.pos.x
+            direction_y = inimigo.pos.y - jogador.pos.y
+            knockback_distancia = (direction_x ** 2 + direction_y ** 2) ** 0.5
+
+            if knockback_distancia != 0:
+                direction_x /= knockback_distancia
+                direction_y /= knockback_distancia
+
+            # Aplicar knockback
+            inimigo.pos.x += direction_x * self.knockback
+            inimigo.pos.y += direction_y * self.knockback
+
+            return dano
         return 0
 
     # a segunda funcao ira realizar o ataque, e ira retornar a variavel ataque_executado como true ou false, no intervalo definido pelo cooldown e duracao de ataque.
@@ -62,6 +80,7 @@ class Ataque(pygame.sprite.Sprite):
             self.ultimo_tick = tick_atual  # atualizamos o ultimo tick
             self.frame = (self.frame + 1) % len(self.sprites_animacao)  # atualizamos o frame
             self.image = self.sprites_animacao[self.frame]
+            self.mask = pygame.mask.from_surface(self.image)  # Atualiza mask
 
         elif not self.ataque_executado:
             self.image = self.sprite_invisivel
@@ -93,9 +112,10 @@ class Slash(Ataque):
         sprites_animacao = [sprite.convert_alpha() for sprite in Slash_Sprites]
 
         # Stats
-        dano = 20
+        dano = 8
         duracao_ataque = 1
         cooldown_ataque = 0.5
+        knockback = 10
 
         # Animação
         frame_rate = 8
@@ -103,4 +123,4 @@ class Slash(Ataque):
         # Offset em relação ao jogador
         offset = pygame.math.Vector2(100, 0)
 
-        super().__init__(escala, dano, duracao_ataque, cooldown_ataque, sprite_invisivel, sprites_animacao, frame_rate, offset)
+        super().__init__(escala, dano, duracao_ataque, cooldown_ataque, sprite_invisivel, sprites_animacao, frame_rate, offset, knockback)

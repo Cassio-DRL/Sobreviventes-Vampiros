@@ -5,6 +5,7 @@ from coletaveis import *
 from ataques import *
 import random
 import math
+import sys
 import pickle
 
 class Camera:
@@ -69,7 +70,7 @@ pygame.display.set_caption('Vampiro Sobreviventes')
 pygame.display.set_icon(pygame.image.load('Sprites/morcego.png'))
 
 # Imagens
-GRAMA_TILE = pygame.image.load('Sprites/Grama_Tile.png').convert_alpha()
+GRAMA_TILE = pygame.transform.scale(pygame.image.load('Sprites/Grama_Tile_Menor.png').convert_alpha(), (640, 640))
 BOTAO_VERDE = pygame.image.load('Sprites/UI/botao_verde.png').convert_alpha()
 BOTAO_VERMELHO = pygame.image.load('Sprites/UI/botao_vermelho.png').convert_alpha()
 BOTAO_AZUL = pygame.image.load('Sprites/UI/botao_azul.png').convert_alpha()
@@ -205,7 +206,7 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
 
             # Inimigo
             for inimigo in inimigos:
-                inimigo.movimento(jogador, delta_time)
+                inimigo.movimento(jogador, inimigos, delta_time)
                 inimigo.animar_sprite()
                 jogador.hit_points_atuais -= inimigo.dar_dano(jogador)
 
@@ -216,6 +217,18 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
                 # Drops dependendo do tipo de inimigo
                 if isinstance(inimigo, Texugo):
                     drop = CristalXp(inimigo.pos, random.choices(['Blue', 'Green', 'Red'], [40, 3, 1], k=1)[0])
+                    total_inimigos_mortos += inimigo.checar_hp(drop, items, todos_sprites)
+                if isinstance(inimigo, Eisquelto):
+                    drop = CristalXp(inimigo.pos, random.choices(['Blue', 'Green', 'Red'], [8, 1, 0], k=1)[0])
+                    total_inimigos_mortos += inimigo.checar_hp(drop, items, todos_sprites)
+                if isinstance(inimigo, Minhocao):
+                    drop = CristalXp(inimigo.pos, random.choices(['Blue', 'Green', 'Red'], [5, 5, 10], k=1)[0])
+                    total_inimigos_mortos += inimigo.checar_hp(drop, items, todos_sprites)
+                if isinstance(inimigo, LoboPidao):
+                    drop = CristalXp(inimigo.pos, random.choices(['Blue', 'Green', 'Red'], [20, 10, 1], k=1)[0])
+                    total_inimigos_mortos += inimigo.checar_hp(drop, items, todos_sprites)
+                if isinstance(inimigo, Zumbi):
+                    drop = CristalXp(inimigo.pos, random.choices(['Blue', 'Green', 'Red'], [10, 50, 0], k=1)[0])
                     total_inimigos_mortos += inimigo.checar_hp(drop, items, todos_sprites)
 
             # Coletáveis
@@ -244,11 +257,25 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
             hp_bar.atualizar(jogador)
             xp_bar.atualizar(jogador.xp, jogador.xp_para_proximo_nivel, (0, 0, 255))
 
-            # Spawnar inimigos (Spawna 10 a cada 10 segundos) (Max = 40)
-            if ticks_passados - cooldown_spawnar_inimigos >= 10000 and len(inimigos) <= 40:
+            # Pesos pra o spawn de cada tipo de inimigo dependendo de quanto tempo se passou em segundos
+            fases_spawn_inimigo = {
+                (0, 120): [5, 1, 0, 0, 0],
+                (120, 240): [1, 5, 1, 0, 0],
+                (240, 360): [1, 3, 10, 0, 0],
+                (360, 480): [0, 1, 4, 6, 1],
+                (480, 600): [0, 0, 0, 1, 3],
+                (600, 100000): [1, 1, 1, 5, 20]
+            }
+            fase_atual = None
+            for fase in fases_spawn_inimigo:
+                if segundos_passados in range(fase[0], fase[1]):
+                    fase_atual = fases_spawn_inimigo[fase]
+
+            # Spawnar inimigos (Spawna 20 a cada 5 segundos) (Max = 40)
+            if ticks_passados - cooldown_spawnar_inimigos >= 5000 and len(inimigos) <= 40:
                 cooldown_spawnar_inimigos = ticks_passados
-                for i in range(10):
-                    inimigo_tipo = random.choice([Texugo])
+                for i in range(20):
+                    inimigo_tipo = random.choices([Eisquelto, Texugo, Zumbi, LoboPidao, Minhocao], fase_atual, k=1)[0]
                     inimigo_spawanado = inimigo_tipo(pontos_ao_redor(jogador, 900))
                     todos_sprites.add(inimigo_spawanado)
                     inimigos.add(inimigo_spawanado)
@@ -281,8 +308,8 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
                         jogo_pausado = False
 
                 if not jogo_pausado:
-                    if evento.key == pygame.K_z and jogador.usar_item('Poção Cura'): # Beber poção de cura caso aperte Z
-                        jogador.hit_points_atuais = min(jogador.hit_points_atuais + 25, jogador.hit_point_max)
+                    if evento.key == pygame.K_z and jogador.usar_item('Poção Cura'):  # Beber poção de cura caso aperte Z
+                        jogador.hit_points_atuais = min(jogador.hit_points_atuais + jogador.hit_point_max//4, jogador.hit_point_max)
 
                     if evento.key == pygame.K_x and ticks_passados - pocao_velocidade_usada >= 10000 and jogador.usar_item('Poção Velocidade'):  # Beber poção de velocidade caso aperte X (Cooldown = 10s)
                         pocao_velocidade_usada = ticks_passados

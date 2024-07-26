@@ -9,6 +9,7 @@ class coletavel(pygame.sprite.Sprite):
 
         # Objeto
         self.rect = self.image.get_rect(topleft=pos)
+        self.mask = pygame.mask.from_surface(self.image)  # Mask para ser usada como hitbox
         self.pos = pos
 
         # Animação
@@ -27,7 +28,7 @@ class coletavel(pygame.sprite.Sprite):
             self.image = self.sprites[self.frame]  # Atualiza a imagem a ser desenhada na tela
 
     def checar_colisao(self, jogador):
-        if jogador.hitbox.colliderect(self.rect):  # Caso o jogador toque no item
+        if self.mask.overlap(jogador.mask, (jogador.rect.left - self.rect.left, jogador.rect.top - self.rect.top)):  # Caso o jogador toque no item
             self.kill()  # Remove o item
             return self.qt_recurso  # Retorna o valor a ser adicionado a contagem do item coletado
         return 0

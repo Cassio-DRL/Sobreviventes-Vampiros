@@ -11,19 +11,23 @@ class Jogador(pygame.sprite.Sprite):
 
         # Objeto
         self.rect = self.image.get_rect()
-        self.hitbox = pygame.Rect(pos.x / 4, pos.y / 4, escala.x / 2, escala.y / 2)  # Hitbox posicionada no centro do rect e com metade do tamanho
+        self.mask = pygame.mask.from_surface(self.image)  # Mask para ser usada como hitbox
         self.pos = pos
 
-        # Statss
+        # Stats originais para calcular novos stats a cada nível
+        self.ataque_original = ataque
+        self.defesa_orginal = defesa
+
+        # Stats iniciais
         self.nome = nome
-        self.hit_point_max = hp
-        self.hit_points_atuais = self.hit_point_max
-        self.ataque = ataque
-        self.defesa = defesa
-        self.velocidade_movimento = velocidade
         self.nivel = 1
         self.xp = 0
         self.xp_para_proximo_nivel = int(100 * (1 + self.nivel ** 1.1))
+        self.hit_point_max = hp * (1 + self.nivel * 0.2)
+        self.hit_points_atuais = self.hit_point_max
+        self.ataque = ataque * (1 + self.nivel * 0.2)
+        self.defesa = defesa * (1 + self.nivel * 0.2)
+        self.velocidade_movimento = velocidade
 
         # Dicionários
         self.inventario = {'Poção Cura': 0, 'Poção Velocidade': 0, 'Bomba': 0, 'Dobro XP': 0}
@@ -72,14 +76,17 @@ class Jogador(pygame.sprite.Sprite):
         else:
             self.image = self.sprite_idle
 
+        # Atualiza rect e mask
         self.rect.center = self.pos
-        self.hitbox.center = self.pos
+        self.mask = pygame.mask.from_surface(self.image)
 
     def nivel_update(self):
         if self.xp >= self.xp_para_proximo_nivel:
             self.xp -= self.xp_para_proximo_nivel
             self.nivel += 1
             self.xp_para_proximo_nivel = int(100 * (1 + self.nivel ** 1.1))
+            self.ataque = self.ataque_original * (1 + self.nivel * 0.2)
+            self.defesa = self.defesa_orginal * (1 + self.nivel * 0.2)
 
     def usar_item(self, item):
         if self.inventario[item] > 0:
@@ -89,17 +96,17 @@ class Jogador(pygame.sprite.Sprite):
 
 
 # Carregar sprites
-Sprite_BichoChicote_Idle = pygame.image.load("Sprites/bicho_chicote_idle.png")
-Sprite_BichoChicote_Andando = [pygame.image.load(f"Sprites/bicho_chicote_{i+1}.png") for i in range(3)]
+Sprite_BichoChicote_Idle = pygame.image.load("Sprites/personagens/bicho_chicote_idle.png")
+Sprite_BichoChicote_Andando = [pygame.image.load(f"Sprites/personagens/bicho_chicote_{i+1}.png") for i in range(3)]
 
-Sprite_BichoAdaga_Idle = pygame.image.load(f"Sprites/bicho_adaga_idle.png")
-Sprite_BichoAdaga_Andando = [pygame.image.load(f"Sprites/bicho_adaga_{i+1}.png") for i in range(3)]
+Sprite_BichoAdaga_Idle = pygame.image.load(f"Sprites/personagens/bicho_adaga_idle.png")
+Sprite_BichoAdaga_Andando = [pygame.image.load(f"Sprites/personagens/bicho_adaga_{i+1}.png") for i in range(3)]
 
-Sprite_BichoCajado_Idle = pygame.image.load(f"Sprites/bicho_cajado_idle.png")
-Sprite_BichoCajado_Andando = [pygame.image.load(f"Sprites/bicho_cajado_{i+1}.png") for i in range(3)]
+Sprite_BichoCajado_Idle = pygame.image.load(f"Sprites/personagens/bicho_cajado_idle.png")
+Sprite_BichoCajado_Andando = [pygame.image.load(f"Sprites/personagens/bicho_cajado_{i+1}.png") for i in range(3)]
 
-Sprite_BichoMachado_Idle = pygame.image.load(f"Sprites/bicho_machado_idle.png")
-Sprite_BichoMachado_Andando = [pygame.image.load(f"Sprites/bicho_machado_{i+1}.png") for i in range(3)]
+Sprite_BichoMachado_Idle = pygame.image.load(f"Sprites/personagens/bicho_machado_idle.png")
+Sprite_BichoMachado_Andando = [pygame.image.load(f"Sprites/personagens/bicho_machado_{i+1}.png") for i in range(3)]
 
 class BichoChicote(Jogador):
     def __init__(self, pos):
@@ -145,7 +152,7 @@ class BichoCajado(Jogador):
         sprite_andando = [sprite.convert_alpha() for sprite in Sprite_BichoCajado_Andando]
 
         # Stats
-        hp = 20
+        hp = 40
         ataque = 10
         defesa = 3
         velocidade_movimento = 5
