@@ -112,8 +112,8 @@ class PersonagemFrame(pygame.sprite.Sprite):
         self.personagem = personagem(pygame.math.Vector2(0, 0))
         self.preco = preco
         self.desbloqueado_variavel = False
-        self.botao_comprar = Botao(pygame.math.Vector2(self.rect.centerx - 60, self.rect.centery + 55), 120, 47, f"{preco}", pygame.font.Font(None, 35), cor=(130, 192, 86))
-        self.botao_selecionar = Botao(pygame.math.Vector2(self.rect.centerx - 60, self.rect.centery + 55), 120, 47, f"SELECIONAR", pygame.font.Font(None, 23), cor=(130, 192, 86))
+        self.botao_comprar = Botao(pygame.math.Vector2(self.rect.centerx - 60, self.rect.centery + 55), 120, 47, f"{preco}", pygame.font.Font(None, 45), cor=(130, 192, 86))
+        self.botao_selecionar = Botao(pygame.math.Vector2(self.rect.centerx - 60, self.rect.centery + 55), 120, 47, f"SELECIONAR", pygame.font.Font(None, 23), cor=(0, 106, 181))
 
     def desenhar(self, tela):
 
@@ -136,6 +136,7 @@ class PersonagemFrame(pygame.sprite.Sprite):
             self.botao_selecionar.desenhar(tela)
 
         else:
+            tela.blit(self.image, self.rect)
             tela.blit(cadeado.convert_alpha(), cadeado.get_rect(center=(self.rect.centerx, self.rect.centery-25)))
             self.botao_comprar.desenhar(tela)
 
@@ -147,7 +148,6 @@ class PersonagemFrame(pygame.sprite.Sprite):
         else:
             if self.botao_comprar.mouse_interacao(evento) and dinheiro >= self.preco:
                 dinheiro -= self.preco
-                self.desbloqueado_variavel = True
                 comprado = True
 
         return dinheiro, selecionado, comprado

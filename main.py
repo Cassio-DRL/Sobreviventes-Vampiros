@@ -190,6 +190,14 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
             TELA.blit(hp_bar.image, camera.mover_objeto(hp_bar))
             TELA.blit(xp_bar.image, (0, 0))
 
+            # UI
+            if not jogo_tela_morte:
+                ui_jogo(total_moedas, total_cristais, jogador.nivel, jogador.xp, jogador.xp_para_proximo_nivel,
+                        jogador.inventario['Poção Cura'], total_inimigos_mortos, segundos_passados,
+                        pygame.font.Font(None, 30), BRANCO, TELA, jogador.inventario['Poção Velocidade'],
+                        jogador.inventario['Bomba'],
+                        jogador.inventario['Dobro XP'])
+
             # Tela de morte se o hp do jogador chegar a 0
             if jogador.hit_points_atuais <= 0 and not jogo_tela_morte:
                 jogo_tela_morte = True
@@ -210,6 +218,7 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
                     drop = CristalXp(inimigo.pos, random.choices(['Blue', 'Green', 'Red'], [40, 3, 1], k=1)[0])
                     total_inimigos_mortos += inimigo.checar_hp(drop, items, todos_sprites)
 
+            # Coletáveis
             for item in items:
                 item.animar_sprite()
                 item.magnetismo(jogador, delta_time)
@@ -231,6 +240,10 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
                     jogador.xp += item.checar_colisao(jogador) * modificador_xp_yield
                     total_cristais += item.checar_colisao(jogador)//max(item.checar_colisao(jogador), 1)
 
+            # Barras
+            hp_bar.atualizar(jogador)
+            xp_bar.atualizar(jogador.xp, jogador.xp_para_proximo_nivel, (0, 0, 255))
+
             # Spawnar inimigos (Spawna 10 a cada 10 segundos) (Max = 40)
             if ticks_passados - cooldown_spawnar_inimigos >= 10000 and len(inimigos) <= 40:
                 cooldown_spawnar_inimigos = ticks_passados
@@ -244,20 +257,10 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
             if ticks_passados - cooldown_spawnar_items >= 15000 and len(items) <= 30:
                 cooldown_spawnar_items = ticks_passados
                 for i in range(15):
-                    item_tipo = random.choices([Moeda, Cura, Bomba, DobroXp, Velocidade], [50, 1, 1, 1, 1], k=1)[0]
+                    item_tipo = random.choices([Moeda, Cura, Bomba, DobroXp, Velocidade], [10, 1, 1, 1, 1], k=1)[0]
                     item_spawnado = item_tipo(pontos_ao_redor(jogador, 900))
                     todos_sprites.add(item_spawnado)
                     items.add(item_spawnado)
-
-            # UI
-            if not jogo_tela_morte:
-                ui_jogo(total_moedas, total_cristais, jogador.nivel, jogador.xp, jogador.xp_para_proximo_nivel,
-                jogador.inventario['Poção Cura'], total_inimigos_mortos, segundos_passados,
-                pygame.font.Font(None, 30), BRANCO, TELA, jogador.inventario['Poção Velocidade'], jogador.inventario['Bomba'],
-                jogador.inventario['Dobro XP'])
-
-                hp_bar.atualizar(jogador)
-                xp_bar.atualizar(jogador.xp, jogador.xp_para_proximo_nivel, (0, 0, 255))
 
         # Eventos
         for evento in pygame.event.get():
@@ -320,10 +323,7 @@ def menu_principal(moedas_acumuladas, personagems_comprados):
 
     volume_barra = BarraFixa(240, 30, (520, 595))
 
-    frames = []
-    for i, coord_x in enumerate((365, 505, 645, 785)):
-        frame = PersonagemFrame((coord_x, 124), personagem_tupla[i], 1000)
-        frames.append(frame)
+    frames = [PersonagemFrame((coord_x, 124), personagem_tupla[i], 1000) for i, coord_x in enumerate((365, 505, 645, 785))]
 
     personagem_selecionado = None
 
@@ -334,7 +334,7 @@ def menu_principal(moedas_acumuladas, personagems_comprados):
                 sys.exit()
 
             if JOGAR_botao.mouse_interacao(evento) and personagem_selecionado:
-                return personagem_selecionado, moedas_acumuladas
+                return personagem_selecionado, moedas_acumuladas, personagems_comprados
 
             if MAIS_botao.mouse_interacao(evento):
                 pygame.mixer.music.set_volume(min(1, pygame.mixer.music.get_volume() + 0.1))
@@ -348,6 +348,7 @@ def menu_principal(moedas_acumuladas, personagems_comprados):
 
             if RESETAR_botao.mouse_interacao(evento):
                 moedas_acumuladas = 4000
+                personagem_selecionado = None
                 personagems_comprados = [False for i in range(len(personagem_tupla))]
 
             for frame in frames:
@@ -359,9 +360,6 @@ def menu_principal(moedas_acumuladas, personagems_comprados):
 
         # Caixa para barra de volume. Possivelmente opções de mudo e fullscreen?
         TELA.blit(box_config.convert_alpha(), box_config.get_rect(topleft=(408, 538)))
-
-        for i in (365, 505, 645, 785):
-            TELA.blit(jogador_frame.convert_alpha(), jogador_frame.get_rect(topleft=(i, 124)))
 
         # Barra de Volume
         volume_texto = pygame.font.Font("C:/Windows/Fonts/pkmnrsi.ttf", 45).render(f"VOLUME", True, BRANCO)
@@ -392,7 +390,7 @@ def menu_principal(moedas_acumuladas, personagems_comprados):
 
 
 while True:
-    personagem_selecionado, moedas_acumuladas = menu_principal(moedas_acumuladas, personagems_comprados)
+    personagem_selecionado, moedas_acumuladas, personagems_comprados = menu_principal(moedas_acumuladas, personagems_comprados)
     while True:
         reiniciar, moedas_ganhas = iniciar_jogo(pygame.time.get_ticks(), personagem_selecionado)
         moedas_acumuladas += moedas_ganhas
