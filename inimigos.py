@@ -127,7 +127,7 @@ class Texugo(Inimigo):
 
         # Stats
         hp = 35
-        dano = 70
+        dano = 110
         defesa = 8
         velocidade_movimento = 1.2
 
@@ -143,7 +143,7 @@ class Eisquelto(Inimigo):
 
         # Stats
         hp = 20
-        dano = 50
+        dano = 90
         defesa = 5
         velocidade_movimento = 1.2
 
@@ -159,7 +159,7 @@ class Minhocao(Inimigo):
 
         # Stats
         hp = 100
-        dano = 120
+        dano = 160
         defesa = 15
         velocidade_movimento = 1.2
 
@@ -175,7 +175,7 @@ class LoboPidao(Inimigo):
 
         # Stats
         hp = 80
-        dano = 105
+        dano = 145
         defesa = 5
         velocidade_movimento = 1.2
 
@@ -191,7 +191,7 @@ class Zumbi(Inimigo):
 
         # Stats
         hp = 150
-        dano = 50
+        dano = 90
         defesa = 5
         velocidade_movimento = 1.2
 
