@@ -1,13 +1,16 @@
 import pygame
+import math
+import random
+
 class Ataque(pygame.sprite.Sprite):
-    def __init__(self, escala, dano, duracao_ataque, cooldown_ataque, sprite_invisivel, sprites_animacao, frame_rate, offset, knockback):
+    def __init__(self, escala, dano, duracao_ataque, cooldown_ataque, sprite_invisivel, sprites_animacao, frame_rate, offset, knockback, direcao):
         super().__init__()
 
         # Sprite
         self.sprite_invisivel = pygame.transform.scale(sprite_invisivel, escala)
         self.sprites_animacao = [pygame.transform.scale(sprite, escala) for sprite in sprites_animacao]
         self.image = self.sprites_animacao[0]
-        self.direcao = 'direita'
+        self.direcao = direcao
 
         # Objeto
         self.pos = pygame.math.Vector2(0, 0)
@@ -20,6 +23,7 @@ class Ataque(pygame.sprite.Sprite):
         self.duracao_ataque = duracao_ataque * 1000  # convertendo para milisegundos
         self.cooldown_ataque = cooldown_ataque * 1000  # convertendo para milisegundos
         self.knockback = knockback
+        self.nivel = 1
 
         # Animação
         self.frame = 0
@@ -28,35 +32,7 @@ class Ataque(pygame.sprite.Sprite):
 
         # Dano
         self.ultimo_hit = pygame.time.get_ticks()
-        self.ultimo_ataque_a_inimigo = {}  # dicionario utilizado para rastrear o ultimo ataque a um inimigo, pois o ataque recebe um inimigo de cada vez, mais otimizado.
         self.ataque_executado = False
-
-    def dar_dano(self, inimigo, jogador):
-        tempo_atual = pygame.time.get_ticks()
-        dano = 0
-        # verifica se o ataque atingiu o inimigo
-        if self.mask.overlap(inimigo.mask, (inimigo.rect.left - self.rect.left, inimigo.rect.top - self.rect.top)) and self.ataque_executado:
-            # verifica se o inimigo reecbeu hit e se o tempo do ultimo ataque a ele foi + que 1 segundo
-            if inimigo not in self.ultimo_ataque_a_inimigo or tempo_atual - self.ultimo_ataque_a_inimigo[inimigo] >= 1000:
-                # Aplica o dano e atualiza o tempo do último ataque a este inimigo
-                self.ultimo_ataque_a_inimigo[inimigo] = tempo_atual
-                dano = max(self.dano * jogador.ataque // inimigo.defesa, 1)  # Dano mínimo de 1
-
-            # Calcular Knockback
-            direction_x = inimigo.pos.x - jogador.pos.x
-            direction_y = inimigo.pos.y - jogador.pos.y
-            knockback_distancia = (direction_x ** 2 + direction_y ** 2) ** 0.5
-
-            if knockback_distancia != 0:
-                direction_x /= knockback_distancia
-                direction_y /= knockback_distancia
-
-            # Aplicar knockback
-            inimigo.pos.x += direction_x * self.knockback
-            inimigo.pos.y += direction_y * self.knockback
-
-            return dano
-        return 0
 
     # a segunda funcao ira realizar o ataque, e ira retornar a variavel ataque_executado como true ou false, no intervalo definido pelo cooldown e duracao de ataque.
     def atacar(self):
@@ -104,23 +80,184 @@ class Ataque(pygame.sprite.Sprite):
 # Carregar sprites
 Sprite_Invisivel = pygame.image.load('Sprites/Ataques/ataque_invisivel.png')
 Slash_Sprites = [pygame.image.load(f"Sprites/Ataques/Slash_chicote/ataque_chicote_{i+1}.png") for i in range(4)]
+Slash2_Sprites = [pygame.image.load(f"Sprites/Ataques/Slash_chicote/ataque_chicote_02_0{i}.png") for i in range(4)]
+Bola = [pygame.image.load(f"Sprites/Ataques/ataque_rotatorio.png")]
 
 class Slash(Ataque):
-    def __init__(self):
-        escala = pygame.math.Vector2(150, 120)
+    def __init__(self, offset, direcao):
+        escala = pygame.math.Vector2(600, 300)
         sprite_invisivel = Sprite_Invisivel
-        sprites_animacao = [sprite.convert_alpha() for sprite in Slash_Sprites]
+        sprites_animacao = [sprite.convert_alpha() for sprite in Slash2_Sprites]
 
         # Stats
-        dano = 8
-        duracao_ataque = 1
-        cooldown_ataque = 0.5
-        knockback = 10
+        self.dano_base = 8
+        self.duracao_ataque_base = 1 # em segundos
+        self.cooldown_ataque_base = 1.35  # em segundos
+        self.knockback_base = 20
 
         # Animação
-        frame_rate = 8
+        frame_rate = 11
 
-        # Offset em relação ao jogador
-        offset = pygame.math.Vector2(100, 0)
+        super().__init__(escala, self.dano_base, self.duracao_ataque_base, self.cooldown_ataque_base, sprite_invisivel, sprites_animacao, frame_rate, offset, self.knockback_base, direcao)
 
-        super().__init__(escala, dano, duracao_ataque, cooldown_ataque, sprite_invisivel, sprites_animacao, frame_rate, offset, knockback)
+    def ajustar_nivel(self, grupo_ataques, grupo_todos):
+        # Usa os valores base para calcular os atributos com base no nível
+        if self.nivel == 1:
+            self.dano = self.dano_base
+            self.duracao_ataque = self.duracao_ataque_base * 1000
+            self.cooldown_ataque = self.cooldown_ataque_base * 1000
+            self.knockback = self.knockback_base
+
+        elif self.nivel == 2:  # Adiciona Projétil
+            self.dano = self.dano_base
+            self.duracao_ataque = self.duracao_ataque_base * 1000
+            self.cooldown_ataque = self.cooldown_ataque_base * 1000
+            self.knockback = self.knockback_base
+
+            ataque_chicote = Slash(pygame.math.Vector2(-300, 0), 'esquerda')
+            ataque_chicote.sprites_animacao = [pygame.transform.flip(sprite, False, True) for sprite in ataque_chicote.sprites_animacao]
+            if sum(1 for sprite in grupo_ataques if isinstance(sprite, Slash)) < 2:
+                grupo_ataques.add(ataque_chicote)
+                grupo_todos.add(ataque_chicote)
+
+        elif self.nivel == 3:  # Aumenta duração do ataque em 50% e reduz cooldown por 33%
+            self.dano = self.dano_base
+            self.duracao_ataque = self.duracao_ataque_base * 1.5 * 1000
+            self.cooldown_ataque = self.cooldown_ataque_base / 1.5 * 1000
+            self.knockback = self.knockback_base
+
+        elif self.nivel == 4:  # Aumenta o dano em 20%
+            self.dano = self.dano_base * 1.2
+            self.duracao_ataque = self.duracao_ataque_base * 1.5 * 1000
+            self.cooldown_ataque = self.cooldown_ataque_base / 1.5 * 1000
+            self.knockback = self.knockback_base
+
+        elif self.nivel == 5:  # Aumenta knockback em 100%
+            self.dano = self.dano_base * 1.2
+            self.duracao_ataque = self.duracao_ataque_base * 1.5 * 1000
+            self.cooldown_ataque = self.cooldown_ataque_base / 1.5 * 1000
+            self.knockback = self.knockback_base
+
+        elif self.nivel == 6:  # Aumenta dano em 20% e aumenta duração em 40%
+            self.dano = self.dano_base * 1.44  # 1.2 * 1.2
+            self.duracao_ataque = self.duracao_ataque_base * 2.1 * 1000  # 1.5 * 1.4
+            self.cooldown_ataque = self.cooldown_ataque_base / 1.5 * 1000
+            self.knockback = self.knockback_base
+
+        elif self.nivel == 7:  # Adiciona projétil
+            self.dano = self.dano_base * 1.44
+            self.duracao_ataque = self.duracao_ataque_base * 2.1 * 1000
+            self.cooldown_ataque = self.cooldown_ataque_base / 1.5 * 1000
+            self.knockback = self.knockback_base
+
+            ataque_chicote = Slash(pygame.math.Vector2(300, -100), 'direita')
+            if sum(1 for sprite in grupo_ataques if isinstance(sprite, Slash)) < 3:
+                grupo_ataques.add(ataque_chicote)
+                grupo_todos.add(ataque_chicote)
+
+        elif self.nivel == 8:  # Reduz cooldown em 50%, aumenta knockback em 50%
+            self.dano = self.dano_base * 1.44
+            self.duracao_ataque = self.duracao_ataque_base * 2.1 * 1000
+            self.cooldown_ataque = self.cooldown_ataque_base / (1.5 * 2) * 1000
+            self.knockback = self.knockback_base
+
+        elif self.nivel == 9:  # Aumenta dano em 40%
+            self.dano = self.dano_base * 2.016  # 1.2 * 1.2 * 1.4
+            self.duracao_ataque = self.duracao_ataque_base * 2.1 * 1000
+            self.cooldown_ataque = self.cooldown_ataque_base / (1.5 * 2) * 1000
+            self.knockback = self.knockback_base
+
+        elif self.nivel >= 10:  # Adiciona projétil
+            self.dano = self.dano_base * 2.016
+            self.duracao_ataque = self.duracao_ataque_base * 2.1 * 1000
+            self.cooldown_ataque = self.cooldown_ataque_base / (1.5 * 2) * 1000
+            self.knockback = self.knockback_base
+
+            ataque_chicote = Slash(pygame.math.Vector2(-300, 100), 'esquerda')
+            ataque_chicote.sprites_animacao = [pygame.transform.flip(sprite, False, True) for sprite in ataque_chicote.sprites_animacao]
+            if sum(1 for sprite in grupo_ataques if isinstance(sprite, Slash)) < 4:
+                grupo_ataques.add(ataque_chicote)
+                grupo_todos.add(ataque_chicote)
+
+class Rotacao(Ataque):
+    def __init__(self, offset, angulo):
+        escala = pygame.math.Vector2(80, 80)
+        sprite_invisivel = Sprite_Invisivel
+        sprites_animacao = [sprite.convert_alpha() for sprite in Bola]
+
+        # Stats
+        self.dano_base = 8
+        self.duracao_ataque_base = 3
+        self.cooldown_ataque_base = 3
+        self.knockback_base = 3
+
+        self.angulo = angulo
+        self.angulo_inicial = angulo
+        self.speed = 3
+
+        # Animação
+        frame_rate = 6
+
+        super().__init__(escala, self.dano_base, self.duracao_ataque_base, self.cooldown_ataque_base, sprite_invisivel, sprites_animacao, frame_rate, offset, self.knockback_base, direcao=None)
+
+    def atualizar_posicao(self, jogador):
+        if self.ataque_executado:
+            self.angulo += self.speed
+            self.pos.x = jogador.rect.centerx + self.offset * math.cos(math.radians(self.angulo))
+            self.pos.y = jogador.rect.centery + self.offset * math.sin(math.radians(self.angulo))
+            self.rect.center = self.pos
+
+        else:
+            self.angulo = self.angulo_inicial
+            self.pos.x = jogador.rect.centerx + self.offset * math.cos(math.radians(self.angulo))
+            self.pos.y = jogador.rect.centery + self.offset * math.sin(math.radians(self.angulo))
+            self.rect.center = self.pos
+
+    def ajustar_nivel(self, grupo_ataques, grupo_todos):
+        if self.nivel == 1:
+            self.dano = self.dano_base
+            self.duracao_ataque = self.duracao_ataque_base * 1000
+            self.cooldown_ataque = self.cooldown_ataque_base * 1000
+            self.knockback = self.knockback_base
+
+        elif self.nivel == 2:
+            self.dano = self.dano_base
+            self.duracao_ataque = self.duracao_ataque_base * 1000
+            self.cooldown_ataque = self.cooldown_ataque_base * 1000
+            self.knockback = self.knockback_base
+
+        elif self.nivel == 3:
+            self.dano = self.dano_base
+            self.duracao_ataque = self.duracao_ataque_base * 1000
+            self.cooldown_ataque = self.cooldown_ataque_base * 1000
+            self.knockback = self.knockback_base
+
+        elif self.nivel == 4:
+            self.dano = self.dano_base
+            self.duracao_ataque = self.duracao_ataque_base * 1000
+            self.cooldown_ataque = self.cooldown_ataque_base * 1000
+            self.knockback = self.knockback_base
+
+        elif self.nivel == 5:
+            self.dano = self.dano_base
+            self.duracao_ataque = self.duracao_ataque_base * 1000
+            self.cooldown_ataque = self.cooldown_ataque_base * 1000
+            self.knockback = self.knockback_base
+
+        elif self.nivel == 6:
+            self.dano = self.dano_base
+            self.duracao_ataque = self.duracao_ataque_base * 1000
+            self.cooldown_ataque = self.cooldown_ataque_base * 1000
+            self.knockback = self.knockback_base
+
+        elif self.nivel == 7:
+            self.dano = self.dano_base
+            self.duracao_ataque = self.duracao_ataque_base * 1000
+            self.cooldown_ataque = self.cooldown_ataque_base * 1000
+            self.knockback = self.knockback_base
+
+        elif self.nivel == 8:
+            self.dano = self.dano_base
+            self.duracao_ataque = self.duracao_ataque_base * 1000
+            self.cooldown_ataque = self.cooldown_ataque_base * 1000
+            self.knockback = self.knockback_base

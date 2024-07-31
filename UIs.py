@@ -16,6 +16,10 @@ box_config = pygame.image.load('Sprites/UI/box.png')
 # Player Frame
 cadeado = pygame.transform.scale(pygame.image.load('Sprites/cadeado.png'), (90, 90))
 
+# Tela de Upgrade
+box_upgrade = pygame.image.load('Sprites/UI/box_level_up.png')
+frame_levelup = pygame.image.load('Sprites/UI/frame levelup.png')
+
 # UI durante jogo
 pocao = pygame.transform.scale(pygame.image.load('Sprites/pocao grande.png'), (45, 45))
 velocidade = pygame.transform.scale(pygame.image.load('Sprites/pocao pequena.png'), (36, 45))
@@ -34,7 +38,7 @@ class Botao:
     def __init__(self, pos, largura, altura, texto, fonte, cor=None, imagem=None):
         self.rect = pygame.Rect(pos.x, pos.y, largura, altura)
         self.fonte = fonte
-        self.texto = self.fonte.render(texto, False, (255, 255, 255))
+        self.texto = self.fonte.render(texto, True, (255, 255, 255))
         self.cor = cor
         self.image = imagem
 
@@ -51,6 +55,10 @@ class Botao:
     def mouse_interacao(self, evento):
         if evento.type == pygame.MOUSEBUTTONDOWN:
             if evento.button == 1 and self.rect.collidepoint(evento.pos):
+                som = pygame.mixer.Sound('Audio/ButtonPlate Click (Minecraft Sound) - Sound Effect for editing.mp3')
+                pygame.mixer.Sound.set_volume(som, pygame.mixer_music.get_volume())
+                pygame.mixer.Sound.play(som)
+                pygame.time.wait(100)
                 return True
         return False
 
@@ -108,7 +116,7 @@ class PersonagemFrame(pygame.sprite.Sprite):
         self.image = jogador_frame
         self.rect = self.image.get_rect(topleft=pos)
         self.personagem_classe = personagem
-        self.personagem = personagem(pygame.math.Vector2(0, 0))
+        self.personagem = personagem(pygame.math.Vector2(0, 0), pygame.time.get_ticks())
         self.preco = preco
         self.desbloqueado_variavel = False
         self.botao_comprar = Botao(pygame.math.Vector2(self.rect.centerx - 60, self.rect.centery + 55), 120, 47, f"{preco}", pygame.font.Font(None, 45), cor=(130, 192, 86))
@@ -116,8 +124,8 @@ class PersonagemFrame(pygame.sprite.Sprite):
 
     def desenhar(self, tela):
 
+        tela.blit(self.image, self.rect)
         if self.desbloqueado_variavel:
-            tela.blit(self.image, self.rect)
             tela.blit(pygame.transform.scale(self.personagem.image, (88, 88)), self.personagem.image.get_rect(center=(self.rect.centerx, self.rect.centery-25)))
 
             NOME = pygame.font.Font(None, 23).render(f"{self.personagem.dicionario['Nome']}", False, (255, 255, 255))
@@ -135,7 +143,6 @@ class PersonagemFrame(pygame.sprite.Sprite):
             self.botao_selecionar.desenhar(tela)
 
         else:
-            tela.blit(self.image, self.rect)
             tela.blit(cadeado.convert_alpha(), cadeado.get_rect(center=(self.rect.centerx, self.rect.centery-25)))
             self.botao_comprar.desenhar(tela)
 
