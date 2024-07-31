@@ -100,6 +100,8 @@ class Jogador(pygame.sprite.Sprite):
             self.xp -= self.xp_para_proximo_nivel
             self.nivel += 1
             self.xp_para_proximo_nivel = int(50 * self.nivel ** 1.1)
+            return True
+        return False
 
     def usar_item(self, item):
         if self.inventario[item] > 0:

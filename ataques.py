@@ -226,6 +226,11 @@ class Rotacao(Ataque):
             self.cooldown_ataque = self.cooldown_ataque_base * 1000
             self.knockback = self.knockback_base
 
+            ataque_rotacao = Rotacao(140, 90)
+            if sum(1 for sprite in grupo_ataques if isinstance(sprite, Rotacao)) < 2:
+                grupo_ataques.add(ataque_rotacao)
+                grupo_todos.add(ataque_rotacao)
+
         elif self.nivel == 3:
             self.dano = self.dano_base
             self.duracao_ataque = self.duracao_ataque_base * 1000
@@ -250,6 +255,11 @@ class Rotacao(Ataque):
             self.cooldown_ataque = self.cooldown_ataque_base * 1000
             self.knockback = self.knockback_base
 
+            ataque_rotacao = Rotacao(140, 180)
+            if sum(1 for sprite in grupo_ataques if isinstance(sprite, Rotacao)) < 3:
+                grupo_ataques.add(ataque_rotacao)
+                grupo_todos.add(ataque_rotacao)
+
         elif self.nivel == 7:
             self.dano = self.dano_base
             self.duracao_ataque = self.duracao_ataque_base * 1000
@@ -261,3 +271,8 @@ class Rotacao(Ataque):
             self.duracao_ataque = self.duracao_ataque_base * 1000
             self.cooldown_ataque = self.cooldown_ataque_base * 1000
             self.knockback = self.knockback_base
+
+            ataque_rotacao = Rotacao(140, 270)
+            if sum(1 for sprite in grupo_ataques if isinstance(sprite, Rotacao)) < 4:
+                grupo_ataques.add(ataque_rotacao)
+                grupo_todos.add(ataque_rotacao)

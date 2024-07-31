@@ -34,7 +34,7 @@ class Inimigo(pygame.sprite.Sprite):
 
         # Animação
         self.frame = 0  # Frame Atual
-        self.ultimo_tick = 0 # Contagem de ticks quando o frame foi atualizado pela última vez
+        self.ultimo_tick = 0  # Contagem de ticks quando o frame foi atualizado pela última vez
         self.frame_rate_animacao = 1000 // frame_rate  # Frame rate da animação do sprite
 
         # Dano
@@ -163,6 +163,8 @@ Lobo_Sprites_branco = [pygame.image.load(f"Sprites/Inimigos/lobo_0{i}_hit.png") 
 Zumbi_Sprites = [pygame.image.load(f"Sprites/Inimigos/Zumbi_0{i}.png") for i in range(4)]
 Zumbi_Sprites_branco = [pygame.image.load(f"Sprites/Inimigos/Zumbi_0{i}_hit.png") for i in range(4)]
 
+Morte_Sprites = [pygame.image.load(f"Sprites/Inimigos/morte_0{i}.png") for i in range(5)]
+
 class Texugo(Inimigo):
     def __init__(self, pos, tempo, jogador):
         escala = pygame.math.Vector2(72, 72)
@@ -249,3 +251,19 @@ class Zumbi(Inimigo):
         super().__init__(pos, sprite_andando, escala, hp, dano, defesa, velocidade_movimento, frame_rate, sprite_atacado, tempo, jogador)
 
 
+class Morte(Inimigo):
+    def __init__(self, pos, tempo, jogador):
+        escala = pygame.math.Vector2(200, 200)
+        sprite_andando = [sprite.convert_alpha() for sprite in Morte_Sprites]
+        sprite_atacado = [sprite.convert_alpha() for sprite in Morte_Sprites]
+
+        # Stats
+        hp = 99999999
+        dano = 99999999
+        defesa = 99999999
+        velocidade_movimento = 1.9
+
+        # Animação
+        frame_rate = 9
+
+        super().__init__(pos, sprite_andando, escala, hp, dano, defesa, velocidade_movimento, frame_rate, sprite_atacado, tempo, jogador)

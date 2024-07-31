@@ -97,6 +97,8 @@ RESETAR_botao = Botao(pygame.math.Vector2(1129, 740), BOTAO_CINZA.get_width(), B
 botoes_menu_principal = (JOGAR_botao, SAIR_botao, MAIS_botao, MENOS_botao, SALVAR_botao, RESETAR_botao)
 
 # Tela de level up
+CONTINUAR_botao_level_up = Botao(pygame.math.Vector2(640, 700), BOTAO_CINZA.get_width(), BOTAO_CINZA.get_height(), "Continuar", pygame.font.Font(None, 30), cor=None, imagem=BOTAO_CINZA)
+botoes_level_up = (CONTINUAR_botao_level_up, CONTINUAR_botao_level_up)
 
 # Sistema
 camera = Camera(LARGURA, ALTURA)
@@ -150,6 +152,7 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
     ataques.add(*ataques_tupla)
 
     # Main Game Loop
+    jogo_tela_level_up = False
     jogo_tela_morte = False
     jogo_pausado = False
     jogo_rodando = True
@@ -158,7 +161,7 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
         clock.tick(FPS)
         delta_time = clock.get_time() / 20  # Para multiplicar velocidade de objetos para garantir que a velocidade não seja afetada pelo FPS
 
-        if not (jogo_pausado or jogo_tela_morte):
+        if not (jogo_pausado or jogo_tela_morte or jogo_tela_level_up):
             # Timer
             ticks_passados = pygame.time.get_ticks() - start_ticks - tempo_pausado_total
             segundos_passados = ticks_passados // 1000
@@ -206,7 +209,6 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
             jogador.movimento(delta_time, modificador_player_speed)
             jogador.levar_dano(inimigos, ticks_passados)
             jogador.animar_sprite(ticks_passados)
-            jogador.nivel_update()
 
             hp_bar.atualizar(jogador)
             xp_bar.atualizar(jogador.xp, jogador.xp_para_proximo_nivel, (0, 0, 255))
@@ -277,16 +279,17 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
             # SPAWNS ALEATÓRIOS ########################################################################################
             # Pesos para o spawn de cada tipo de inimigo, além de número pra spawnar a cada intervalo em milisegundos dependendo de quanto tempo se passou em segundos
             fases_spawn_inimigo = (
-                {'Fase': (0, 60), 'Pesos': [1, 0, 0, 0, 0], 'Numero Spawn': 10, 'Intervalo': 1000},
-                {'Fase': (60, 120), 'Pesos': [5, 1, 0, 0, 0], 'Numero Spawn': 10, 'Intervalo': 13000},
-                {'Fase': (120, 180), 'Pesos': [1, 1, 1, 0, 0], 'Numero Spawn': 10, 'Intervalo': 10000},
-                {'Fase': (180, 240), 'Pesos': [1, 3, 10, 0, 0], 'Numero Spawn': 10, 'Intervalo': 7000},
-                {'Fase': (240, 300), 'Pesos': [2, 5, 20, 0, 0], 'Numero Spawn': 10, 'Intervalo': 5000},
-                {'Fase': (300, 360), 'Pesos': [1, 1, 2, 2, 0], 'Numero Spawn': 10, 'Intervalo': 5000},
-                {'Fase': (360, 420), 'Pesos': [1, 3, 2, 1, 0], 'Numero Spawn': 10, 'Intervalo': 4000},
-                {'Fase': (420, 480), 'Pesos': [0, 1, 2, 6, 1], 'Numero Spawn': 10, 'Intervalo': 3000},
-                {'Fase': (480, 600), 'Pesos': [0, 0, 0, 1, 3], 'Numero Spawn': 10, 'Intervalo': 2000},
-                {'Fase': (600, 100000), 'Pesos': [1, 1, 1, 5, 20], 'Numero Spawn': 10, 'Intervalo': 1000}
+                {'Fase': (0, 60), 'Pesos': [1, 0, 0, 0, 0, 0], 'Numero Spawn': 10, 'Intervalo': 15000},
+                {'Fase': (60, 120), 'Pesos': [5, 1, 0, 0, 0, 0], 'Numero Spawn': 10, 'Intervalo': 13000},
+                {'Fase': (120, 180), 'Pesos': [1, 1, 1, 0, 0, 0], 'Numero Spawn': 10, 'Intervalo': 10000},
+                {'Fase': (180, 240), 'Pesos': [1, 3, 10, 0, 0, 0], 'Numero Spawn': 10, 'Intervalo': 7000},
+                {'Fase': (240, 300), 'Pesos': [2, 5, 20, 0, 0, 0], 'Numero Spawn': 10, 'Intervalo': 5000},
+                {'Fase': (300, 360), 'Pesos': [1, 1, 2, 2, 0, 0], 'Numero Spawn': 10, 'Intervalo': 5000},
+                {'Fase': (360, 420), 'Pesos': [1, 3, 2, 1, 0, 0], 'Numero Spawn': 10, 'Intervalo': 4000},
+                {'Fase': (420, 480), 'Pesos': [0, 1, 2, 6, 1, 0], 'Numero Spawn': 10, 'Intervalo': 3000},
+                {'Fase': (480, 600), 'Pesos': [0, 0, 0, 1, 3, 0], 'Numero Spawn': 10, 'Intervalo': 2000},
+                {'Fase': (600, 900), 'Pesos': [1, 1, 1, 5, 20, 0], 'Numero Spawn': 10, 'Intervalo': 1000},
+                {'Fase': (900, 10000), 'Pesos': [0, 0, 0, 0, 0, 1], 'Numero Spawn': 10, 'Intervalo': 1000}
             )
 
             for fase in fases_spawn_inimigo:
@@ -298,7 +301,7 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
             # Spawnar inimigos (Max = 50)
             if ticks_passados - cooldown_spawnar_inimigos >= intervalo and len(inimigos) <= 50:
                 cooldown_spawnar_inimigos = ticks_passados
-                tipos_de_inimigo = random.choices([Eisquelto, Texugo, Zumbi, LoboPidao, Minhocao], pesos, k=numero_spawn)
+                tipos_de_inimigo = random.choices([Eisquelto, Texugo, Zumbi, LoboPidao, Minhocao, Morte], pesos, k=numero_spawn)
                 for inimigo_classe in tipos_de_inimigo:
                     inimigo_spawanado = inimigo_classe(pontos_ao_redor(jogador, 900), ticks_passados, jogador)
                     todos_sprites.add(inimigo_spawanado)
@@ -313,7 +316,13 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
                     todos_sprites.add(item_spawnado)
                     items.add(item_spawnado)
 
-        # Eventos
+            subiu_de_nivel = jogador.nivel_update()
+            if subiu_de_nivel:
+                jogo_tela_level_up = True
+                contar_tempo_pausado = pygame.time.get_ticks()
+                tela_level_up()
+
+        # EVENTOS ######################################################################################################
         for evento in pygame.event.get():
             # Fechar o jogo caso aperte o botão na janela
             if evento.type == pygame.QUIT:
@@ -338,7 +347,7 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
                     if evento.key == pygame.K_x and ticks_passados - pocao_velocidade_usada >= 10000 and jogador.usar_item('Poção Velocidade'):  # Beber poção de velocidade caso aperte X (Cooldown = 10s)
                         pocao_velocidade_usada = ticks_passados
 
-                    if evento.key == pygame.K_c and jogador.usar_item('Bomba'):  # Usar bomba  caso aperte C
+                    if evento.key == pygame.K_c and jogador.usar_item('Bomba'):  # Usar bomba caso aperte C
                         for inimigo in inimigos:
                             inimigo.hit_points_atuais = 0
 
@@ -348,11 +357,10 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
 
                     if evento.key == pygame.K_p:
                         for ataque in ataques_tupla:
-                            if isinstance(ataque, Slash):
-                                ataque.nivel += 1
-                                for ataques_derivados in ataques:
-                                    if isinstance(ataques_derivados, Slash):
-                                        ataques_derivados.nivel = ataque.nivel
+                            ataque.nivel += 1
+                            for ataques_derivados in ataques:
+                                if isinstance(ataques_derivados, type(ataque)):
+                                    ataques_derivados.nivel = ataque.nivel
 
             # Apertos de botão na tela de pausa
             if jogo_pausado:
@@ -374,6 +382,14 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
                             return True, moedas_ganhas
                         elif botao == MENU_PRINCIPAL_botao_morte:
                             return False, moedas_ganhas
+
+            if jogo_tela_level_up:
+                for botao in botoes_level_up:
+                    if botao.mouse_interacao(evento):
+                        if botao == CONTINUAR_botao_level_up:
+                            tempo_pausado_total += pygame.time.get_ticks() - contar_tempo_pausado
+                            jogo_tela_level_up = False
+
 
         # Atualiza a tela
         pygame.display.flip()
@@ -429,7 +445,7 @@ def menu_principal(moedas_acumuladas, personagems_comprados):
         TELA.blit(volume_barra.image, volume_barra.rect)
 
         # Titulo do Jogo
-        titulo_texto = pygame.font.Font(None, 100).render(f"LEAGUE OF LEGENDS", True, BRANCO)
+        titulo_texto = pygame.font.Font(None, 100).render(f"VAMPIRO SOBREVIVENTES", True, BRANCO)
         TELA.blit(titulo_texto, titulo_texto.get_rect(center=(640, 85)))
 
         # Contagem de moedas
@@ -449,6 +465,17 @@ def menu_principal(moedas_acumuladas, personagems_comprados):
 
         pygame.display.update()
 
+
+def tela_level_up():
+    # Camada sobre a tela que permite que coisas sejam desenhadas com opacidade reduzida
+    camada = pygame.Surface((LARGURA, ALTURA), pygame.SRCALPHA)
+    pygame.draw.rect(camada, (20, 50, 50, 150), (0, 0, LARGURA, ALTURA))
+    TELA.blit(camada, (0, 0))
+
+    texto_morte = pygame.font.Font(None, 100).render(f"SUBIU DE NÍVEL!!!", True, BRANCO)
+    TELA.blit(texto_morte, (LARGURA // 2 - texto_morte.get_width() // 2, ALTURA // 2 - 300))
+    for botao in botoes_level_up:
+        botao.desenhar(TELA)
 
 while True:
     personagem_selecionado, moedas_acumuladas, personagems_comprados = menu_principal(moedas_acumuladas, personagems_comprados)
