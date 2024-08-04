@@ -17,7 +17,6 @@ box_config = pygame.image.load('Sprites/UI/box.png')
 cadeado = pygame.transform.scale(pygame.image.load('Sprites/cadeado.png'), (90, 90))
 
 # Tela de Upgrade
-box_upgrade = pygame.image.load('Sprites/UI/box_level_up.png')
 frame_levelup = pygame.image.load('Sprites/UI/frame levelup.png')
 
 # UI durante jogo
@@ -91,7 +90,7 @@ class BarraVida(Barra):
         pygame.draw.rect(self.image, (255, 0, 0), (0, 0, self.largura * proporcao_de_vida, self.altura))
 
 
-# Barra que fica em uma posição fixa
+# Barra que fica em uma posição fixa (Usada para barra de XP no jogo e barra de volume no menu inicial)
 class BarraFixa(Barra):
     def __init__(self, largura, altura, posicao_fixa):
         super().__init__(largura, altura)
@@ -157,6 +156,32 @@ class PersonagemFrame(pygame.sprite.Sprite):
                 comprado = True
 
         return dinheiro, selecionado, comprado
+
+class AtaqueLevelUpFrame(pygame.sprite.Sprite):
+    def __init__(self, pos, ataque):
+        super().__init__()
+        self.image = frame_levelup
+        self.rect = self.image.get_rect(center=pos)
+        self.ataque = ataque
+        self.botao_selecionar = Botao(pygame.math.Vector2(self.rect.topleft[0] + 131, self.rect.topleft[1] + 104), 383, 25, "SELECIONAR", pygame.font.Font(None, 35), cor=(130, 192, 86))
+
+    def desenhar(self, tela):
+        tela.blit(self.image, self.rect)
+
+        NOME = pygame.font.Font(None, 30).render(f"{self.ataque.nome}", False, (255, 255, 255))
+        NIVEL = pygame.font.Font(None, 30).render(f"LVL {self.ataque.nivel + 1}", False, (255, 255, 255))
+        DESCRICAO = pygame.font.Font(None, 23).render(f"{self.ataque.level_up_dict[self.ataque.nivel + 1]}", False, (0, 0, 0))
+
+        tela.blit(self.ataque.icone, self.ataque.icone.get_rect(topleft = (self.rect.topleft[0]+4, self.rect.topleft[1]+4)))
+        tela.blit(NOME, NOME.get_rect(topleft=(self.rect.topleft[0] + 131, self.rect.topleft[1] + 20)))
+        tela.blit(NIVEL, NIVEL.get_rect(topleft=(self.rect.topleft[0] + 424, self.rect.topleft[1] + 20)))
+        tela.blit(DESCRICAO, DESCRICAO.get_rect(topleft=(self.rect.topleft[0] + 131, self.rect.topleft[1] + 50)))
+        self.botao_selecionar.desenhar(tela)
+
+    def selecionar_upgrade(self, evento):
+        if self.botao_selecionar.mouse_interacao(evento):
+            return self.ataque
+        return None
 
 def menu_pausa(largura, altura, tela, fonte, botoes, cor):
     # Função para desenhar todos os elementos da tela de pausa

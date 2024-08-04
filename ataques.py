@@ -23,7 +23,7 @@ class Ataque(pygame.sprite.Sprite):
         self.duracao_ataque = duracao_ataque * 1000  # convertendo para milisegundos
         self.cooldown_ataque = cooldown_ataque * 1000  # convertendo para milisegundos
         self.knockback = knockback
-        self.nivel = 1
+        self.nivel = 0
 
         # Animação
         self.frame = 0
@@ -38,7 +38,7 @@ class Ataque(pygame.sprite.Sprite):
     def atacar(self):
         tempo_atual = pygame.time.get_ticks()
 
-        if tempo_atual - self.ultimo_hit >= self.cooldown_ataque:  # Checa se o tempo decorrido desde o último ataque >= cooldown
+        if tempo_atual - self.ultimo_hit >= self.cooldown_ataque and self.nivel != 0:  # Checa se o tempo decorrido desde o último ataque >= cooldown e so nível > 0
             # Checa se o ataque ainda está sendo executado
             self.ataque_executado = True if tempo_atual - self.ultimo_hit < self.duracao_ataque + self.cooldown_ataque else False
             if not self.ataque_executado:
@@ -81,17 +81,22 @@ class Ataque(pygame.sprite.Sprite):
 Sprite_Invisivel = pygame.image.load('Sprites/Ataques/ataque_invisivel.png')
 Slash_Sprites = [pygame.image.load(f"Sprites/Ataques/Slash_chicote/ataque_chicote_{i+1}.png") for i in range(4)]
 Slash2_Sprites = [pygame.image.load(f"Sprites/Ataques/Slash_chicote/ataque_chicote_02_0{i}.png") for i in range(4)]
-Bola = [pygame.image.load(f"Sprites/Ataques/ataque_rotatorio.png")]
+Bola_Sprites = [pygame.image.load(f"Sprites/Ataques/ataque_rotatorio.png")]
+Adaga_Sprites = [pygame.image.load('Sprites/Ataques/adaga.png')]
+Machado_Sprites = [pygame.image.load('Sprites/Ataques/machado.png')]
+Chicote_Icone = pygame.image.load('Sprites/Ataques/chicote.png')
 
-class Slash(Ataque):
+class Chicote(Ataque):
     def __init__(self, offset, direcao):
-        escala = pygame.math.Vector2(600, 300)
+        escala = pygame.math.Vector2(300, 200)
         sprite_invisivel = Sprite_Invisivel
         sprites_animacao = [sprite.convert_alpha() for sprite in Slash2_Sprites]
+        self.icone = pygame.transform.scale(Chicote_Icone.convert_alpha(), (119, 119))
 
         # Stats
+        self.nome = "CHICOTE"
         self.dano_base = 8
-        self.duracao_ataque_base = 1 # em segundos
+        self.duracao_ataque_base = 0.4 # em segundos
         self.cooldown_ataque_base = 1.35  # em segundos
         self.knockback_base = 20
 
@@ -100,92 +105,61 @@ class Slash(Ataque):
 
         super().__init__(escala, self.dano_base, self.duracao_ataque_base, self.cooldown_ataque_base, sprite_invisivel, sprites_animacao, frame_rate, offset, self.knockback_base, direcao)
 
+        # Dicionário dos upgrades a cada level up
+        self.level_up_dict = {
+            1: "Atinge inimigos próximos ao jogador.",
+            2: "Adiciona Projétil",
+            3: "Duração do ataque + 50%. Cooldown - 33%",
+            4: "Aumenta o dano em 20%",
+            5: "Aumenta o dano em 20%",
+            6: "Dano + 20%. Duração + 40%",
+            7: "Adiciona projétil",
+            8: "Reduz cooldown em 50%",
+            9: "Aumenta dano em 40%",
+            10: "Adiciona projétil"
+        }
+
     def ajustar_nivel(self, grupo_ataques, grupo_todos):
-        # Usa os valores base para calcular os atributos com base no nível
-        if self.nivel == 1:
-            self.dano = self.dano_base
-            self.duracao_ataque = self.duracao_ataque_base * 1000
-            self.cooldown_ataque = self.cooldown_ataque_base * 1000
-            self.knockback = self.knockback_base
+        ajustes = {
+            1: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 1000},
+            2: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 1000},
+            3: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1.5 * 1000, 'cooldown': self.cooldown_ataque_base / 1.5 * 1000},
+            4: {'dano': self.dano_base * 1.2, 'duracao': self.duracao_ataque_base * 1.5 * 1000, 'cooldown': self.cooldown_ataque_base / 1.5 * 1000},
+            5: {'dano': self.dano_base * 1.44, 'duracao': self.duracao_ataque_base * 1.5 * 1000, 'cooldown': self.cooldown_ataque_base / 1.5 * 1000},
+            6: {'dano': self.dano_base * 1.728, 'duracao': self.duracao_ataque_base * 2.1 * 1000, 'cooldown': self.cooldown_ataque_base / 1.5 * 1000},
+            7: {'dano': self.dano_base * 1.728, 'duracao': self.duracao_ataque_base * 2.1 * 1000, 'cooldown': self.cooldown_ataque_base / 1.5 * 1000},
+            8: {'dano': self.dano_base * 1.728, 'duracao': self.duracao_ataque_base * 2.1 * 1000, 'cooldown': self.cooldown_ataque_base / (1.5 * 2) * 1000},
+            9: {'dano': self.dano_base * 2.4192, 'duracao': self.duracao_ataque_base * 2.1 * 1000, 'cooldown': self.cooldown_ataque_base / (1.5 * 2) * 1000},
+            10: {'dano': self.dano_base * 2.4192, 'duracao': self.duracao_ataque_base * 2.1 * 1000, 'cooldown': self.cooldown_ataque_base / (1.5 * 2) * 1000}
+        }
 
-        elif self.nivel == 2:  # Adiciona Projétil
-            self.dano = self.dano_base
-            self.duracao_ataque = self.duracao_ataque_base * 1000
-            self.cooldown_ataque = self.cooldown_ataque_base * 1000
-            self.knockback = self.knockback_base
+        # Aplicar ajustes baseados no nível
+        if self.nivel in ajustes:
+            ajustes_nivel = ajustes[self.nivel]
+            self.dano = ajustes_nivel['dano']
+            self.duracao_ataque = ajustes_nivel['duracao']
+            self.cooldown_ataque = ajustes_nivel['cooldown']
 
-            ataque_chicote = Slash(pygame.math.Vector2(-300, 0), 'esquerda')
-            ataque_chicote.sprites_animacao = [pygame.transform.flip(sprite, False, True) for sprite in ataque_chicote.sprites_animacao]
-            if sum(1 for sprite in grupo_ataques if isinstance(sprite, Slash)) < 2:
-                grupo_ataques.add(ataque_chicote)
-                grupo_todos.add(ataque_chicote)
-
-        elif self.nivel == 3:  # Aumenta duração do ataque em 50% e reduz cooldown por 33%
-            self.dano = self.dano_base
-            self.duracao_ataque = self.duracao_ataque_base * 1.5 * 1000
-            self.cooldown_ataque = self.cooldown_ataque_base / 1.5 * 1000
-            self.knockback = self.knockback_base
-
-        elif self.nivel == 4:  # Aumenta o dano em 20%
-            self.dano = self.dano_base * 1.2
-            self.duracao_ataque = self.duracao_ataque_base * 1.5 * 1000
-            self.cooldown_ataque = self.cooldown_ataque_base / 1.5 * 1000
-            self.knockback = self.knockback_base
-
-        elif self.nivel == 5:  # Aumenta knockback em 100%
-            self.dano = self.dano_base * 1.2
-            self.duracao_ataque = self.duracao_ataque_base * 1.5 * 1000
-            self.cooldown_ataque = self.cooldown_ataque_base / 1.5 * 1000
-            self.knockback = self.knockback_base
-
-        elif self.nivel == 6:  # Aumenta dano em 20% e aumenta duração em 40%
-            self.dano = self.dano_base * 1.44  # 1.2 * 1.2
-            self.duracao_ataque = self.duracao_ataque_base * 2.1 * 1000  # 1.5 * 1.4
-            self.cooldown_ataque = self.cooldown_ataque_base / 1.5 * 1000
-            self.knockback = self.knockback_base
-
-        elif self.nivel == 7:  # Adiciona projétil
-            self.dano = self.dano_base * 1.44
-            self.duracao_ataque = self.duracao_ataque_base * 2.1 * 1000
-            self.cooldown_ataque = self.cooldown_ataque_base / 1.5 * 1000
-            self.knockback = self.knockback_base
-
-            ataque_chicote = Slash(pygame.math.Vector2(300, -100), 'direita')
-            if sum(1 for sprite in grupo_ataques if isinstance(sprite, Slash)) < 3:
-                grupo_ataques.add(ataque_chicote)
-                grupo_todos.add(ataque_chicote)
-
-        elif self.nivel == 8:  # Reduz cooldown em 50%, aumenta knockback em 50%
-            self.dano = self.dano_base * 1.44
-            self.duracao_ataque = self.duracao_ataque_base * 2.1 * 1000
-            self.cooldown_ataque = self.cooldown_ataque_base / (1.5 * 2) * 1000
-            self.knockback = self.knockback_base
-
-        elif self.nivel == 9:  # Aumenta dano em 40%
-            self.dano = self.dano_base * 2.016  # 1.2 * 1.2 * 1.4
-            self.duracao_ataque = self.duracao_ataque_base * 2.1 * 1000
-            self.cooldown_ataque = self.cooldown_ataque_base / (1.5 * 2) * 1000
-            self.knockback = self.knockback_base
-
-        elif self.nivel >= 10:  # Adiciona projétil
-            self.dano = self.dano_base * 2.016
-            self.duracao_ataque = self.duracao_ataque_base * 2.1 * 1000
-            self.cooldown_ataque = self.cooldown_ataque_base / (1.5 * 2) * 1000
-            self.knockback = self.knockback_base
-
-            ataque_chicote = Slash(pygame.math.Vector2(-300, 100), 'esquerda')
-            ataque_chicote.sprites_animacao = [pygame.transform.flip(sprite, False, True) for sprite in ataque_chicote.sprites_animacao]
-            if sum(1 for sprite in grupo_ataques if isinstance(sprite, Slash)) < 4:
-                grupo_ataques.add(ataque_chicote)
-                grupo_todos.add(ataque_chicote)
+            # Adiciona projéteis conforme o nível
+            if self.nivel in (2, 7, 10):
+                num_projetis_max = {2: 2, 7: 3, 10: 4}[self.nivel]
+                posicao_chicote = {2: ((-160, 0), 'esquerda'), 7: ((160, -100), 'direita'), 10: ((-160, 100), 'esquerda')}[self.nivel]
+                flip = {2: (False, True), 7: (False, False), 10: (False, True)}[self.nivel]
+                ataque_chicote = Chicote(*posicao_chicote)
+                ataque_chicote.sprites_animacao = [pygame.transform.flip(sprite, *flip) for sprite in ataque_chicote.sprites_animacao]
+                if sum(1 for sprite in grupo_ataques if isinstance(sprite, Chicote)) < num_projetis_max:
+                    grupo_ataques.add(ataque_chicote)
+                    grupo_todos.add(ataque_chicote)
 
 class Rotacao(Ataque):
     def __init__(self, offset, angulo):
         escala = pygame.math.Vector2(80, 80)
         sprite_invisivel = Sprite_Invisivel
-        sprites_animacao = [sprite.convert_alpha() for sprite in Bola]
+        sprites_animacao = [sprite.convert_alpha() for sprite in Bola_Sprites]
+        self.icone = pygame.transform.scale(Bola_Sprites[0].convert_alpha(), (119, 119))
 
         # Stats
+        self.nome = "ESFERA DE ENERGIA"
         self.dano_base = 8
         self.duracao_ataque_base = 3
         self.cooldown_ataque_base = 3
@@ -199,6 +173,20 @@ class Rotacao(Ataque):
         frame_rate = 6
 
         super().__init__(escala, self.dano_base, self.duracao_ataque_base, self.cooldown_ataque_base, sprite_invisivel, sprites_animacao, frame_rate, offset, self.knockback_base, direcao=None)
+
+        # Dicionário dos upgrades a cada level up
+        self.level_up_dict = {
+            1: "Gira ao redor do jogador e causa dano",
+            2: "Adiciona Projétil",
+            3: "Aumneta duração em 50%",
+            4: "Aumenta o dano em 20%",
+            5: "Diminui cooldown em 50%",
+            6: "Adiciona projétil",
+            7: "Aumenta duração em 50%",
+            8: "Adiciona projétil",
+            9: "Aumenta duração em 50%",
+            10: "Ataque dura perpetualmente"
+        }
 
     def atualizar_posicao(self, jogador):
         if self.ataque_executado:
@@ -214,65 +202,262 @@ class Rotacao(Ataque):
             self.rect.center = self.pos
 
     def ajustar_nivel(self, grupo_ataques, grupo_todos):
-        if self.nivel == 1:
-            self.dano = self.dano_base
-            self.duracao_ataque = self.duracao_ataque_base * 1000
-            self.cooldown_ataque = self.cooldown_ataque_base * 1000
-            self.knockback = self.knockback_base
+        ajustes = {
+            1: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 1000},
+            2: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 1000},
+            3: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000 * 1.5, 'cooldown': self.cooldown_ataque_base * 1000},
+            4: {'dano': self.dano_base * 1.2, 'duracao': self.duracao_ataque_base * 1000 * 1.5, 'cooldown': self.cooldown_ataque_base * 1000},
+            5: {'dano': self.dano_base * 1.2, 'duracao': self.duracao_ataque_base * 1000 * 1.5, 'cooldown': self.cooldown_ataque_base * 1000 * 0.5},
+            6: {'dano': self.dano_base * 1.2, 'duracao': self.duracao_ataque_base * 1000 * 1.5, 'cooldown': self.cooldown_ataque_base * 1000 * 0.5},
+            7: {'dano': self.dano_base * 1.2, 'duracao': self.duracao_ataque_base * 1000 * 1.5 * 1.5, 'cooldown': self.cooldown_ataque_base * 1000 * 0.5},
+            8: {'dano': self.dano_base * 1.2, 'duracao': self.duracao_ataque_base * 1000 * 1.5 * 1.5, 'cooldown': self.cooldown_ataque_base * 1000 * 0.5},
+            9: {'dano': self.dano_base * 1.2, 'duracao': self.duracao_ataque_base * 1000 * 1.5 * 1.5 * 1.5, 'cooldown': self.cooldown_ataque_base * 1000 * 0.5},
+            10: {'dano': self.dano_base * 1.2, 'duracao': float('inf'), 'cooldown': self.cooldown_ataque_base * 1000 * 0.5}
+        }
 
-        elif self.nivel == 2:
-            self.dano = self.dano_base
-            self.duracao_ataque = self.duracao_ataque_base * 1000
-            self.cooldown_ataque = self.cooldown_ataque_base * 1000
-            self.knockback = self.knockback_base
+        # Aplicar ajustes baseados no nível
+        if self.nivel in ajustes:
+            ajustes_nivel = ajustes[self.nivel]
+            self.dano = ajustes_nivel['dano']
+            self.duracao_ataque = ajustes_nivel['duracao']
+            self.cooldown_ataque = ajustes_nivel['cooldown']
 
-            ataque_rotacao = Rotacao(140, 90)
-            if sum(1 for sprite in grupo_ataques if isinstance(sprite, Rotacao)) < 2:
-                grupo_ataques.add(ataque_rotacao)
-                grupo_todos.add(ataque_rotacao)
+            # Adiciona projéteis conforme o nível
+            if self.nivel in (2, 6, 8):
+                num_projetis_max = {2: 2, 6: 3, 8: 4}[self.nivel]
+                angulo_projetil = {2: 90, 6: 180, 8: 270}[self.nivel]
+                ataque_rotacao = Rotacao(140, angulo_projetil)
+                if sum(1 for sprite in grupo_ataques if isinstance(sprite, Rotacao)) < num_projetis_max:
+                    grupo_ataques.add(ataque_rotacao)
+                    grupo_todos.add(ataque_rotacao)
 
-        elif self.nivel == 3:
-            self.dano = self.dano_base
-            self.duracao_ataque = self.duracao_ataque_base * 1000
-            self.cooldown_ataque = self.cooldown_ataque_base * 1000
-            self.knockback = self.knockback_base
+class Adaga(Ataque):
+    def __init__(self, offset, direcao):
+        escala = pygame.math.Vector2(75, 75)
+        sprite_invisivel = Sprite_Invisivel
+        sprites_animacao = [sprite.convert_alpha() for sprite in Adaga_Sprites]
+        self.icone = pygame.transform.scale(Adaga_Sprites[0].convert_alpha(), (119, 119))
 
-        elif self.nivel == 4:
-            self.dano = self.dano_base
-            self.duracao_ataque = self.duracao_ataque_base * 1000
-            self.cooldown_ataque = self.cooldown_ataque_base * 1000
-            self.knockback = self.knockback_base
+        # Stats
+        self.nome = "ADAGA"
+        self.dano_base = 5
+        self.duracao_ataque_base = 5  # em segundos
+        self.cooldown_ataque_base = 2  # em segundos
+        self.knockback_base = 0
+        self.limite_projeteis = 1
 
-        elif self.nivel == 5:
-            self.dano = self.dano_base
-            self.duracao_ataque = self.duracao_ataque_base * 1000
-            self.cooldown_ataque = self.cooldown_ataque_base * 1000
-            self.knockback = self.knockback_base
+        # Animação
+        frame_rate = 1
 
-        elif self.nivel == 6:
-            self.dano = self.dano_base
-            self.duracao_ataque = self.duracao_ataque_base * 1000
-            self.cooldown_ataque = self.cooldown_ataque_base * 1000
-            self.knockback = self.knockback_base
+        super().__init__(escala, self.dano_base, self.duracao_ataque_base, self.cooldown_ataque_base, sprite_invisivel, sprites_animacao, frame_rate, offset, self.knockback_base, direcao)
 
-            ataque_rotacao = Rotacao(140, 180)
-            if sum(1 for sprite in grupo_ataques if isinstance(sprite, Rotacao)) < 3:
-                grupo_ataques.add(ataque_rotacao)
-                grupo_todos.add(ataque_rotacao)
+        # Dicionário dos upgrades a cada level up
+        self.level_up_dict = {
+            1: "É lançando na direção do jogador",
+            2: "Adiciona Projétil",
+            3: "Aumenta duração do ataque em 100%",
+            4: "Adiciona Projétil",
+            5: "Aumenta o dano em 40%",
+            6: "Adiciona Projétil",
+            7: "Aumenta o dano em 40%",
+            8: "Adiciona Projétil",
+            9: "Aumenta dano em 40%",
+            10: "Adiciona projétil"
+        }
 
-        elif self.nivel == 7:
-            self.dano = self.dano_base
-            self.duracao_ataque = self.duracao_ataque_base * 1000
-            self.cooldown_ataque = self.cooldown_ataque_base * 1000
-            self.knockback = self.knockback_base
+    def spawnar_projetil(self, grupo_ataques, grupo_todos):
+        if self.ataque_executado and sum(1 for ataque in grupo_ataques if isinstance(ataque, Projetil_Adaga)) < self.limite_projeteis:
+            projetil = Projetil_Adaga(self.sprites_animacao, self.pos + (0, random.randrange(-50, 50)), self.direcao, 15, self.dano, self.knockback)
+            grupo_ataques.add(projetil)
+            grupo_todos.add(projetil)
 
-        elif self.nivel == 8:
-            self.dano = self.dano_base
-            self.duracao_ataque = self.duracao_ataque_base * 1000
-            self.cooldown_ataque = self.cooldown_ataque_base * 1000
-            self.knockback = self.knockback_base
+    def ajustar_nivel(self, grupo_ataques, grupo_todos):
+        ajustes = {
+            1: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 1000},
+            2: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 1000},
+            3: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000},
+            4: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000},
+            5: {'dano': self.dano_base * 1.4, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000},
+            6: {'dano': self.dano_base * 1.4, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000},
+            7: {'dano': self.dano_base * 1.4 * 1.4, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000},
+            8: {'dano': self.dano_base * 1.4 * 1.4, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000},
+            9: {'dano': self.dano_base * 1.4 * 1.4 * 1.4, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000},
+            10: {'dano': self.dano_base * 1.4 * 1.4 * 1.4, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000}
+        }
 
-            ataque_rotacao = Rotacao(140, 270)
-            if sum(1 for sprite in grupo_ataques if isinstance(sprite, Rotacao)) < 4:
-                grupo_ataques.add(ataque_rotacao)
-                grupo_todos.add(ataque_rotacao)
+        # Aplicar ajustes baseados no nível
+        if self.nivel in ajustes:
+            ajustes_nivel = ajustes[self.nivel]
+            self.dano = ajustes_nivel['dano']
+            self.duracao_ataque = ajustes_nivel['duracao']
+            self.cooldown_ataque = ajustes_nivel['cooldown']
+
+        if self.nivel in (2, 4, 6, 8, 10):
+            self.limite_projeteis = {2: 2, 4: 3, 6: 4, 8: 5, 10: 6}[self.nivel]
+
+
+class Machado(Ataque):
+    def __init__(self, offset, direcao):
+        escala = pygame.math.Vector2(90, 90)
+        sprite_invisivel = Sprite_Invisivel
+        sprites_animacao = [sprite.convert_alpha() for sprite in Machado_Sprites]
+        self.icone = pygame.transform.scale(Machado_Sprites[0].convert_alpha(), (119, 119))
+
+        # Stats
+        self.nome = "MACHADO"
+        self.dano_base = 16
+        self.duracao_ataque_base = 5 # em segundos
+        self.cooldown_ataque_base = 3  # em segundos
+        self.knockback_base = 5
+        self.limite_projeteis = 1
+
+        # Animação
+        frame_rate = 11
+
+        super().__init__(escala, self.dano_base, self.duracao_ataque_base, self.cooldown_ataque_base, sprite_invisivel, sprites_animacao, frame_rate, offset, self.knockback_base, direcao)
+
+        # Dicionário dos upgrades a cada level up
+        self.level_up_dict = {
+            1: "Move-se em parabóla",
+            2: "Adiciona projétil",
+            3: "Reduz cooldown em 50%",
+            4: "Aumenta o dano em 20%",
+            5: "Adiciona projétil",
+            6: "Cooldown - 50%. Dano + 20%",
+            7: "Adiciona projétil",
+            8: "Reduz cooldown em 50%",
+            9: "Aumenta dano em 20%",
+            10: "Adiciona projétil"
+        }
+
+    def ajustar_nivel(self, grupo_ataques, grupo_todos):
+        ajustes = {
+            1: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 1000},
+            2: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 1000},
+            3: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 1000},
+            4: {'dano': self.dano_base * 1.2, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 1000},
+            5: {'dano': self.dano_base * 1.2, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 1000},
+            6: {'dano': self.dano_base * 1.2 * 1.2, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 0.5 * 1000},
+            7: {'dano': self.dano_base * 1.2 * 1.2, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 0.5 * 1000},
+            8: {'dano': self.dano_base * 1.2 * 1.2, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 0.5 * 0.5 * 1000},
+            9: {'dano': self.dano_base * 1.2 * 1.2 * 1.2, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 0.5 * 0.5 * 1000},
+            10: {'dano': self.dano_base * 1.2 * 1.2 * 1.2, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 0.5 * 0.5 * 1000}
+
+        }
+
+        # Aplicar ajustes baseados no nível
+        if self.nivel in ajustes:
+            ajustes_nivel = ajustes[self.nivel]
+            self.dano = ajustes_nivel['dano']
+            self.duracao_ataque = ajustes_nivel['duracao']
+            self.cooldown_ataque = ajustes_nivel['cooldown']
+
+        if self.nivel in (2, 5, 7, 10):
+            self.limite_projeteis = {2: 2, 5: 3, 7: 4, 10: 5}[self.nivel]
+
+    def spawnar_projetil(self, grupo_ataques, grupo_todos):
+        direcao_oposta = 'direita' if self.direcao == 'esquerda' else 'esquerda'
+        machados_possiveis = (
+            Projetil_Machado(self.sprites_animacao, self.pos + (0, -20), self.direcao, 7, -9, self.dano, self.knockback),
+            Projetil_Machado(self.sprites_animacao, self.pos + (0, -40), direcao_oposta, 7, -9, self.dano, self.knockback),
+            Projetil_Machado(self.sprites_animacao, self.pos + (0, +40), self.direcao, 9, -9, self.dano, self.knockback),
+            Projetil_Machado(self.sprites_animacao, self.pos + (0, +20), direcao_oposta, 9, -9, self.dano, self.knockback),
+            Projetil_Machado(self.sprites_animacao, self.pos + (0, +60), self.direcao, 9, -9, self.dano, self.knockback)
+        )
+
+        if self.ataque_executado and sum(1 for ataque in grupo_ataques if isinstance(ataque, Projetil_Machado)) < self.limite_projeteis:
+            grupo_ataques.add(machados_possiveis[:self.limite_projeteis])
+            grupo_todos.add(machados_possiveis[:self.limite_projeteis])
+
+class Projetil_Adaga(pygame.sprite.Sprite):
+    def __init__(self, sprites_animacao, pos, direcao, velocidade, dano, knockback):
+        super().__init__()
+        self.image = sprites_animacao[0]
+        self.rect = self.image.get_rect(center=pos)
+        self.pos = pos
+        self.direcao = direcao
+        self.velocidade = velocidade
+        self.sprites_animacao = sprites_animacao
+        self.dano = dano
+        self.knockback = knockback
+        self.frame = 0
+        self.ultimo_tick = pygame.time.get_ticks()
+        self.frame_rate = 1000 // 1
+        self.mask = pygame.mask.from_surface(self.image)
+        self.ataque_executado = True
+
+    def atualizar(self, jogador, dt):
+        # Move o projétil na direção do jogador
+        if self.direcao == 'direita':
+            self.pos.x += self.velocidade * dt
+        else:
+            self.pos.x -= self.velocidade * dt
+
+        # Animar o projétil
+        tick_atual = pygame.time.get_ticks()
+        if tick_atual - self.ultimo_tick > self.frame_rate:
+            self.ultimo_tick = tick_atual
+            self.frame = (self.frame + 1) % len(self.sprites_animacao)
+            self.image = self.sprites_animacao[self.frame]
+            self.mask = pygame.mask.from_surface(self.image)  # Atualiza mask
+
+        self.rect = self.image.get_rect(center=self.pos)
+
+        direcao_x = jogador.pos.x - self.pos.x
+        direcao_y = jogador.pos.y - self.pos.y
+        distancia = (direcao_x ** 2 + direcao_y ** 2) ** (1 / 2)
+        if distancia > 1000:  # Se o jogador estiver muito longe do ataque, deleta o ataque
+            self.kill()
+
+class Projetil_Machado(pygame.sprite.Sprite):
+    def __init__(self, sprites_animacao, pos, direcao, velocidade_x, velocidade_y, dano, knockback):
+        super().__init__()
+
+        # Objeto
+        self.image = sprites_animacao[0]
+        self.rect = self.image.get_rect(center=pos)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.ataque_executado = True
+
+        # Posição e movimento
+        self.pos = pos
+        self.direcao = direcao
+        self.velocidade_x = velocidade_x
+        self.velocidade_y = velocidade_y
+        self.gravidade = 0.4
+
+        # Stats
+        self.dano = dano
+        self.knockback = knockback
+
+        # Animação
+        self.sprites_animacao = sprites_animacao
+        self.frame = 0
+        self.ultimo_tick = pygame.time.get_ticks()
+        self.frame_rate = 1000 // 10
+
+    def atualizar(self, jogador, dt):
+        # Move o projétil numa parabóla
+        if self.direcao == 'direita':
+            self.pos.x += self.velocidade_x * dt
+        else:
+            self.pos.x -= self.velocidade_x * dt
+        self.pos.y += self.velocidade_y * dt
+        self.velocidade_y += self.gravidade
+
+        # Animar o projétil
+        tick_atual = pygame.time.get_ticks()
+        if tick_atual - self.ultimo_tick > self.frame_rate:
+            self.ultimo_tick = tick_atual
+            self.frame = (self.frame + 1) % len(self.sprites_animacao)
+            self.image = self.sprites_animacao[self.frame]
+            self.mask = pygame.mask.from_surface(self.image)  # Atualiza mask
+
+        self.rect = self.image.get_rect(center=self.pos)
+
+        direcao_x = jogador.pos.x - self.pos.x
+        direcao_y = jogador.pos.y - self.pos.y
+        distancia = (direcao_x ** 2 + direcao_y ** 2) ** (1 / 2)
+        if distancia > 1000:  # Se o jogador estiver muito longe do ataque, deleta o ataque
+            self.kill()
+

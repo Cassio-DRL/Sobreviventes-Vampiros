@@ -1,9 +1,11 @@
+import random
+
 import pygame
 class DanoTexto(pygame.sprite.Sprite):
     def __init__(self, pos, dano, tempo):
         super().__init__()
         self.image = pygame.font.Font(None, 56).render(str(int(dano)), True, (255, 0, 0))
-        self.rect = self.image.get_rect(center=pos)
+        self.rect = self.image.get_rect(center=pos + (random.randrange(-20, 20), random.randrange(-20, 20)))
         self.criado = tempo
 
     def update(self, tempo, cooldown):
@@ -15,6 +17,7 @@ class Inimigo(pygame.sprite.Sprite):
         super().__init__()
 
         # Sprite
+        self.escala = escala
         self.sprite_andando = [pygame.transform.scale(sprite, escala) for sprite in sprites_walking]  # Lista de frames do sprite
         self.sprite_branco = [pygame.transform.scale(sprite, escala) for sprite in sprites_branco]
         self.image = self.sprite_andando[0]  # Imagem a ser desenhada na tela
@@ -39,7 +42,7 @@ class Inimigo(pygame.sprite.Sprite):
 
         # Dano
         self.ultimo_hit = tempo  # Contagem de ticks quando o inimigo deu dano pela última vez
-        self.cooldown = 200
+        self.cooldown = 100
         self.textos_dano = pygame.sprite.Group()
 
     def movimento(self, jogador, grupo_inimigos, dt):
@@ -106,7 +109,7 @@ class Inimigo(pygame.sprite.Sprite):
         # Atualiza posição do rect e da hitbox
         self.rect.center = self.pos
 
-    def levar_dano(self, armas_grupo, jogador, tempo, dt):
+    def levar_dano(self, armas_grupo, jogador, tempo, dt, Adaga):
         for arma in armas_grupo:
             if self.mask.overlap(arma.mask, (arma.rect.left - self.rect.left, arma.rect.top - self.rect.top)) and arma.ataque_executado:
 
@@ -123,10 +126,14 @@ class Inimigo(pygame.sprite.Sprite):
                 self.pos.x += direction_x * arma.knockback * dt
                 self.pos.y += direction_y * arma.knockback * dt
 
+                # Receber dano e criar texto de dano
                 if tempo - self.ultimo_hit >= self.cooldown:
-                    self.hit_points_atuais -= max(arma.dano * jogador.ataque / self.defesa, 1)
-                    self.textos_dano.add(DanoTexto(self.pos + (0, -20), max(arma.dano * jogador.ataque / self.defesa, 1), tempo))
-                    self.ultimo_hit = tempo
+                    if self.hit_points_atuais > 0:
+                        self.hit_points_atuais -= max(arma.dano * jogador.ataque / self.defesa, 1)
+                        self.textos_dano.add(DanoTexto(self.pos + (0, -20), max(arma.dano * jogador.ataque / self.defesa, 1), tempo))
+                        self.ultimo_hit = tempo
+                        if isinstance(arma, Adaga):  # Deleta adagas quando elas colidem com o inimigo
+                            arma.kill()
 
         if tempo - self.ultimo_hit >= self.cooldown:
             self.image = self.sprite_andando[self.frame]

@@ -204,7 +204,7 @@ class BichoMachado(Jogador):
         hp = 750
         ataque = 8
         defesa = 8
-        velocidade_movimento = 2
+        velocidade_movimento = 2.5
 
         # Animação
         frame_rate = 9

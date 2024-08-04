@@ -13,10 +13,6 @@ class Camera:
         self.largura = largura
         self.altura = altura
 
-    def mover_objeto(self, objeto):
-        # Move um objeto em relação à posição atual da câmera e retorna a nova posição do objeto
-        return objeto.rect.move(self.camera.topleft)
-
     def movimento(self, jogador):
         # Calcula a nova posição x e y da câmera de forma que o centro do jogador esteja no centro da tela
         x = int(self.largura / 2) - jogador.rect.centerx
@@ -24,6 +20,9 @@ class Camera:
         # Atualiza a posição da câmera com as novas coordenadas
         self.camera = pygame.Rect(x, y, self.largura, self.altura)
 
+    def mover_objeto(self, objeto):
+        # Move um objeto em relação à posição atual da câmera e retorna a nova posição do objeto
+        return objeto.rect.move(self.camera.topleft)
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, pos, sprite_loaded):
@@ -97,8 +96,9 @@ RESETAR_botao = Botao(pygame.math.Vector2(1129, 740), BOTAO_CINZA.get_width(), B
 botoes_menu_principal = (JOGAR_botao, SAIR_botao, MAIS_botao, MENOS_botao, SALVAR_botao, RESETAR_botao)
 
 # Tela de level up
-CONTINUAR_botao_level_up = Botao(pygame.math.Vector2(640, 700), BOTAO_CINZA.get_width(), BOTAO_CINZA.get_height(), "Continuar", pygame.font.Font(None, 30), cor=None, imagem=BOTAO_CINZA)
-botoes_level_up = (CONTINUAR_botao_level_up, CONTINUAR_botao_level_up)
+box_upgrade = pygame.image.load('Sprites/UI/box_level_up.png')
+CONTINUAR_botao_level_up = Botao(pygame.math.Vector2(567, 700), BOTAO_CINZA.get_width(), BOTAO_CINZA.get_height(), "Continuar", pygame.font.Font(None, 30), cor=None, imagem=BOTAO_CINZA)
+botoes_level_up = (CONTINUAR_botao_level_up,)
 
 # Sistema
 camera = Camera(LARGURA, ALTURA)
@@ -133,9 +133,6 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
     # Tempo
     tempo_pausado_total = 0
 
-    # Ataques
-    ataques_tupla = (Slash(pygame.math.Vector2(300, 0), 'direita'), Rotacao(140, 0))
-
     # Grupos de sprite
     todos_sprites = pygame.sprite.Group()
     inimigos = pygame.sprite.Group()
@@ -144,12 +141,31 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
     tiles = pygame.sprite.Group(Tile(pygame.math.Vector2(0, 0), GRAMA_TILE))
 
     # Gerar jogador e ataques
+    ataque_lista = [Chicote(pygame.math.Vector2(160, 0), 'direita'), Rotacao(140, 0), Adaga((0, 0), 'direita'), Machado((0, 0), 'direita')]
     jogador = personagem_selecionado(pygame.math.Vector2(0, 0), 0)
+
+    # Classe do personagem associada a uma classe de ataque inicial
+    ataques_inicias = {
+        BichoChicote: Chicote,
+        BichoAdaga: Adaga,
+        BichoCajado: Rotacao,
+        BichoMachado: Machado
+    }
+
+    # Inicia um dos ataques no nível 1 dependendo do personagem selecionado
+    for jogador_classe, ataque_classe in ataques_inicias.items():
+        if isinstance(jogador, jogador_classe):
+            for ataque in ataque_lista:
+                if isinstance(ataque, ataque_classe):
+                    ataque.nivel = 1
+
+    # Inicializa barras de HP e Xp
     hp_bar = BarraVida(70, 10, (0, 50))
     xp_bar = BarraFixa(LARGURA, 30, (0, 0))
 
-    todos_sprites.add(jogador, *ataques_tupla)
-    ataques.add(*ataques_tupla)
+    # Adiciona o jogador e os ataques aos sprite groups
+    todos_sprites.add(jogador, *ataque_lista)
+    ataques.add(*ataque_lista)
 
     # Main Game Loop
     jogo_tela_level_up = False
@@ -158,6 +174,7 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
     jogo_rodando = True
 
     while jogo_rodando:
+
         clock.tick(FPS)
         delta_time = clock.get_time() / 20  # Para multiplicar velocidade de objetos para garantir que a velocidade não seja afetada pelo FPS
 
@@ -170,12 +187,8 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
             # Desenha sprites
             for group in (tiles, todos_sprites):
                 for sprite in group:
-                    TELA.blit(sprite.image, camera.mover_objeto(sprite))
-
-            for inimigo in inimigos:
-                for dano in inimigo.textos_dano:
-                    TELA.blit(dano.image, camera.mover_objeto(dano))
-                    dano.update(ticks_passados, 200)
+                    if not isinstance(sprite, Adaga) and not isinstance(sprite, Machado):  # Não mostra a instância original do ataque adaga ou machado mas ainda irá mostrar os projetéis spawnados
+                        TELA.blit(sprite.image, camera.mover_objeto(sprite))
 
             TELA.blit(hp_bar.image, camera.mover_objeto(hp_bar))
             TELA.blit(xp_bar.image, (0, 0))
@@ -194,47 +207,61 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
 
             # ATUALIZAR JOGO ###########################################################################################
             # Atualizar modificadores
-            if ticks_passados - pocao_velocidade_usada < 10000:  # Dura 10 segundos
+            if ticks_passados - pocao_velocidade_usada < 10000:  # Velocidade dura 10 segundos
                 modificador_player_speed = 3
                 TELA.blit(arco_iris, arco_iris.get_rect(topleft=(79, 726)))
             else:
                 modificador_player_speed = 1
 
-            if ticks_passados - dobro_xp_usado < 10000:  # Dura 10 segundos
+            if ticks_passados - dobro_xp_usado < 10000:  # Dobro XP dura 10 segundos
                 modificador_xp_yield = 2
                 TELA.blit(arco_iris, arco_iris.get_rect(topleft=(230, 726)))
             else:
                 modificador_xp_yield = 1
-            # Atualizar jogador
+
+            # ATUALIZAR JOGADOR
             jogador.movimento(delta_time, modificador_player_speed)
             jogador.levar_dano(inimigos, ticks_passados)
             jogador.animar_sprite(ticks_passados)
+
+            subiu_de_nivel = jogador.nivel_update()
+            if subiu_de_nivel:
+                jogo_tela_level_up = True
+                contar_tempo_pausado = pygame.time.get_ticks()
 
             hp_bar.atualizar(jogador)
             xp_bar.atualizar(jogador.xp, jogador.xp_para_proximo_nivel, (0, 0, 255))
 
             camera.movimento(jogador)
 
-            # Atualizar ataques
+            # ATUALIZAR ATAQUES
             for ataque in ataques:
-                ataque.ajustar_nivel(ataques, todos_sprites)
-                ataque.animar_sprite()
-                ataque.atacar()
-                ataque.atualizar_posicao(jogador)
+                if isinstance(ataque, Projetil_Adaga) or isinstance(ataque, Projetil_Machado):
+                    ataque.atualizar(jogador, delta_time)
+                else:
+                    ataque.animar_sprite()
+                    ataque.atacar()
+                    ataque.atualizar_posicao(jogador)
+                    ataque.ajustar_nivel(ataques, todos_sprites)
+                    if isinstance(ataque, Adaga) or isinstance(ataque, Machado):
+                        ataque.spawnar_projetil(ataques, todos_sprites)
 
-            # Gerar background
+            # GERA BACKGROUND INFINITO
             for tile in tiles:
                 novo_tile_group = pygame.sprite.Group(Tile(pygame.math.Vector2(x, y), GRAMA_TILE) for x, y in tile.jogador_presente(jogador))
                 if novo_tile_group:
                     tiles = novo_tile_group
                     break
 
-            # Atualizar inimigos
+            # ATUALIZAR INIMIGOS
             for inimigo in inimigos:
 
                 inimigo.movimento(jogador, inimigos, delta_time)
-                inimigo.levar_dano(ataques, jogador, ticks_passados, delta_time)
                 inimigo.animar_sprite(ticks_passados)
+                inimigo.levar_dano(ataques, jogador, ticks_passados, delta_time, Projetil_Adaga)
+                for dano in inimigo.textos_dano:  # Mostrar texto de dano
+                    TELA.blit(dano.image, camera.mover_objeto(dano))
+                    dano.update(ticks_passados, 200)
 
                 # Drops dependendo do tipo de inimigo
                 if isinstance(inimigo, Texugo):
@@ -253,7 +280,7 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
                     drop = CristalXp(inimigo.pos, random.choices(['Blue', 'Green', 'Red'], [10, 50, 0], k=1)[0])
                     total_inimigos_mortos += inimigo.checar_hp(drop, items, todos_sprites, ticks_passados)
 
-            # Atualizar coletáveis
+            # ATUALIZAR ITEMS
             for item in items:
                 item.animar_sprite()
                 item.magnetismo(jogador, delta_time)
@@ -262,6 +289,7 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
                 if isinstance(item, Moeda):
                     total_moedas += item.checar_colisao(jogador)
 
+                # Items utilizáveis do inventário com limite de 3 pra cada
                 elif isinstance(item, Cura):
                     jogador.inventario['Poção Cura'] = min(jogador.inventario['Poção Cura'] + item.checar_colisao(jogador), 3)
                 elif isinstance(item, Velocidade):
@@ -298,7 +326,7 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
                     numero_spawn = fase['Numero Spawn']
                     intervalo = fase['Intervalo']
 
-            # Spawnar inimigos (Max = 50)
+            # SPAWNAR INIMIGOS (Max = 50)
             if ticks_passados - cooldown_spawnar_inimigos >= intervalo and len(inimigos) <= 50:
                 cooldown_spawnar_inimigos = ticks_passados
                 tipos_de_inimigo = random.choices([Eisquelto, Texugo, Zumbi, LoboPidao, Minhocao, Morte], pesos, k=numero_spawn)
@@ -307,7 +335,7 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
                     todos_sprites.add(inimigo_spawanado)
                     inimigos.add(inimigo_spawanado)
 
-            # Spawnar items (Spawna 15 a cada 15 segundos) (Max = 30)
+            # SPAWNAR ITEMS (Spawna 15 a cada 15 segundos) (Max = 30)
             if ticks_passados - cooldown_spawnar_items >= 15000 and len(items) <= 30:
                 cooldown_spawnar_items = ticks_passados
                 for i in range(15):
@@ -315,12 +343,6 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
                     item_spawnado = item_tipo(pontos_ao_redor(jogador, 900))
                     todos_sprites.add(item_spawnado)
                     items.add(item_spawnado)
-
-            subiu_de_nivel = jogador.nivel_update()
-            if subiu_de_nivel:
-                jogo_tela_level_up = True
-                contar_tempo_pausado = pygame.time.get_ticks()
-                tela_level_up()
 
         # EVENTOS ######################################################################################################
         for evento in pygame.event.get():
@@ -330,7 +352,7 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
                 sys.exit()
 
             # Checar se alguma tecla relevante foi apertada
-            if evento.type == pygame.KEYDOWN and not jogo_tela_morte:
+            if evento.type == pygame.KEYDOWN and not (jogo_tela_morte or jogo_tela_level_up):
                 if evento.key == pygame.K_ESCAPE:  # Pausar ou despausar jogo se apertar ESC
                     if not jogo_pausado:
                         jogo_pausado = True
@@ -355,13 +377,6 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
                         if jogador.usar_item('Dobro XP'):
                             dobro_xp_usado = ticks_passados
 
-                    if evento.key == pygame.K_p:
-                        for ataque in ataques_tupla:
-                            ataque.nivel += 1
-                            for ataques_derivados in ataques:
-                                if isinstance(ataques_derivados, type(ataque)):
-                                    ataques_derivados.nivel = ataque.nivel
-
             # Apertos de botão na tela de pausa
             if jogo_pausado:
                 for botao in botoes_menu_pausa:
@@ -383,16 +398,31 @@ def iniciar_jogo(start_ticks, personagem_selecionado):
                         elif botao == MENU_PRINCIPAL_botao_morte:
                             return False, moedas_ganhas
 
-            if jogo_tela_level_up:
-                for botao in botoes_level_up:
-                    if botao.mouse_interacao(evento):
-                        if botao == CONTINUAR_botao_level_up:
-                            tempo_pausado_total += pygame.time.get_ticks() - contar_tempo_pausado
-                            jogo_tela_level_up = False
 
+        if jogo_tela_level_up:
+            # Chama a função da tela de level up que retorna o ataque selecionado
+            selecionado = tela_level_up(ataque_lista)
+
+            if selecionado is not None:
+                # Atualiza os ataques na lista inicial de ataques
+                for ataque_origem in ataque_lista:
+                    if ataque_origem == selecionado:
+                        ataque_origem.nivel += 1
+
+                        # Atualiza o nível de todas as instâncias dos ataques (Relevante para Chicote e rotação)
+                        for i in range(2):
+                            for ataques_derivados in ataques:
+                                if isinstance(ataques_derivados, type(ataque_origem)):
+                                    ataques_derivados.ajustar_nivel(ataques, todos_sprites)
+                                    ataques_derivados.nivel = ataque_origem.nivel
+
+            tempo_pausado_total += pygame.time.get_ticks() - contar_tempo_pausado
+
+        jogo_tela_level_up = False
 
         # Atualiza a tela
         pygame.display.flip()
+
 
 # Função para mostrar o menu principal
 def menu_principal(moedas_acumuladas, personagems_comprados):
@@ -400,7 +430,7 @@ def menu_principal(moedas_acumuladas, personagems_comprados):
 
     volume_barra = BarraFixa(240, 30, (520, 595))
 
-    frames = [PersonagemFrame((coord_x, 124), personagem_tupla[i], 1000) for i, coord_x in enumerate((365, 505, 645, 785))]
+    molduras = [PersonagemFrame((coord_x, 124), personagem_tupla[i], 1000) for i, coord_x in enumerate((365, 505, 645, 785))]
 
     personagem_selecionado = None
 
@@ -428,10 +458,10 @@ def menu_principal(moedas_acumuladas, personagems_comprados):
                 personagem_selecionado = None
                 personagems_comprados = [False for _ in range(len(personagem_tupla))]
 
-            for frame in frames:
+            for frame in molduras:
                 moedas_acumuladas, personagem_selecionado, comprou = frame.comprar(moedas_acumuladas, personagem_selecionado, evento)
                 if comprou:
-                    personagems_comprados[frames.index(frame)] = True
+                    personagems_comprados[molduras.index(frame)] = True
 
         TELA.blit(background.convert_alpha(), background.get_rect(topleft=(0, 0)))
 
@@ -459,23 +489,61 @@ def menu_principal(moedas_acumuladas, personagems_comprados):
             botao.desenhar(TELA)
 
         # Desenhar frames de personagem de acordo se eles estão bloqueados ou não
-        for i, frame in enumerate(frames):
+        for i, frame in enumerate(molduras):
             frame.desbloqueado_variavel = personagems_comprados[i]
             frame.desenhar(TELA)
 
         pygame.display.update()
 
 
-def tela_level_up():
+def tela_level_up(ataque_lista):
+    ataques_frames = pygame.sprite.Group()
+
+    # Cria uma lista em ordem aleatória dos ataques
+    ataques_randomizados = ataque_lista.copy()
+    random.shuffle(ataques_randomizados)
+
+    # Cria até 3 opções de upgrade pra ataques abaixo do nível 10
+    for ataque, coord_y in zip(ataques_randomizados, [270, 420, 570]):
+        if ataque.nivel < 10:
+            ataques_frames.add(AtaqueLevelUpFrame((640, coord_y), ataque))
+
     # Camada sobre a tela que permite que coisas sejam desenhadas com opacidade reduzida
     camada = pygame.Surface((LARGURA, ALTURA), pygame.SRCALPHA)
     pygame.draw.rect(camada, (20, 50, 50, 150), (0, 0, LARGURA, ALTURA))
     TELA.blit(camada, (0, 0))
 
-    texto_morte = pygame.font.Font(None, 100).render(f"SUBIU DE NÍVEL!!!", True, BRANCO)
-    TELA.blit(texto_morte, (LARGURA // 2 - texto_morte.get_width() // 2, ALTURA // 2 - 300))
-    for botao in botoes_level_up:
-        botao.desenhar(TELA)
+    while True:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            # Apertar continuar permite que o jogador avance sem escolher nenhum upgrade
+            if CONTINUAR_botao_level_up.mouse_interacao(evento):
+                return None
+
+            # Checa se algum dos botões de selecionar foi apertado
+            for ataque_upgradavel in ataques_frames:
+                upgrade_selecionado = ataque_upgradavel.selecionar_upgrade(evento)
+                if upgrade_selecionado is not None:
+                    return upgrade_selecionado
+
+        # Texto grande na tela
+        texto_morte = pygame.font.Font(None, 100).render(f"SUBIU DE NÍVEL", True, BRANCO)
+        TELA.blit(texto_morte, (LARGURA // 2 - texto_morte.get_width() // 2, ALTURA // 2 - 300))
+
+        # Caixa com os icones de ataque
+        TELA.blit(box_upgrade, box_upgrade.get_rect(center=(640, 420)))
+
+        # Botões
+        for botao in botoes_level_up:
+            botao.desenhar(TELA)
+
+        for ataque in ataques_frames:
+            ataque.desenhar(TELA)
+
+        pygame.display.update()
 
 while True:
     personagem_selecionado, moedas_acumuladas, personagems_comprados = menu_principal(moedas_acumuladas, personagems_comprados)
