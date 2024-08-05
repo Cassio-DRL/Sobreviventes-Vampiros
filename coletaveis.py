@@ -9,6 +9,7 @@ class coletavel(pygame.sprite.Sprite):
 
         # Objeto
         self.rect = self.image.get_rect(topleft=pos)
+        self.mask = pygame.mask.from_surface(self.image)  # Mask para ser usada como hitbox
         self.pos = pos
 
         # Animação
@@ -27,7 +28,7 @@ class coletavel(pygame.sprite.Sprite):
             self.image = self.sprites[self.frame]  # Atualiza a imagem a ser desenhada na tela
 
     def checar_colisao(self, jogador):
-        if jogador.hitbox.colliderect(self.rect):  # Caso o jogador toque no item
+        if self.mask.overlap(jogador.mask, (jogador.rect.left - self.rect.left, jogador.rect.top - self.rect.top)):  # Caso o jogador toque no item
             self.kill()  # Remove o item
             return self.qt_recurso  # Retorna o valor a ser adicionado a contagem do item coletado
         return 0
@@ -43,9 +44,9 @@ class coletavel(pygame.sprite.Sprite):
             direcao_x /= distancia
             direcao_y /= distancia
 
-            # Move o coletavel com o dobro da velocidade do jogador
-            self.pos.x += direcao_x * dt * jogador.velocidade_movimento * 2
-            self.pos.y += direcao_y * dt * jogador.velocidade_movimento * 2
+            # Move o coletavel em direção ao jogador
+            self.pos.x += direcao_x * dt * 10
+            self.pos.y += direcao_y * dt * 10
             self.rect.topleft = self.pos
 
 
@@ -100,7 +101,6 @@ class CristalXp(coletavel):
     def __init__(self, pos, tipo):
         escala = (50, 50)
         sprites = [pygame.image.load(f"Sprites/Cristais/{tipo}/{tipo.lower()}_crystal_000{i}.png").convert_alpha() for i in range(4)]
-        xp = 10 if tipo == 'Blue' else 40 if tipo == 'Green' else 80
+        xp = 20 if tipo == 'Blue' else 40 if tipo == 'Green' else 80
         frame_rate = 11
         super().__init__(pos, escala, sprites, xp, frame_rate)
-
