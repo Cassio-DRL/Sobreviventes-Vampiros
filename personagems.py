@@ -20,7 +20,7 @@ class Jogador(pygame.sprite.Sprite):
         self.nome = nome
         self.nivel = 1
         self.xp = 0
-        self.xp_para_proximo_nivel = int(50 * self.nivel ** 1.1)
+        self.xp_para_proximo_nivel = 50
         self.hit_point_max = hp
         self.hit_points_atuais = self.hit_point_max
         self.ataque = ataque
@@ -99,7 +99,7 @@ class Jogador(pygame.sprite.Sprite):
         if self.xp >= self.xp_para_proximo_nivel:
             self.xp -= self.xp_para_proximo_nivel
             self.nivel += 1
-            self.xp_para_proximo_nivel = int(50 * self.nivel ** 1.1)
+            self.xp_para_proximo_nivel = int(100 * self.nivel ** 1.1)
             return True
         return False
 
