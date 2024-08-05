@@ -10,6 +10,7 @@ import math
 import sys
 import pickle
 from datetime import datetime
+
 class Camera:
     # Cria um Rect representando a câmera
     def __init__(self, largura, altura):
@@ -344,21 +345,21 @@ def iniciar_jogo(start_ticks, personagem_selecionado, tempo_jogo):
             # SPAWNS ALEATÓRIOS ########################################################################################
             # Pesos para o spawn de cada tipo de inimigo, além de número pra spawnar a cada intervalo em milisegundos dependendo de quanto tempo se passou em segundos
             fases_spawn_inimigo = (
-                {'Fase': (0, tempo_jogo*(1/15)), 'Pesos': [1, 0, 0, 0, 0, 0, 0, 0, 0, 0], 'Numero Spawn': 10, 'Intervalo': 15000},
-                {'Fase': (tempo_jogo*(1/15), tempo_jogo*(2/15)), 'Pesos': [8, 1, 0, 0, 0, 0, 0, 0, 0, 0], 'Numero Spawn': 10, 'Intervalo': 13000},
-                {'Fase': (tempo_jogo*(2/15), tempo_jogo*(3/15)), 'Pesos': [6, 2, 1, 0, 0, 0, 0, 0, 0, 0], 'Numero Spawn': 10, 'Intervalo': 10000},
-                {'Fase': (tempo_jogo*(3/15), tempo_jogo*(4/15)), 'Pesos': [3, 3, 2, 0, 0, 0, 0, 0, 0, 0], 'Numero Spawn': 10, 'Intervalo': 7000},
-                {'Fase': (tempo_jogo*(4/15), tempo_jogo*(5/15)), 'Pesos': [0, 2, 3, 0, 1, 0, 0, 0, 0, 0], 'Numero Spawn': 10, 'Intervalo': 5000},
-                {'Fase': (tempo_jogo*(5/15), tempo_jogo*(6/15)), 'Pesos': [0, 0, 0, 5, 10, 0, 0, 0, 0, 0], 'Numero Spawn': 10, 'Intervalo': 5000},
-                {'Fase': (tempo_jogo*(6/15), tempo_jogo*(7/15)), 'Pesos': [0, 0, 0, 6, 4, 6, 0, 0, 0, 0], 'Numero Spawn': 10, 'Intervalo': 4000},
-                {'Fase': (tempo_jogo*(7/15), tempo_jogo*(8/15)), 'Pesos': [0, 0, 12, 0, 0, 6, 6, 0, 0, 0], 'Numero Spawn': 10, 'Intervalo': 3000},
-                {'Fase': (tempo_jogo*(8/15), tempo_jogo*(9/15)), 'Pesos': [0, 0, 0, 0, 1, 1, 4, 6, 0, 0], 'Numero Spawn': 10, 'Intervalo': 2000},
-                {'Fase': (tempo_jogo*(9/15), tempo_jogo*(10/15)), 'Pesos': [1, 1, 0, 0, 0, 2, 3, 6, 0, 0], 'Numero Spawn': 10, 'Intervalo': 1000},
-                {'Fase': (tempo_jogo*(10/15), tempo_jogo*(11/15)), 'Pesos': [1, 1, 0, 0, 0, 2, 8, 3, 0, 0], 'Numero Spawn': 10, 'Intervalo': 1000},
-                {'Fase': (tempo_jogo*(11/15), tempo_jogo*(12/15)), 'Pesos': [1, 1, 0, 0, 0, 0, 0, 10, 2, 0], 'Numero Spawn': 10, 'Intervalo': 1000},
-                {'Fase': (tempo_jogo*(12/15), tempo_jogo*(13/15)), 'Pesos': [1, 1, 0, 0, 0, 0, 0, 4, 4, 0], 'Numero Spawn': 10, 'Intervalo': 1000},
-                {'Fase': (tempo_jogo*(13/15), tempo_jogo*(14/15)), 'Pesos': [1, 1, 0, 0, 0, 0, 0, 1, 5, 0], 'Numero Spawn': 10, 'Intervalo': 1000},
-                {'Fase': (tempo_jogo*(14/15), tempo_jogo), 'Pesos': [1, 1, 1, 1, 1, 2, 4, 6, 12, 0], 'Numero Spawn': 10, 'Intervalo': 1000},
+                {'Fase': (0, tempo_jogo*(1/15)), 'Pesos': [1, 0, 0, 0, 0, 0, 0, 0, 0, 0], 'Numero Spawn': 10, 'Intervalo': 7000},
+                {'Fase': (tempo_jogo*(1/15), tempo_jogo*(2/15)), 'Pesos': [8, 1, 0, 0, 0, 0, 0, 0, 0, 0], 'Numero Spawn': 15, 'Intervalo': 6000},
+                {'Fase': (tempo_jogo*(2/15), tempo_jogo*(3/15)), 'Pesos': [6, 2, 1, 0, 0, 0, 0, 0, 0, 0], 'Numero Spawn': 15, 'Intervalo': 5000},
+                {'Fase': (tempo_jogo*(3/15), tempo_jogo*(4/15)), 'Pesos': [3, 3, 2, 0, 0, 0, 0, 0, 0, 0], 'Numero Spawn': 15, 'Intervalo': 4000},
+                {'Fase': (tempo_jogo*(4/15), tempo_jogo*(5/15)), 'Pesos': [0, 2, 3, 0, 1, 0, 0, 0, 0, 0], 'Numero Spawn': 15, 'Intervalo': 3000},
+                {'Fase': (tempo_jogo*(5/15), tempo_jogo*(6/15)), 'Pesos': [0, 0, 0, 5, 10, 0, 0, 0, 0, 0], 'Numero Spawn': 15, 'Intervalo': 2000},
+                {'Fase': (tempo_jogo*(6/15), tempo_jogo*(7/15)), 'Pesos': [0, 0, 0, 6, 4, 6, 0, 0, 0, 0], 'Numero Spawn': 15, 'Intervalo': 2000},
+                {'Fase': (tempo_jogo*(7/15), tempo_jogo*(8/15)), 'Pesos': [0, 0, 12, 0, 0, 6, 6, 0, 0, 0], 'Numero Spawn': 15, 'Intervalo': 2000},
+                {'Fase': (tempo_jogo*(8/15), tempo_jogo*(9/15)), 'Pesos': [0, 0, 0, 0, 1, 1, 4, 6, 0, 0], 'Numero Spawn': 15, 'Intervalo': 1000},
+                {'Fase': (tempo_jogo*(9/15), tempo_jogo*(10/15)), 'Pesos': [0, 0, 0, 0, 0, 2, 3, 6, 0, 0], 'Numero Spawn': 15, 'Intervalo': 1000},
+                {'Fase': (tempo_jogo*(10/15), tempo_jogo*(11/15)), 'Pesos': [0, 0, 0, 0, 0, 2, 8, 3, 0, 0], 'Numero Spawn': 15, 'Intervalo': 1000},
+                {'Fase': (tempo_jogo*(11/15), tempo_jogo*(12/15)), 'Pesos': [0, 0, 0, 0, 0, 0, 0, 10, 2, 0], 'Numero Spawn': 15, 'Intervalo': 1000},
+                {'Fase': (tempo_jogo*(12/15), tempo_jogo*(13/15)), 'Pesos': [0, 0, 0, 0, 0, 0, 0, 4, 4, 0], 'Numero Spawn': 15, 'Intervalo': 1000},
+                {'Fase': (tempo_jogo*(13/15), tempo_jogo*(14/15)), 'Pesos': [0, 0, 0, 0, 0, 0, 0, 1, 5, 0], 'Numero Spawn': 15, 'Intervalo': 1000},
+                {'Fase': (tempo_jogo*(14/15), tempo_jogo), 'Pesos': [1, 1, 1, 1, 1, 2, 4, 6, 12, 0], 'Numero Spawn': 15, 'Intervalo': 1000},
                 {'Fase': (tempo_jogo, 100000), 'Pesos': [0, 0, 0, 0, 0, 0, 0, 0, 0, 1], 'Numero Spawn': 20, 'Intervalo': 1000}
             )
 

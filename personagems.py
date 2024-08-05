@@ -142,7 +142,7 @@ class BichoChicote(Jogador):
 
         # Stats
         hp = 600
-        ataque = 6
+        ataque = 12
         defesa = 6
         velocidade_movimento = 3
 
@@ -162,7 +162,7 @@ class BichoAdaga(Jogador):
 
         # Stats
         hp = 550
-        ataque = 8
+        ataque = 16
         defesa = 4
         velocidade_movimento = 4
 
@@ -182,7 +182,7 @@ class BichoCajado(Jogador):
 
         # Stats
         hp = 400
-        ataque = 10
+        ataque = 20
         defesa = 3
         velocidade_movimento = 5
 
@@ -202,7 +202,7 @@ class BichoMachado(Jogador):
 
         # Stats
         hp = 750
-        ataque = 8
+        ataque = 16
         defesa = 8
         velocidade_movimento = 2.5
 

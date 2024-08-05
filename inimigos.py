@@ -11,6 +11,7 @@ class DanoTexto(pygame.sprite.Sprite):
         # Remover o texto após a duração especificada
         if tempo - self.criado > cooldown:
             self.kill()
+
 class Inimigo(pygame.sprite.Sprite):
     def __init__(self, pos, sprites_walking, escala, hit_points, dano, defesa, velocidade_movimento, frame_rate, sprites_branco, tempo, jogador):
         super().__init__()
@@ -28,7 +29,7 @@ class Inimigo(pygame.sprite.Sprite):
         self.pos = pos
 
         # Stats
-        self.hit_point_max = hit_points * max(jogador.nivel/4, 1)
+        self.hit_point_max = hit_points * max(jogador.nivel/2, 1)
         self.hit_points_atuais = self.hit_point_max
         self.dano = dano
         self.defesa = defesa
@@ -84,7 +85,7 @@ class Inimigo(pygame.sprite.Sprite):
 
         # Por algum motivo, depois do menu inicial aparecer os inimigos se moviam muito e eu não consegui achar a causa deste comportamento
         # A melhor solução que eu achei foi limitar a distância que inimigos podem mover-se por update
-        if nova_pos_x - self.pos.x > 6 or nova_pos_x - self.pos.x < (- 6) or nova_pos_y - self.pos.y > 6 or nova_pos_y - self.pos.y < (- 6):
+        if nova_pos_x - self.pos.x > 12 or nova_pos_x - self.pos.x < (- 12) or nova_pos_y - self.pos.y > 12 or nova_pos_y - self.pos.y < (- 12):
             self.pos.x = self.pos.x
             self.pos.y = self.pos.y
         else:
