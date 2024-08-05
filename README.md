@@ -8,10 +8,11 @@ _EX:_ No arquivo **inimigos.py**, definimos TUDO que seja relacionado ao objeto 
 Isso foi realizado para todo objeto que inserimos no jogo, criando uma estrutura de acesso simples, pois se você deseja acessar qualquer coisa que seja relacionada aos inimigos estará tudo contido dentro do arquivo respectivo, simplificando o entendimento e o nosso desenvolvimento. O principal motivo da utilização desse modelo de arquitetura de código foi para facilitar o nosso trabalho em equipe, por exemplo, se alguém estava trabalhando em refinar o sistema de colisão dos inimigos, tudo que era necessário modificar era o arquivo inimigos.py, e mais nada.
 
 ## Screenshots do jogo em execução:
-![Imagem Menu Inicia](Screenshots/menu_inicial.png)
-![Imagem Gameplay 1](Screenshots/jogo_1.png)
-![Imagem Gameplay 2](Screenshots/jogo_2.png)
-![Imagem Menu Morte](Screenshots/morte.png)
+![Imagem Menu Inicia](Screenshots/tela_menu_inicial.png)
+![Imagem Gameplay](Screenshots/gameplay.png)
+![Imagem Tela de Seleção de Upgrades](Screenshots/level_up.png)
+![Imagem Menu Pausa](Screenshots/tela_pausa.png)
+![Imagem Menu Morte](Screenshots/Tela_de_morte.png)
 
 ## Ferramentas, Bibliotecas e Frameworks Utilizadas:
 
