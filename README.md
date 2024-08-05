@@ -23,13 +23,15 @@ Foi utilizado o PyInstaller para compilação do jogo em um arquivo executável,
 O jogo foi desenvolvido na linguagem **Python**, com utilização principal do módulo **Pygame** para o seu desenvolvimento.
 Também foram utilizados módulos complementares, adicionados para realizar funções específicas que não estavam disponíveis no Pygame
 
-1: **sys** - Utilizado para corrigir um problema que ocorria após a compilação em um arquivo .exe com o pyinstaller, onde o jogo não fechava.
+1: **sys** - Utilizado pela função sys.exit() cujo objetivo foi corrigir um problema que ocorria após a compilação em um arquivo .exe com o pyinstaller, onde o jogo não fechava corretamente.
 
 2: **random** - Foi utilizando para geração aleatória de diversos recursos e dados, como o spawn de inimigos e recursos em localizações aleatórias ao redor do player.
 
-3: **math** - Foi utilizado para utilização de funções matemáticas específicas, principalmente para encontrar o círculo ao redor do jogador, que é utilizado para geração do spawn de inimigos ao seu redor.
+3: **math** - Foi utilizado para utilização de funções matemáticas específicas, principalmente para encontrar o círculo ao redor do jogador, que é utilizado para geração do spawn de inimigos ao seu redor, bem como o ataque Esfera de Energia que gira ao redor da posição do jogador.
 
 4: **pickle** - Foi adicionado para adicionar um sistema de save que mantém o registro de sua quantidade de moedas e personagens desbloqueados mesmo após fechar o jogo. O módulo pickle autoriza a utilização de um arquivo .pkl para acessar, armazenar e manipular esses dados.
+
+5: **datetime** - Foi usado para acessar a data e hora do sistema, informção relevante para distinguir as screenshots tiradas durante o jogo.
 
 ### Frameworks:
 
