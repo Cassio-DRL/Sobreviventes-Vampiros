@@ -76,7 +76,6 @@ class Ataque(pygame.sprite.Sprite):
 
         self.rect.center = self.pos
 
-
 # Carregar sprites
 Sprite_Invisivel = pygame.image.load('Sprites/Ataques/ataque_invisivel.png')
 Slash_Sprites = [pygame.image.load(f"Sprites/Ataques/Slash_chicote/ataque_chicote_{i+1}.png") for i in range(4)]
@@ -107,15 +106,15 @@ class Chicote(Ataque):
 
         # Dicionário dos upgrades a cada level up
         self.level_up_dict = {
-            1: "Atinge inimigos próximos ao jogador.",
+            1: "Atinge inimigos próximos ao jogador",
             2: "Adiciona Projétil",
             3: "Duração do ataque + 50%. Cooldown - 33%",
-            4: "Aumenta o dano em 20%",
-            5: "Aumenta o dano em 20%",
-            6: "Dano + 20%. Duração + 40%",
+            4: "Aumenta o dano em 60%",
+            5: "Aumenta o dano em 60%",
+            6: "Dano + 40%. Duração + 40%",
             7: "Adiciona projétil",
             8: "Reduz cooldown em 50%",
-            9: "Aumenta dano em 40%",
+            9: "Aumenta dano em 100%",
             10: "Adiciona projétil"
         }
 
@@ -124,13 +123,13 @@ class Chicote(Ataque):
             1: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 1000},
             2: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 1000},
             3: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1.5 * 1000, 'cooldown': self.cooldown_ataque_base / 1.5 * 1000},
-            4: {'dano': self.dano_base * 1.2, 'duracao': self.duracao_ataque_base * 1.5 * 1000, 'cooldown': self.cooldown_ataque_base / 1.5 * 1000},
-            5: {'dano': self.dano_base * 1.44, 'duracao': self.duracao_ataque_base * 1.5 * 1000, 'cooldown': self.cooldown_ataque_base / 1.5 * 1000},
-            6: {'dano': self.dano_base * 1.728, 'duracao': self.duracao_ataque_base * 2.1 * 1000, 'cooldown': self.cooldown_ataque_base / 1.5 * 1000},
-            7: {'dano': self.dano_base * 1.728, 'duracao': self.duracao_ataque_base * 2.1 * 1000, 'cooldown': self.cooldown_ataque_base / 1.5 * 1000},
-            8: {'dano': self.dano_base * 1.728, 'duracao': self.duracao_ataque_base * 2.1 * 1000, 'cooldown': self.cooldown_ataque_base / (1.5 * 2) * 1000},
-            9: {'dano': self.dano_base * 2.4192, 'duracao': self.duracao_ataque_base * 2.1 * 1000, 'cooldown': self.cooldown_ataque_base / (1.5 * 2) * 1000},
-            10: {'dano': self.dano_base * 2.4192, 'duracao': self.duracao_ataque_base * 2.1 * 1000, 'cooldown': self.cooldown_ataque_base / (1.5 * 2) * 1000}
+            4: {'dano': self.dano_base * 1.6, 'duracao': self.duracao_ataque_base * 1.5 * 1000, 'cooldown': self.cooldown_ataque_base / 1.5 * 1000},
+            5: {'dano': self.dano_base * 1.6 * 1.6, 'duracao': self.duracao_ataque_base * 1.5 * 1000, 'cooldown': self.cooldown_ataque_base / 1.5 * 1000},
+            6: {'dano': self.dano_base * 1.6 * 1.6 * 1.4, 'duracao': self.duracao_ataque_base * 2.1 * 1000, 'cooldown': self.cooldown_ataque_base / 1.5 * 1000},
+            7: {'dano': self.dano_base * 1.6 * 1.6 * 1.4, 'duracao': self.duracao_ataque_base * 2.1 * 1000, 'cooldown': self.cooldown_ataque_base / 1.5 * 1000},
+            8: {'dano': self.dano_base * 1.6 * 1.6 * 1.4, 'duracao': self.duracao_ataque_base * 2.1 * 1000, 'cooldown': self.cooldown_ataque_base / (1.5 * 2) * 1000},
+            9: {'dano': self.dano_base * 1.6 * 1.6 * 1.4 * 2, 'duracao': self.duracao_ataque_base * 2.1 * 1000, 'cooldown': self.cooldown_ataque_base / (1.5 * 2) * 1000},
+            10: {'dano': self.dano_base * 1.6 * 1.6 * 1.4 * 2, 'duracao': self.duracao_ataque_base * 2.1 * 1000, 'cooldown': self.cooldown_ataque_base / (1.5 * 2) * 1000}
         }
 
         # Aplicar ajustes baseados no nível
@@ -176,14 +175,14 @@ class Rotacao(Ataque):
 
         # Dicionário dos upgrades a cada level up
         self.level_up_dict = {
-            1: "Gira ao redor do jogador e causa dano",
+            1: "Gira ao redor do jogador",
             2: "Adiciona Projétil",
             3: "Aumneta duração em 50%",
-            4: "Aumenta o dano em 20%",
+            4: "Aumenta o dano em 100%",
             5: "Diminui cooldown em 50%",
-            6: "Adiciona projétil",
+            6: "Adiciona projétil e aumenta dano em 70%",
             7: "Aumenta duração em 50%",
-            8: "Adiciona projétil",
+            8: "Adiciona projétil e aumenta dano em 70%",
             9: "Aumenta duração em 50%",
             10: "Ataque dura perpetualmente"
         }
@@ -206,13 +205,13 @@ class Rotacao(Ataque):
             1: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 1000},
             2: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 1000},
             3: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000 * 1.5, 'cooldown': self.cooldown_ataque_base * 1000},
-            4: {'dano': self.dano_base * 1.2, 'duracao': self.duracao_ataque_base * 1000 * 1.5, 'cooldown': self.cooldown_ataque_base * 1000},
-            5: {'dano': self.dano_base * 1.2, 'duracao': self.duracao_ataque_base * 1000 * 1.5, 'cooldown': self.cooldown_ataque_base * 1000 * 0.5},
-            6: {'dano': self.dano_base * 1.2, 'duracao': self.duracao_ataque_base * 1000 * 1.5, 'cooldown': self.cooldown_ataque_base * 1000 * 0.5},
-            7: {'dano': self.dano_base * 1.2, 'duracao': self.duracao_ataque_base * 1000 * 1.5 * 1.5, 'cooldown': self.cooldown_ataque_base * 1000 * 0.5},
-            8: {'dano': self.dano_base * 1.2, 'duracao': self.duracao_ataque_base * 1000 * 1.5 * 1.5, 'cooldown': self.cooldown_ataque_base * 1000 * 0.5},
-            9: {'dano': self.dano_base * 1.2, 'duracao': self.duracao_ataque_base * 1000 * 1.5 * 1.5 * 1.5, 'cooldown': self.cooldown_ataque_base * 1000 * 0.5},
-            10: {'dano': self.dano_base * 1.2, 'duracao': float('inf'), 'cooldown': self.cooldown_ataque_base * 1000 * 0.5}
+            4: {'dano': self.dano_base * 2, 'duracao': self.duracao_ataque_base * 1000 * 1.5, 'cooldown': self.cooldown_ataque_base * 1000},
+            5: {'dano': self.dano_base * 2, 'duracao': self.duracao_ataque_base * 1000 * 1.5, 'cooldown': self.cooldown_ataque_base * 1000 * 0.5},
+            6: {'dano': self.dano_base * 2 * 1.7, 'duracao': self.duracao_ataque_base * 1000 * 1.5, 'cooldown': self.cooldown_ataque_base * 1000 * 0.5},
+            7: {'dano': self.dano_base * 2 * 1.7, 'duracao': self.duracao_ataque_base * 1000 * 1.5 * 1.5, 'cooldown': self.cooldown_ataque_base * 1000 * 0.5},
+            8: {'dano': self.dano_base * 2 * 1.7 * 1.7, 'duracao': self.duracao_ataque_base * 1000 * 1.5 * 1.5, 'cooldown': self.cooldown_ataque_base * 1000 * 0.5},
+            9: {'dano': self.dano_base * 2 * 1.7 * 1.7, 'duracao': self.duracao_ataque_base * 1000 * 1.5 * 1.5 * 1.5, 'cooldown': self.cooldown_ataque_base * 1000 * 0.5},
+            10: {'dano': self.dano_base * 2 * 1.7 * 1.7, 'duracao': float('inf'), 'cooldown': self.cooldown_ataque_base * 1000 * 0.5}
         }
 
         # Aplicar ajustes baseados no nível
@@ -257,11 +256,11 @@ class Adaga(Ataque):
             2: "Adiciona Projétil",
             3: "Aumenta duração do ataque em 100%",
             4: "Adiciona Projétil",
-            5: "Aumenta o dano em 40%",
+            5: "Aumenta o dano em 60%",
             6: "Adiciona Projétil",
-            7: "Aumenta o dano em 40%",
+            7: "Aumenta o dano em 60%",
             8: "Adiciona Projétil",
-            9: "Aumenta dano em 40%",
+            9: "Aumenta dano em 60%",
             10: "Adiciona projétil"
         }
 
@@ -277,12 +276,12 @@ class Adaga(Ataque):
             2: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 1000},
             3: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000},
             4: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000},
-            5: {'dano': self.dano_base * 1.4, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000},
-            6: {'dano': self.dano_base * 1.4, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000},
-            7: {'dano': self.dano_base * 1.4 * 1.4, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000},
-            8: {'dano': self.dano_base * 1.4 * 1.4, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000},
-            9: {'dano': self.dano_base * 1.4 * 1.4 * 1.4, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000},
-            10: {'dano': self.dano_base * 1.4 * 1.4 * 1.4, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000}
+            5: {'dano': self.dano_base * 1.6, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000},
+            6: {'dano': self.dano_base * 1.6, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000},
+            7: {'dano': self.dano_base * 1.6 * 1.6, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000},
+            8: {'dano': self.dano_base * 1.6 * 1.6, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000},
+            9: {'dano': self.dano_base * 1.6 * 1.6 * 1.6, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000},
+            10: {'dano': self.dano_base * 1.6 * 1.6 * 1.6, 'duracao': self.duracao_ataque_base * 1000 * 2, 'cooldown': self.cooldown_ataque_base * 1000}
         }
 
         # Aplicar ajustes baseados no nível
@@ -321,12 +320,12 @@ class Machado(Ataque):
             1: "Move-se em parabóla",
             2: "Adiciona projétil",
             3: "Reduz cooldown em 50%",
-            4: "Aumenta o dano em 20%",
+            4: "Aumenta o dano em 80%",
             5: "Adiciona projétil",
-            6: "Cooldown - 50%. Dano + 20%",
+            6: "Cooldown - 50%. Dano + 80%",
             7: "Adiciona projétil",
             8: "Reduz cooldown em 50%",
-            9: "Aumenta dano em 20%",
+            9: "Aumenta dano em 80%",
             10: "Adiciona projétil"
         }
 
@@ -335,13 +334,13 @@ class Machado(Ataque):
             1: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 1000},
             2: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 1000},
             3: {'dano': self.dano_base, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 1000},
-            4: {'dano': self.dano_base * 1.2, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 1000},
-            5: {'dano': self.dano_base * 1.2, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 1000},
-            6: {'dano': self.dano_base * 1.2 * 1.2, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 0.5 * 1000},
-            7: {'dano': self.dano_base * 1.2 * 1.2, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 0.5 * 1000},
-            8: {'dano': self.dano_base * 1.2 * 1.2, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 0.5 * 0.5 * 1000},
-            9: {'dano': self.dano_base * 1.2 * 1.2 * 1.2, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 0.5 * 0.5 * 1000},
-            10: {'dano': self.dano_base * 1.2 * 1.2 * 1.2, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 0.5 * 0.5 * 1000}
+            4: {'dano': self.dano_base * 1.8, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 1000},
+            5: {'dano': self.dano_base * 1.8, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 1000},
+            6: {'dano': self.dano_base * 1.8 * 1.8, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 0.5 * 1000},
+            7: {'dano': self.dano_base * 1.8 * 1.8, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 0.5 * 1000},
+            8: {'dano': self.dano_base * 1.8 * 1.8, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 0.5 * 0.5 * 1000},
+            9: {'dano': self.dano_base * 1.8 * 1.8 * 1.8, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 0.5 * 0.5 * 1000},
+            10: {'dano': self.dano_base * 1.8 * 1.8 * 1.8, 'duracao': self.duracao_ataque_base * 1000, 'cooldown': self.cooldown_ataque_base * 0.5 * 0.5 * 0.5 * 1000}
 
         }
 
@@ -369,50 +368,9 @@ class Machado(Ataque):
             grupo_ataques.add(machados_possiveis[:self.limite_projeteis])
             grupo_todos.add(machados_possiveis[:self.limite_projeteis])
 
-class Projetil_Adaga(pygame.sprite.Sprite):
+class Projetil(pygame.sprite.Sprite):
     def __init__(self, sprites_animacao, pos, direcao, velocidade, dano, knockback):
         super().__init__()
-        self.image = sprites_animacao[0]
-        self.rect = self.image.get_rect(center=pos)
-        self.pos = pos
-        self.direcao = direcao
-        self.velocidade = velocidade
-        self.sprites_animacao = sprites_animacao
-        self.dano = dano
-        self.knockback = knockback
-        self.frame = 0
-        self.ultimo_tick = pygame.time.get_ticks()
-        self.frame_rate = 1000 // 1
-        self.mask = pygame.mask.from_surface(self.image)
-        self.ataque_executado = True
-
-    def atualizar(self, jogador, dt):
-        # Move o projétil na direção do jogador
-        if self.direcao == 'direita':
-            self.pos.x += self.velocidade * dt
-        else:
-            self.pos.x -= self.velocidade * dt
-
-        # Animar o projétil
-        tick_atual = pygame.time.get_ticks()
-        if tick_atual - self.ultimo_tick > self.frame_rate:
-            self.ultimo_tick = tick_atual
-            self.frame = (self.frame + 1) % len(self.sprites_animacao)
-            self.image = self.sprites_animacao[self.frame]
-            self.mask = pygame.mask.from_surface(self.image)  # Atualiza mask
-
-        self.rect = self.image.get_rect(center=self.pos)
-
-        direcao_x = jogador.pos.x - self.pos.x
-        direcao_y = jogador.pos.y - self.pos.y
-        distancia = (direcao_x ** 2 + direcao_y ** 2) ** (1 / 2)
-        if distancia > 1000:  # Se o jogador estiver muito longe do ataque, deleta o ataque
-            self.kill()
-
-class Projetil_Machado(pygame.sprite.Sprite):
-    def __init__(self, sprites_animacao, pos, direcao, velocidade_x, velocidade_y, dano, knockback):
-        super().__init__()
-
         # Objeto
         self.image = sprites_animacao[0]
         self.rect = self.image.get_rect(center=pos)
@@ -420,11 +378,9 @@ class Projetil_Machado(pygame.sprite.Sprite):
         self.ataque_executado = True
 
         # Posição e movimento
-        self.pos = pos
+        self.pos = pygame.math.Vector2(pos)
         self.direcao = direcao
-        self.velocidade_x = velocidade_x
-        self.velocidade_y = velocidade_y
-        self.gravidade = 0.4
+        self.velocidade = pygame.math.Vector2(velocidade)
 
         # Stats
         self.dano = dano
@@ -434,30 +390,59 @@ class Projetil_Machado(pygame.sprite.Sprite):
         self.sprites_animacao = sprites_animacao
         self.frame = 0
         self.ultimo_tick = pygame.time.get_ticks()
-        self.frame_rate = 1000 // 10
+        self.frame_rate = 1000 // 1
 
-    def atualizar(self, jogador, dt):
-        # Move o projétil numa parabóla
-        if self.direcao == 'direita':
-            self.pos.x += self.velocidade_x * dt
-        else:
-            self.pos.x -= self.velocidade_x * dt
-        self.pos.y += self.velocidade_y * dt
-        self.velocidade_y += self.gravidade
-
-        # Animar o projétil
+    def animar_sprite(self):
         tick_atual = pygame.time.get_ticks()
         if tick_atual - self.ultimo_tick > self.frame_rate:
             self.ultimo_tick = tick_atual
             self.frame = (self.frame + 1) % len(self.sprites_animacao)
             self.image = self.sprites_animacao[self.frame]
             self.mask = pygame.mask.from_surface(self.image)  # Atualiza mask
-
         self.rect = self.image.get_rect(center=self.pos)
 
+    def verificar_distancia(self, jogador):
         direcao_x = jogador.pos.x - self.pos.x
         direcao_y = jogador.pos.y - self.pos.y
-        distancia = (direcao_x ** 2 + direcao_y ** 2) ** (1 / 2)
+        distancia = (direcao_x ** 2 + direcao_y ** 2) ** 0.5
         if distancia > 1000:  # Se o jogador estiver muito longe do ataque, deleta o ataque
             self.kill()
 
+
+class Projetil_Adaga(Projetil):
+    def __init__(self, sprites_animacao, pos, direcao, velocidade, dano, knockback):
+        super().__init__(sprites_animacao, pos, direcao, (velocidade, 0), dano, knockback)
+
+    def atualizar(self, jogador, dt):
+        # Move o projétil na direção do jogador
+        if self.direcao == 'direita':
+            self.pos.x += self.velocidade.x * dt
+        else:
+            self.pos.x -= self.velocidade.x * dt
+
+        # Animar o projétil
+        self.animar_sprite()
+
+        # Checar distância do jogador
+        self.verificar_distancia(jogador)
+
+
+class Projetil_Machado(Projetil):
+    def __init__(self, sprites_animacao, pos, direcao, velocidade_x, velocidade_y, dano, knockback):
+        super().__init__(sprites_animacao, pos, direcao, (velocidade_x, velocidade_y), dano, knockback)
+        self.gravidade = 0.4
+
+    def atualizar(self, jogador, dt):
+        # Move o projétil numa parábola
+        if self.direcao == 'direita':
+            self.pos.x += self.velocidade.x * dt
+        else:
+            self.pos.x -= self.velocidade.x * dt
+        self.pos.y += self.velocidade.y * dt
+        self.velocidade.y += self.gravidade
+
+        # Animar o projétil
+        self.animar_sprite()
+
+        # Checar distância do jogador
+        self.verificar_distancia(jogador)

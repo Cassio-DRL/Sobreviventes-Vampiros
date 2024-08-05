@@ -1,5 +1,4 @@
 import random
-
 import pygame
 class DanoTexto(pygame.sprite.Sprite):
     def __init__(self, pos, dano, tempo):
@@ -29,7 +28,7 @@ class Inimigo(pygame.sprite.Sprite):
         self.pos = pos
 
         # Stats
-        self.hit_point_max = hit_points * max(jogador.nivel/2, 1)
+        self.hit_point_max = hit_points * max(jogador.nivel/4, 1)
         self.hit_points_atuais = self.hit_point_max
         self.dano = dano
         self.defesa = defesa
@@ -83,9 +82,15 @@ class Inimigo(pygame.sprite.Sprite):
                     nova_pos_x += empurra_x * self.velocidade_movimento * dt
                     nova_pos_y += empurra_y * self.velocidade_movimento * dt
 
-        # Atualiza posição do inimigo
-        self.pos.x = nova_pos_x
-        self.pos.y = nova_pos_y
+        # Por algum motivo, depois do menu inicial aparecer os inimigos se moviam muito e eu não consegui achar a causa deste comportamento
+        # A melhor solução que eu achei foi limitar a distância que inimigos podem mover-se por update
+        if nova_pos_x - self.pos.x > 6 or nova_pos_x - self.pos.x < (- 6) or nova_pos_y - self.pos.y > 6 or nova_pos_y - self.pos.y < (- 6):
+            self.pos.x = self.pos.x
+            self.pos.y = self.pos.y
+        else:
+            # Atualiza posição do inimigo
+            self.pos.x = nova_pos_x
+            self.pos.y = nova_pos_y
 
         if direcao_x > 0:  # Movendo pra direita
             if self.direcao != 'direita':
@@ -170,7 +175,53 @@ Lobo_Sprites_branco = [pygame.image.load(f"Sprites/Inimigos/lobo_0{i}_hit.png") 
 Zumbi_Sprites = [pygame.image.load(f"Sprites/Inimigos/Zumbi_0{i}.png") for i in range(4)]
 Zumbi_Sprites_branco = [pygame.image.load(f"Sprites/Inimigos/Zumbi_0{i}_hit.png") for i in range(4)]
 
+Morguesso_Sprites = [pygame.image.load(f"Sprites/Inimigos/morguesso_0{i}.png") for i in range(2)]
+Morguesso_Sprites_branco = [pygame.image.load(f"Sprites/Inimigos/morguesso_0{i}_hit.png") for i in range(2)]
+
+Abobora_Sprites = [pygame.image.load(f"Sprites/Inimigos/pumpkin_0{i}.png") for i in range(4)]
+Abobora_Sprites_branco = [pygame.image.load(f"Sprites/Inimigos/pumpkin_0{i}_hit.png") for i in range(4)]
+
+Hidra_Sprites = [pygame.image.load(f"Sprites/Inimigos/hidra_0{i}.png") for i in range(4)]
+Hidra_Sprites_branco = [pygame.image.load(f"Sprites/Inimigos/hidra_0{i}_hit.png") for i in range(4)]
+
+Centopeia_Sprites = [pygame.image.load(f"Sprites/Inimigos/centopeia_0{i}.png") for i in range(6)]
+Centopeia_Sprites_branco = [pygame.image.load(f"Sprites/Inimigos/centopeia_0{i}_hit.png") for i in range(6)]
+
 Morte_Sprites = [pygame.image.load(f"Sprites/Inimigos/morte_0{i}.png") for i in range(5)]
+
+
+class Morcego(Inimigo):
+    def __init__(self, pos, tempo, jogador):
+        escala = pygame.math.Vector2(240, 240)
+        sprite_andando = [sprite.convert_alpha() for sprite in Morguesso_Sprites]
+        sprite_atacado = [sprite.convert_alpha() for sprite in Morguesso_Sprites_branco]
+
+        # Stats
+        hp = 5
+        dano = 70
+        defesa = 5
+        velocidade_movimento = 2.2
+
+        # Animação
+        frame_rate = 9
+
+        super().__init__(pos, sprite_andando, escala, hp, dano, defesa, velocidade_movimento, frame_rate, sprite_atacado, tempo, jogador)
+class Eisquelto(Inimigo):
+    def __init__(self, pos, tempo, jogador):
+        escala = pygame.math.Vector2(59, 72)
+        sprite_andando = [sprite.convert_alpha() for sprite in Esqueleto_Sprites]
+        sprite_atacado = [sprite.convert_alpha() for sprite in Esqueleto_Sprites_branco]
+
+        # Stats
+        hp = 10
+        dano = 90
+        defesa = 5
+        velocidade_movimento = 1.9
+
+        # Animação
+        frame_rate = 9
+
+        super().__init__(pos, sprite_andando, escala, hp, dano, defesa, velocidade_movimento, frame_rate, sprite_atacado, tempo, jogador)
 
 class Texugo(Inimigo):
     def __init__(self, pos, tempo, jogador):
@@ -189,50 +240,16 @@ class Texugo(Inimigo):
 
         super().__init__(pos, sprite_andando, escala, hp, dano, defesa, velocidade_movimento, frame_rate, sprite_atacado, tempo, jogador)
 
-class Eisquelto(Inimigo):
+class Abobora(Inimigo):
     def __init__(self, pos, tempo, jogador):
-        escala = pygame.math.Vector2(59, 72)
-        sprite_andando = [sprite.convert_alpha() for sprite in Esqueleto_Sprites]
-        sprite_atacado = [sprite.convert_alpha() for sprite in Esqueleto_Sprites_branco]
+        escala = pygame.math.Vector2(72, 72)
+        sprite_andando = [sprite.convert_alpha() for sprite in Abobora_Sprites]
+        sprite_atacado = [sprite.convert_alpha() for sprite in Abobora_Sprites_branco]
 
         # Stats
-        hp = 5
-        dano = 90
-        defesa = 5
-        velocidade_movimento = 1.9
-
-        # Animação
-        frame_rate = 9
-
-        super().__init__(pos, sprite_andando, escala, hp, dano, defesa, velocidade_movimento, frame_rate, sprite_atacado, tempo, jogador)
-
-class Minhocao(Inimigo):
-    def __init__(self, pos, tempo, jogador):
-        escala = pygame.math.Vector2(128, 128)
-        sprite_andando = [sprite.convert_alpha() for sprite in Minhocao_Sprites]
-        sprite_atacado = [sprite.convert_alpha() for sprite in Minhocao_Sprites_branco]
-
-        # Stats
-        hp = 100
-        dano = 180
-        defesa = 15
-        velocidade_movimento = 1.9
-
-        # Animação
-        frame_rate = 9
-
-        super().__init__(pos, sprite_andando, escala, hp, dano, defesa, velocidade_movimento, frame_rate, sprite_atacado, tempo, jogador)
-
-class LoboPidao(Inimigo):
-    def __init__(self, pos, tempo, jogador):
-        escala = pygame.math.Vector2(84, 86)
-        sprite_andando = [sprite.convert_alpha() for sprite in Lobo_Sprites]
-        sprite_atacado = [sprite.convert_alpha() for sprite in Lobo_Sprites_branco]
-
-        # Stats
-        hp = 80
-        dano = 145
-        defesa = 10
+        hp = 35
+        dano = 130
+        defesa = 16
         velocidade_movimento = 1.9
 
         # Animação
@@ -247,8 +264,8 @@ class Zumbi(Inimigo):
         sprite_atacado = [sprite.convert_alpha() for sprite in Zumbi_Sprites_branco]
 
         # Stats
-        hp = 150
-        dano = 90
+        hp = 70
+        dano = 150
         defesa = 5
         velocidade_movimento = 1.9
 
@@ -257,6 +274,73 @@ class Zumbi(Inimigo):
 
         super().__init__(pos, sprite_andando, escala, hp, dano, defesa, velocidade_movimento, frame_rate, sprite_atacado, tempo, jogador)
 
+class LoboPidao(Inimigo):
+    def __init__(self, pos, tempo, jogador):
+        escala = pygame.math.Vector2(84, 86)
+        sprite_andando = [sprite.convert_alpha() for sprite in Lobo_Sprites]
+        sprite_atacado = [sprite.convert_alpha() for sprite in Lobo_Sprites_branco]
+
+        # Stats
+        hp = 135
+        dano = 170
+        defesa = 10
+        velocidade_movimento = 1.9
+
+        # Animação
+        frame_rate = 9
+
+        super().__init__(pos, sprite_andando, escala, hp, dano, defesa, velocidade_movimento, frame_rate, sprite_atacado, tempo, jogador)
+
+class Minhocao(Inimigo):
+    def __init__(self, pos, tempo, jogador):
+        escala = pygame.math.Vector2(128, 128)
+        sprite_andando = [sprite.convert_alpha() for sprite in Minhocao_Sprites]
+        sprite_atacado = [sprite.convert_alpha() for sprite in Minhocao_Sprites_branco]
+
+        # Stats
+        hp = 180
+        dano = 190
+        defesa = 25
+        velocidade_movimento = 1.4
+
+        # Animação
+        frame_rate = 9
+
+        super().__init__(pos, sprite_andando, escala, hp, dano, defesa, velocidade_movimento, frame_rate, sprite_atacado, tempo, jogador)
+
+class Hidra(Inimigo):
+    def __init__(self, pos, tempo, jogador):
+        escala = pygame.math.Vector2(128, 128)
+        sprite_andando = [sprite.convert_alpha() for sprite in Hidra_Sprites]
+        sprite_atacado = [sprite.convert_alpha() for sprite in Hidra_Sprites_branco]
+
+        # Stats
+        hp = 210
+        dano = 210
+        defesa = 15
+        velocidade_movimento = 2.1
+
+        # Animação
+        frame_rate = 9
+
+        super().__init__(pos, sprite_andando, escala, hp, dano, defesa, velocidade_movimento, frame_rate, sprite_atacado, tempo, jogador)
+
+class Centopeia(Inimigo):
+    def __init__(self, pos, tempo, jogador):
+        escala = pygame.math.Vector2(130, 49)
+        sprite_andando = [sprite.convert_alpha() for sprite in Centopeia_Sprites]
+        sprite_atacado = [sprite.convert_alpha() for sprite in Centopeia_Sprites_branco]
+
+        # Stats
+        hp = 256
+        dano = 230
+        defesa = 15
+        velocidade_movimento = 2.3
+
+        # Animação
+        frame_rate = 9
+
+        super().__init__(pos, sprite_andando, escala, hp, dano, defesa, velocidade_movimento, frame_rate, sprite_atacado, tempo, jogador)
 
 class Morte(Inimigo):
     def __init__(self, pos, tempo, jogador):
@@ -268,7 +352,7 @@ class Morte(Inimigo):
         hp = 99999999
         dano = 99999999
         defesa = 99999999
-        velocidade_movimento = 1.9
+        velocidade_movimento = 5.1
 
         # Animação
         frame_rate = 9

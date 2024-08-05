@@ -157,7 +157,7 @@ class PersonagemFrame(pygame.sprite.Sprite):
 
         return dinheiro, selecionado, comprado
 
-class AtaqueLevelUpFrame(pygame.sprite.Sprite):
+class MolduraAtaqueLevelUP(pygame.sprite.Sprite):
     def __init__(self, pos, ataque):
         super().__init__()
         self.image = frame_levelup
@@ -182,62 +182,6 @@ class AtaqueLevelUpFrame(pygame.sprite.Sprite):
         if self.botao_selecionar.mouse_interacao(evento):
             return self.ataque
         return None
-
-def menu_pausa(largura, altura, tela, fonte, botoes, cor):
-    # Função para desenhar todos os elementos da tela de pausa
-
-    # Camada sobre a tela que permite que coisas sejam desenhadas com opacidade reduzida
-    camada = pygame.Surface((largura, altura), pygame.SRCALPHA)
-    pygame.draw.rect(camada, (20, 50, 50, 150), (0, 0, largura, altura))
-    tela.blit(camada, (0, 0))
-
-    # Texto grande no meio da tela
-    texto_pausa = fonte.render(f"JOGO PAUSADO", False, cor)
-    tela.blit(texto_pausa, (largura // 2 - texto_pausa.get_width() // 2, altura // 2 - 100))
-
-    # Desenha cada botão
-    for botao in botoes:
-        botao.desenhar(tela)
-
-
-def tela_morte(largura, altura, tela, fonte, botoes, cor, num_inimigos, num_cristais, num_moedas):
-    # Função para desenhar todos os elementos da tela de morte
-    camada = pygame.Surface((largura, altura), pygame.SRCALPHA)
-    pygame.draw.rect(camada, (20, 50, 50, 150), (0, 0, largura, altura))
-    tela.blit(camada, (0, 0))
-
-    # Texto grande no meio da tela
-    texto_morte = fonte.render(f"MORTO", True, cor)
-    tela.blit(texto_morte, (largura // 2 - texto_morte.get_width() // 2, altura // 2 - 300))
-
-    # Moedas ganhas
-    inimigos = FONTE_NONE_MEDIA.render(f"Inimigos Mortos: {num_inimigos}", True, cor)
-    cristais = FONTE_NONE_MEDIA.render(f"Cristais Coletados: {num_cristais}", True, cor)
-    moedas = FONTE_NONE_MEDIA.render(f"Moedas Coletadas: {num_moedas}", True, cor)
-
-    contagem_inimigos = FONTE_NONE_MEDIA.render(f"{num_inimigos // 2}", True, cor)
-    contagem_cristais = FONTE_NONE_MEDIA.render(f"{num_cristais // 4}", True, cor)
-    contagem_moedas = FONTE_NONE_MEDIA.render(f"{num_moedas}", True, cor)
-    total = FONTE_NONE_MEDIA.render(f"{num_moedas + num_cristais // 4 + num_inimigos // 2}", True, cor)
-
-    tela.blit(inimigos, inimigos.get_rect(topleft=(300, 250)))
-    tela.blit(cristais, cristais.get_rect(topleft=(300, 300)))
-    tela.blit(moedas, moedas.get_rect(topleft=(300, 350)))
-
-    tela.blit(contagem_inimigos, contagem_inimigos.get_rect(topright=(800, 250)))
-    tela.blit(contagem_cristais, contagem_cristais.get_rect(topright=(800, 300)))
-    tela.blit(contagem_moedas, contagem_moedas.get_rect(topright=(800, 350)))
-    tela.blit(total, total.get_rect(topright=(800, 400)))
-
-    for i in (251, 301, 351):
-        tela.blit(moeda.convert_alpha(), moeda.get_rect(topright=(840, i)))
-
-    # Desenha cada botão
-    for botao in botoes:
-        botao.desenhar(tela)
-
-    return num_moedas + num_cristais // 4 + num_inimigos // 2
-
 
 def ui_jogo(total_moedas, total_cristais, nivel, xp, xp_para_proximo_nivel, pocoes, inimigos_mortos, segundos, fonte, cor, tela, pocoes_velocidade, bombas, dobro_xp):
     LEVEL_ui = fonte.render(f"lvl {nivel}", False, cor)

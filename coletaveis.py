@@ -101,7 +101,6 @@ class CristalXp(coletavel):
     def __init__(self, pos, tipo):
         escala = (50, 50)
         sprites = [pygame.image.load(f"Sprites/Cristais/{tipo}/{tipo.lower()}_crystal_000{i}.png").convert_alpha() for i in range(4)]
-        xp = 10 if tipo == 'Blue' else 40 if tipo == 'Green' else 80
+        xp = 20 if tipo == 'Blue' else 40 if tipo == 'Green' else 80
         frame_rate = 11
         super().__init__(pos, escala, sprites, xp, frame_rate)
-
