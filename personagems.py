@@ -1,4 +1,5 @@
 import pygame
+
 class Jogador(pygame.sprite.Sprite):
     def __init__(self, pos, escala, sprite_idle, sprite_andando, hp, ataque, defesa, velocidade, frame_rate, nome, tempo, sprite_idle_apanhando, sprite_apanhando):
         super().__init__()

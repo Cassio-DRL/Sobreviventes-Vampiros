@@ -307,7 +307,7 @@ def iniciar_jogo(start_ticks, personagem_selecionado, tempo_jogo):
 
                 # Drops dependendo do tipo de inimigo
                 drop_probabilities = {
-                    Morcego: [1, 0, 0],
+                    Morguesso: [1, 0, 0],
                     Eisquelto: [8, 1, 0],
                     Texugo: [8, 1, 0.2],
                     Abobora: [0, 1, 0],
@@ -378,7 +378,7 @@ def iniciar_jogo(start_ticks, personagem_selecionado, tempo_jogo):
             # SPAWNAR INIMIGOS (Max = 50)
             if ticks_passados - cooldown_spawnar_inimigos >= intervalo and len(inimigos_sprite_group) <= 50:
                 cooldown_spawnar_inimigos = ticks_passados
-                tipos_de_inimigo = random.choices([Morcego, Eisquelto, Texugo, Abobora, Zumbi, LoboPidao, Minhocao, Hidra, Centopeia, Morte], pesos, k=numero_spawn)
+                tipos_de_inimigo = random.choices([Morguesso, Eisquelto, Texugo, Abobora, Zumbi, LoboPidao, Minhocao, Hidra, Centopeia, Morte], pesos, k=numero_spawn)
                 for inimigo_classe in tipos_de_inimigo:
                     inimigo_spawanado = inimigo_classe(pontos_ao_redor(jogador, 900), ticks_passados, jogador)
                     todos_sprites.add(inimigo_spawanado)

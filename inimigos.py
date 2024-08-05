@@ -8,7 +8,7 @@ class DanoTexto(pygame.sprite.Sprite):
         self.criado = tempo
 
     def update(self, tempo, cooldown):
-        # Remover o texto após a duração especificada
+        # Remover o texto após certo período de tempo
         if tempo - self.criado > cooldown:
             self.kill()
 
@@ -164,8 +164,8 @@ class Inimigo(pygame.sprite.Sprite):
 Texugo_Sprites = [pygame.image.load(f"Sprites/Inimigos/Texugo_0{i}.png") for i in range(4)]
 Texugo_Sprites_branco = [pygame.image.load(f"Sprites/Inimigos/Texugo_0{i}_hit.png") for i in range(4)]
 
-Esqueleto_Sprites = [pygame.image.load(f"Sprites/Inimigos/Esqueleto_0{i}.png") for i in range(4)]
-Esqueleto_Sprites_branco = [pygame.image.load(f"Sprites/Inimigos/Esqueleto_0{i}_hit.png") for i in range(4)]
+Eisqueleto_Sprites = [pygame.image.load(f"Sprites/Inimigos/Esqueleto_0{i}.png") for i in range(4)]
+Eisqueleto_Sprites_branco = [pygame.image.load(f"Sprites/Inimigos/Esqueleto_0{i}_hit.png") for i in range(4)]
 
 Minhocao_Sprites = [pygame.image.load(f"Sprites/Inimigos/minhocao_0{i}.png") for i in range(4)]
 Minhocao_Sprites_branco = [pygame.image.load(f"Sprites/Inimigos/minhocao_0{i}_hit.png") for i in range(4)]
@@ -191,7 +191,7 @@ Centopeia_Sprites_branco = [pygame.image.load(f"Sprites/Inimigos/centopeia_0{i}_
 Morte_Sprites = [pygame.image.load(f"Sprites/Inimigos/morte_0{i}.png") for i in range(5)]
 
 
-class Morcego(Inimigo):
+class Morguesso(Inimigo):
     def __init__(self, pos, tempo, jogador):
         escala = pygame.math.Vector2(240, 240)
         sprite_andando = [sprite.convert_alpha() for sprite in Morguesso_Sprites]
@@ -210,8 +210,8 @@ class Morcego(Inimigo):
 class Eisquelto(Inimigo):
     def __init__(self, pos, tempo, jogador):
         escala = pygame.math.Vector2(59, 72)
-        sprite_andando = [sprite.convert_alpha() for sprite in Esqueleto_Sprites]
-        sprite_atacado = [sprite.convert_alpha() for sprite in Esqueleto_Sprites_branco]
+        sprite_andando = [sprite.convert_alpha() for sprite in Eisqueleto_Sprites]
+        sprite_atacado = [sprite.convert_alpha() for sprite in Eisqueleto_Sprites_branco]
 
         # Stats
         hp = 10
@@ -265,7 +265,7 @@ class Zumbi(Inimigo):
         sprite_atacado = [sprite.convert_alpha() for sprite in Zumbi_Sprites_branco]
 
         # Stats
-        hp = 70
+        hp = 120
         dano = 150
         defesa = 5
         velocidade_movimento = 1.9
