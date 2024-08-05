@@ -214,11 +214,11 @@ def iniciar_jogo(start_ticks, personagem_selecionado, tempo_jogo):
             TELA.blit(hp_bar.image, camera.mover_objeto(hp_bar))
             TELA.blit(xp_bar.image, (0, 0))
 
-            # Desenha UI
-            ui_jogo(total_moedas, total_cristais, jogador.nivel, jogador.xp, jogador.xp_para_proximo_nivel,
-                    jogador.inventario['Poção Cura'], total_inimigos_mortos, segundos_passados,
-                    pygame.font.Font(None, 30), BRANCO, TELA, jogador.inventario['Poção Velocidade'],
-                    jogador.inventario['Bomba'], jogador.inventario['Dobro XP'])
+            # Desenha HUD
+            hud(total_moedas, total_cristais, jogador.nivel, jogador.xp, jogador.xp_para_proximo_nivel,
+                jogador.inventario['Poção Cura'], total_inimigos_mortos, segundos_passados,
+                pygame.font.Font(None, 30), BRANCO, TELA, jogador.inventario['Poção Velocidade'],
+                jogador.inventario['Bomba'], jogador.inventario['Dobro XP'])
 
             # Mostra tela de morte se o hp do jogador chegar a 0
             if jogador.hit_points_atuais <= 0 and not jogo_tela_morte:

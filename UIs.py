@@ -178,7 +178,7 @@ class MolduraAtaqueLevelUP(pygame.sprite.Sprite):
             return self.ataque
         return None
 
-def ui_jogo(total_moedas, total_cristais, nivel, xp, xp_para_proximo_nivel, pocoes, inimigos_mortos, segundos, fonte, cor, tela, pocoes_velocidade, bombas, dobro_xp):
+def hud(total_moedas, total_cristais, nivel, xp, xp_para_proximo_nivel, pocoes, inimigos_mortos, segundos, fonte, cor, tela, pocoes_velocidade, bombas, dobro_xp):
     LEVEL_ui = fonte.render(f"lvl {nivel}", False, cor)
     XP_ui = fonte.render(f"{xp}/{xp_para_proximo_nivel}", False, cor)
 
