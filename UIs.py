@@ -6,20 +6,15 @@ pygame.init()
 FONTE_NONE_GRANDE = pygame.font.Font(None, 100)
 FONTE_NONE_MEDIA = pygame.font.Font(None, 50)
 
-# Tela Inicial
-background = pygame.image.load('Sprites/UI/Background.png')
-jogador_frame = pygame.image.load('Sprites/UI/Character_frame.png')
-moedas_conta = pygame.image.load('Sprites/UI/coin_count_frame.png')
-inventario = pygame.image.load('Sprites/UI/Inventário.png')
-box_config = pygame.image.load('Sprites/UI/box.png')
-
 # Player Frame
+jogador_frame = pygame.image.load('Sprites/UI/Character_frame.png')
 cadeado = pygame.transform.scale(pygame.image.load('Sprites/cadeado.png'), (90, 90))
 
 # Tela de Upgrade
 frame_levelup = pygame.image.load('Sprites/UI/frame levelup.png')
 
 # UI durante jogo
+inventario = pygame.image.load('Sprites/UI/Inventário.png')
 pocao = pygame.transform.scale(pygame.image.load('Sprites/pocao grande.png'), (45, 45))
 velocidade = pygame.transform.scale(pygame.image.load('Sprites/pocao pequena.png'), (36, 45))
 bomba = pygame.transform.scale(pygame.image.load('Sprites/bomba.png'), (45, 45))

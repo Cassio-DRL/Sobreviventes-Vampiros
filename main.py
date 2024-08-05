@@ -76,11 +76,16 @@ BOTAO_VERDE = pygame.image.load('Sprites/UI/botao_verde.png').convert_alpha()
 BOTAO_VERMELHO = pygame.image.load('Sprites/UI/botao_vermelho.png').convert_alpha()
 BOTAO_AZUL = pygame.image.load('Sprites/UI/botao_azul.png').convert_alpha()
 BOTAO_CINZA = pygame.image.load('Sprites/UI/botao_cinza.png').convert_alpha()
+ARCO_IRIS_QUADRADO = pygame.image.load('Sprites/rainbow.png').convert_alpha()
+
+# Imagens Tela Inicial
+background = pygame.image.load('Sprites/UI/Background.png')
+moedas_conta = pygame.image.load('Sprites/UI/coin_count_frame.png')
+box_config = pygame.image.load('Sprites/UI/box.png')
 SIMBOLO_MAIS = pygame.transform.scale(pygame.image.load('Sprites/UI/mais_icone.png').convert_alpha(), (50, 50))
 SIMBOLO_MENOS = pygame.transform.scale(pygame.image.load('Sprites/UI/menos_icone.png').convert_alpha(), (50, 140))
 SETA_PRA_CIMA = pygame.image.load('Sprites/UI/setinha pra cima.png').convert_alpha()
 SETA_PRA_BAIXO = pygame.image.load('Sprites/UI/setinha pra baixo.png').convert_alpha()
-ARCO_IRIS_QUADRADO = pygame.image.load('Sprites/rainbow.png').convert_alpha()
 
 # Menu pausa
 CONTINUAR_botao_pausa = Botao(pygame.math.Vector2(200, 700), BOTAO_CINZA.get_width(), BOTAO_CINZA.get_height(), "Continuar", pygame.font.Font(None, 30), cor=None, imagem=BOTAO_CINZA)
@@ -103,6 +108,7 @@ RESETAR_botao = Botao(pygame.math.Vector2(1129, 740), BOTAO_CINZA.get_width(), B
 SETA_CIMA_botao = Botao(pygame.math.Vector2(741, 653), 15, 15, "", pygame.font.Font(None, 30), cor=None, imagem=SETA_PRA_CIMA)
 SETA_BAIXO_botao = Botao(pygame.math.Vector2(741, 677), 15, 15, "", pygame.font.Font(None, 30), cor=None, imagem=SETA_PRA_BAIXO)
 botoes_menu_principal = (JOGAR_botao, SAIR_botao, MAIS_botao, MENOS_botao, SALVAR_botao, RESETAR_botao, SETA_CIMA_botao, SETA_BAIXO_botao)
+
 
 # Tela de level up
 box_upgrade = pygame.image.load('Sprites/UI/box_level_up.png')
