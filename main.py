@@ -71,7 +71,7 @@ pygame.display.set_caption('Vampiro Sobreviventes')
 pygame.display.set_icon(pygame.image.load('Sprites/morcego.png'))
 
 # Imagens
-GRAMA_TILE = pygame.transform.scale(pygame.image.load('Sprites/Grama_Tile_Menor.png').convert_alpha(), (640, 640))
+GRAMA_TILE = pygame.transform.scale(pygame.image.load('Sprites/Grama_Tile_Menor.png').convert_alpha(), (680, 680))
 BOTAO_VERDE = pygame.image.load('Sprites/UI/botao_verde.png').convert_alpha()
 BOTAO_VERMELHO = pygame.image.load('Sprites/UI/botao_vermelho.png').convert_alpha()
 BOTAO_AZUL = pygame.image.load('Sprites/UI/botao_azul.png').convert_alpha()
@@ -204,6 +204,8 @@ def iniciar_jogo(start_ticks, personagem_selecionado, tempo_jogo):
             # DESENHAR ELEMENTOS GRÁFICOS ##############################################################################
             ############################################################################################################
 
+            TELA.fill(PRETO)
+
             # Desenha sprites
             for group in (tiles, todos_sprites):
                 for sprite in group:
@@ -237,14 +239,14 @@ def iniciar_jogo(start_ticks, personagem_selecionado, tempo_jogo):
                     break
 
             # ATUALIZAR MODIFICADORES ##################################################################################
-            if ticks_passados - pocao_velocidade_usada < 10000:  # Velocidade dura 10 segundos
-                modificador_player_speed = 1.5
+            if ticks_passados - pocao_velocidade_usada < 3000:  # Velocidade dura 3 segundos
+                modificador_player_speed = 3
                 TELA.blit(ARCO_IRIS_QUADRADO, ARCO_IRIS_QUADRADO.get_rect(topleft=(79, 726)))
             else:
                 modificador_player_speed = 1
 
-            if ticks_passados - dobro_xp_usado < 10000:  # Dobro XP dura 10 segundos
-                modificador_xp_yield = 1.5
+            if ticks_passados - dobro_xp_usado < 5000:  # Dobro XP dura 5 segundos
+                modificador_xp_yield = 2
                 TELA.blit(ARCO_IRIS_QUADRADO, ARCO_IRIS_QUADRADO.get_rect(topleft=(230, 726)))
             else:
                 modificador_xp_yield = 1
@@ -387,7 +389,7 @@ def iniciar_jogo(start_ticks, personagem_selecionado, tempo_jogo):
             # SPAWNAR ITEMS (Spawna 15 a cada 15 segundos) (Max = 30)
             if ticks_passados - cooldown_spawnar_items >= 15000 and len(items_sprite_group) <= 30:
                 cooldown_spawnar_items = ticks_passados
-                tipos_de_item = random.choices([Moeda, Cura, Bomba, DobroXp, Velocidade], [20, 2, 0.01, 2, 2], k=15)
+                tipos_de_item = random.choices([Moeda, Cura, Bomba, DobroXp, Velocidade], [20, 2, 0.1, 2, 2], k=15)
                 for item_classe in tipos_de_item:
                     item_spawnado = item_classe(pontos_ao_redor(jogador, 900))
                     todos_sprites.add(item_spawnado)
@@ -424,14 +426,14 @@ def iniciar_jogo(start_ticks, personagem_selecionado, tempo_jogo):
                         if evento.key == pygame.K_z and jogador.usar_item('Poção Cura'):  # Beber poção de cura caso aperte Z
                             jogador.hit_points_atuais = min(jogador.hit_points_atuais + jogador.hit_point_max//4, jogador.hit_point_max)
 
-                        if evento.key == pygame.K_x and ticks_passados - pocao_velocidade_usada >= 10000 and jogador.usar_item('Poção Velocidade'):  # Beber poção de velocidade caso aperte X (Cooldown = 10s)
+                        if evento.key == pygame.K_x and ticks_passados - pocao_velocidade_usada >= 3000 and jogador.usar_item('Poção Velocidade'):  # Beber poção de velocidade caso aperte X (Cooldown = 10s)
                             pocao_velocidade_usada = ticks_passados
 
                         if evento.key == pygame.K_c and jogador.usar_item('Bomba'):  # Usar bomba caso aperte C
                             for inimigo in inimigos_sprite_group:
                                 inimigo.hit_points_atuais = 0
 
-                        if evento.key == pygame.K_v and ticks_passados - dobro_xp_usado >= 10000 and jogador.usar_item('Dobro XP'):  # Usar dobro xp caso aperte V (Cooldown = 10s)
+                        if evento.key == pygame.K_v and ticks_passados - dobro_xp_usado >= 5000 and jogador.usar_item('Dobro XP'):  # Usar dobro xp caso aperte V (Cooldown = 10s)
                                 dobro_xp_usado = ticks_passados
 
             # Apertos de botão na tela de pausa
