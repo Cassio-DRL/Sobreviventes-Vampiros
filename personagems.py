@@ -46,7 +46,7 @@ class Jogador(pygame.sprite.Sprite):
         self.andando = False
 
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-            self.pos.x -= int(self.velocidade_movimento * dt * mod)
+            self.pos.x -= self.velocidade_movimento * dt * mod
             if self.direcao != 'esquerda':
                 self.direcao = 'esquerda'
                 self.sprite_idle = pygame.transform.flip(self.sprite_idle, True, False)
@@ -56,7 +56,7 @@ class Jogador(pygame.sprite.Sprite):
             self.andando = True
 
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-            self.pos.x += int(self.velocidade_movimento * dt * mod)
+            self.pos.x += self.velocidade_movimento * dt * mod
             if self.direcao != 'direita':
                 self.direcao = 'direita'
                 self.sprite_idle = pygame.transform.flip(self.sprite_idle, True, False)
@@ -66,10 +66,10 @@ class Jogador(pygame.sprite.Sprite):
             self.andando = True
 
         if keys[pygame.K_UP] or keys[pygame.K_w]:
-            self.pos.y -= int(self.velocidade_movimento * dt * mod)
+            self.pos.y -= self.velocidade_movimento * dt * mod
             self.andando = True
         if keys[pygame.K_DOWN] or keys[pygame.K_s]:
-            self.pos.y += int(self.velocidade_movimento * dt * mod)
+            self.pos.y += self.velocidade_movimento * dt * mod
             self.andando = True
 
     def animar_sprite(self, tempo):
