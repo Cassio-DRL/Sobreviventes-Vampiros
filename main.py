@@ -238,13 +238,13 @@ def iniciar_jogo(start_ticks, personagem_selecionado, tempo_jogo):
 
             # ATUALIZAR MODIFICADORES ##################################################################################
             if ticks_passados - pocao_velocidade_usada < 10000:  # Velocidade dura 10 segundos
-                modificador_player_speed = 3
+                modificador_player_speed = 1.5
                 TELA.blit(ARCO_IRIS_QUADRADO, ARCO_IRIS_QUADRADO.get_rect(topleft=(79, 726)))
             else:
                 modificador_player_speed = 1
 
             if ticks_passados - dobro_xp_usado < 10000:  # Dobro XP dura 10 segundos
-                modificador_xp_yield = 2
+                modificador_xp_yield = 1.5
                 TELA.blit(ARCO_IRIS_QUADRADO, ARCO_IRIS_QUADRADO.get_rect(topleft=(230, 726)))
             else:
                 modificador_xp_yield = 1
@@ -345,7 +345,7 @@ def iniciar_jogo(start_ticks, personagem_selecionado, tempo_jogo):
 
                 elif isinstance(item, CristalXp):
                     ganho = item.checar_colisao(jogador)
-                    jogador.xp += ganho * modificador_xp_yield
+                    jogador.xp += int(ganho * modificador_xp_yield)
                     total_cristais += ganho//max(ganho, 1)
 
             # SPAWNS ALEATÓRIOS ########################################################################################
