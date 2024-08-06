@@ -1,11 +1,20 @@
  # VAMPIRO SOBREVIVENTES - Projeto de IP1 - 2024.1 - Grupo 8 - CC
 
-## Como usar o jogo
-Baixe o projeto e rode o executável específico para o seu sistema operacional (Windows e Linux compatíveis).
+## Instruções para execução:
+Baixe o repositório do projeto e execute o arquivo executável específico para o seu sistema operacional (Windows e Linux compatíveis).
 
-Alternativamente, abra o main.py na sua IDE de escolha e rode. Certifique-se que o pygame está instalado.
+Alternativamente, siga o passo a passo abaixo para executar o arquivo main.py em sua IDE de escolha:
 
-### Controles
+### 1: Instale a versão mais recente de Python:
+https://www.python.org/downloads/
+
+### 2: Instale a versão mais recente da biblioteca PyGame:
+Utilize o comando abaixo no terminal local para instalação da biblioteca.
+> python3 -m pip install -U pygame --user
+
+### 3: Na IDE de sua escolha, execute o arquivo main.py
+
+## Controles
 | Tecla | Função |
 | :---:   | :---: |
 | WASD ou ← → ↑ ↓ | Movimento do jogador |
@@ -33,7 +42,11 @@ Isso foi realizado para todo objeto que inserimos no jogo, criando uma estrutura
 ## Ferramentas, Bibliotecas e Frameworks Utilizadas:
 
 ### Ferramentas:
-Foi utilizado o PyInstaller para compilação do jogo em um arquivo executável, para uma execução simples em sistemas Windows e Linux.
+IDEs (VSCode, PyCharm, etc.): Utilizado para desenvolver o código do jogo.
+PyInstaller: Utilizado para compilação do jogo em um arquivo executável, para uma execução simples em sistemas Windows e Linux.
+Discord: Utilizado para comunicação entre os integrantes do grupo.
+Github: Utilizado para o manuseamento e versionamento do código.
+Paint.NET: Utilizado para criação e edição de assets gráficos.
 
 ### Bibliotecas:
 
@@ -59,7 +72,36 @@ Não foi utilizado frameworks para esse projeto.
 > [!NOTE]
 > _Um detalhe importante:_ A nossa estrutura para divisão de trabalho não foi uma de separar tarefas específicas para cada pessoa. A nossa estrutura era uma simples lista de tarefas que necessitavam ser completas, e quem queria concluir aquela tarefa escolhia e desenvolvia.
 
-A SER COMPLETO
+### Cassio Diniz:
+Responsável pela organização do projeto; 
+Desenvolveu o sistema de ataques (ataques.py); 
+Otimizou a performance do game loop (main.py); 
+Escreveu o relatório (README.MD).
+
+### Vitor Aleixo:
+Refinou o sistema de pausa; 
+Desenvolvimento da tela de morte; 
+Desenvolveu os slides.
+
+### André Cruz:
+Desenvolveu os arquivos iniciais: main.py, coletaveis.py, inimigos.py e personagens.py; 
+Adicionou novos personagens, ataques e inimigos 
+Sistema de aumento de nível; 
+Criação e obtenção da maioria dos assets; 
+Completou o menu inicial.
+
+### Gabriel Oliveira:
+Iniciou o desenvolvimento do sistema de dificuldades; 
+Ajudou a visualizar as mecânicas do jogo inicial.
+
+### Lucas Oliveira:
+Ajudou na concepção do tema inicial do jogo; 
+Otimizou o movimento do personagem.
+
+### Gabriel Almeida
+Iniciou a base do menu inicial; 
+Desenvolveu os slides; 
+Refinou alguns elementos de UI.
 
 ## Conceitos utilizados:
 Conceitos básicos de Python
