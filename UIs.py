@@ -3,8 +3,9 @@ import pygame
 pygame.init()
 
 # Fontes
-FONTE_NONE_GRANDE = pygame.font.Font(None, 100)
-FONTE_NONE_MEDIA = pygame.font.Font(None, 50)
+FONTE_NONE_GRANDE = pygame.font.Font("fonte/Silkscreen-Regular.ttf", 100)
+FONTE_NONE_MEDIA = pygame.font.Font("fonte/Silkscreen-Regular.ttf", 50)
+fonte = "fonte/Silkscreen-Regular.ttf"
 
 # Player Frame
 jogador_frame = pygame.image.load('Sprites/UI/Character_frame.png')
@@ -113,8 +114,8 @@ class PersonagemFrame(pygame.sprite.Sprite):
         self.personagem = personagem(pygame.math.Vector2(0, 0), pygame.time.get_ticks())
         self.preco = preco
         self.desbloqueado_variavel = False
-        self.botao_comprar = Botao(pygame.math.Vector2(self.rect.centerx - 60, self.rect.centery + 55), 120, 47, f"{preco}", pygame.font.Font(None, 45), cor=(130, 192, 86))
-        self.botao_selecionar = Botao(pygame.math.Vector2(self.rect.centerx - 60, self.rect.centery + 55), 120, 47, f"SELECIONAR", pygame.font.Font(None, 23), cor=(0, 106, 181))
+        self.botao_comprar = Botao(pygame.math.Vector2(self.rect.centerx - 60, self.rect.centery + 55), 120, 47, f"{preco}", pygame.font.Font(fonte, 45), cor=(130, 192, 86))
+        self.botao_selecionar = Botao(pygame.math.Vector2(self.rect.centerx - 60, self.rect.centery + 55), 120, 47, f"SELECIONAR", pygame.font.Font(fonte, 23), cor=(0, 106, 181))
 
     def desenhar(self, tela):
 
@@ -122,11 +123,11 @@ class PersonagemFrame(pygame.sprite.Sprite):
         if self.desbloqueado_variavel:
             tela.blit(pygame.transform.scale(self.personagem.image, (88, 88)), self.personagem.image.get_rect(center=(self.rect.centerx, self.rect.centery-25)))
 
-            NOME = pygame.font.Font(None, 23).render(f"{self.personagem.dicionario['Nome']}", False, (255, 255, 255))
-            HP = pygame.font.Font(None, 20).render(f"HP: {self.personagem.dicionario['HP']}", False, (255, 255, 255))
-            ATK = pygame.font.Font(None, 20).render(f"ATK: {self.personagem.dicionario['ATK']}", False, (255, 255, 255))
-            DEF = pygame.font.Font(None, 20).render(f"DEF: {self.personagem.dicionario['DEF']}", False, (255, 255, 255))
-            SPD = pygame.font.Font(None, 20).render(f"SPEED: {self.personagem.dicionario['SPD']}", False, (255, 255, 255))
+            NOME = pygame.font.Font(fonte, 19).render(f"{self.personagem.dicionario['Nome']}", False, (255, 255, 255))
+            HP = pygame.font.Font(fonte, 17).render(f"HP: {self.personagem.dicionario['HP']}", False, (255, 255, 255))
+            ATK = pygame.font.Font(fonte, 17).render(f"ATK: {self.personagem.dicionario['ATK']}", False, (255, 255, 255))
+            DEF = pygame.font.Font(fonte, 17).render(f"DEF: {self.personagem.dicionario['DEF']}", False, (255, 255, 255))
+            SPD = pygame.font.Font(fonte, 17).render(f"SPEED: {self.personagem.dicionario['SPD']}", False, (255, 255, 255))
 
             tela.blit(NOME, NOME.get_rect(center=(self.rect.centerx, self.rect.centery-90)))
             tela.blit(HP, HP.get_rect(topleft=(self.rect.centerx-56, self.rect.centery-15)))
@@ -158,14 +159,14 @@ class MolduraAtaqueLevelUP(pygame.sprite.Sprite):
         self.image = frame_levelup
         self.rect = self.image.get_rect(center=pos)
         self.ataque = ataque
-        self.botao_selecionar = Botao(pygame.math.Vector2(self.rect.topleft[0] + 131, self.rect.topleft[1] + 104), 383, 25, "SELECIONAR", pygame.font.Font(None, 35), cor=(130, 192, 86))
+        self.botao_selecionar = Botao(pygame.math.Vector2(self.rect.topleft[0] + 131, self.rect.topleft[1] + 104), 383, 25, "SELECIONAR", pygame.font.Font(fonte, 29), cor=(130, 192, 86))
 
     def desenhar(self, tela):
         tela.blit(self.image, self.rect)
 
-        NOME = pygame.font.Font(None, 30).render(f"{self.ataque.nome}", False, (255, 255, 255))
-        NIVEL = pygame.font.Font(None, 30).render(f"LVL {self.ataque.nivel + 1}", False, (255, 255, 255))
-        DESCRICAO = pygame.font.Font(None, 23).render(f"{self.ataque.level_up_dict[self.ataque.nivel + 1]}", False, (0, 0, 0))
+        NOME = pygame.font.Font(fonte, 30).render(f"{self.ataque.nome}", False, (255, 255, 255))
+        NIVEL = pygame.font.Font(fonte, 20).render(f"LVL {self.ataque.nivel + 1}", False, (255, 255, 255))
+        DESCRICAO = pygame.font.Font(fonte, 23).render(f"{self.ataque.level_up_dict[self.ataque.nivel + 1]}", False, (0, 0, 0))
 
         tela.blit(self.ataque.icone, self.ataque.icone.get_rect(topleft = (self.rect.topleft[0]+4, self.rect.topleft[1]+4)))
         tela.blit(NOME, NOME.get_rect(topleft=(self.rect.topleft[0] + 131, self.rect.topleft[1] + 20)))
@@ -207,7 +208,7 @@ def hud(total_moedas, total_cristais, nivel, xp, xp_para_proximo_nivel, pocoes, 
     tela.blit(CRISTAIS_ui, CRISTAIS_ui.get_rect(topleft=(1140, 38)))
     tela.blit(MOEDAS_ui, MOEDAS_ui.get_rect(topleft=(1221, 38)))
 
-    tela.blit(LEVEL_ui, LEVEL_ui.get_rect(topright=(1270, 8)))
+    tela.blit(LEVEL_ui, LEVEL_ui.get_rect(topright=(1270, 0)))
     tela.blit(XP_ui, XP_ui.get_rect(center=(640, 18)))
 
     tela.blit(TIMER_ui, TIMER_ui.get_rect(center=(640, 55)))
