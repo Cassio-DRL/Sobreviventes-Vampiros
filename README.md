@@ -6,19 +6,15 @@ Baixe o projeto e rode o executável específico para o seu sistema operacional 
 Alternativamente, abra o main.py na sua IDE de escolha e rode. Certifique-se que o pygame está instalado.
 
 ### Controles
-WASD ou setas - Controlam movimento do personagem
-
-Z - Consome Poção de Cura
-
-X - Consome Poção de Velocidade
-
-C - Consome Bomba
-
-V - Consome Banana de XP
-
-ESC - Pausa o jogo
-
-P - Tira screenshot
+| Tecla | Função |
+| :---:   | :---: |
+| WASD ou ← → ↑ ↓ | Movimento do jogador |
+| Z | Consome Poção de Cura|
+| X | Consome Poção de Velocidade|
+| C | Consome Bomba|
+| V   | Consome Banana de XP |
+| ESC  | Pausa o jogo |
+| P  | Tira Screenshot |
 
 ## Arquitetura do Projeto:
 O jogo é separado em diversos arquivos, a ideia principal é que o "Game Loop" esteja localizado no arquivo main.py, onde chamamos todos os outros arquivos de objetos separados. Para cada **tipo** de objeto (coletável, ataque, inimigo, etc.), tem um arquivo separado, onde definimos sua classe, e utilizamos as classes para definir cada objeto do jogo e manipular seus dados no "Game Loop" de acordo com os nossos objetivos.
