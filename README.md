@@ -1,4 +1,4 @@
- # VAMPIROS SOBREVIVENTES - Projeto de IP1 - 2024.1 - Grupo 8 - CC
+ # VAMPIRO SOBREVIVENTES - Projeto de IP1 - 2024.1 - Grupo 8 - CC
 
 ## Como usar o jogo
 Baixe o projeto e rode o executável específico para o seu sistema operacional (Windows e Linux compatíveis).
