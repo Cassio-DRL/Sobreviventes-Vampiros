@@ -5,14 +5,21 @@ Baixe o repositório do projeto e execute o arquivo executável específico para
 
 Alternativamente, siga o passo a passo abaixo para executar o arquivo main.py em sua IDE de escolha:
 
-### 1: Instale a versão mais recente de Python:
+### 1: Baixe o repositório do projeto
+
+### 2: Instale a versão mais recente de Python:
 https://www.python.org/downloads/
 
-### 2: Instale a versão mais recente da biblioteca PyGame:
-Utilize o comando abaixo no terminal local para instalação da biblioteca.
+### 3: Instale a versão mais recente da biblioteca PyGame:
+Utilize o comando abaixo no terminal local para instalação da biblioteca.  
+
+Para Windows:  
+> py -m pip install -U pygame --user  
+  
+Para MacOS e Linux:  
 > python3 -m pip install -U pygame --user
 
-### 3: Na IDE de sua escolha, execute o arquivo main.py
+### 4: Na IDE de sua escolha, execute o arquivo main.py.
 
 ## Controles
 | Tecla | Função |
