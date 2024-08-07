@@ -9,7 +9,7 @@ import random
 import math
 import sys
 import pickle
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class Camera:
     # Cria um Rect representando a câmera
@@ -60,6 +60,10 @@ pygame.mixer.music.set_volume(0.5)
 BRANCO = (255, 255, 255)
 PRETO = (0, 0, 0)
 
+# Fonte
+fonte_titulo = "fonte/fonteboa.ttf"
+fonte = "fonte/Silkscreen-Regular.ttf"
+
 # Dimensões da tela
 LARGURA = 1280
 ALTURA = 800
@@ -71,7 +75,7 @@ pygame.display.set_caption('Vampiro Sobreviventes')
 pygame.display.set_icon(pygame.image.load('Sprites/morcego.png'))
 
 # Imagens
-GRAMA_TILE = pygame.transform.scale(pygame.image.load('Sprites/Grama_Tile_Menor.png').convert_alpha(), (680, 680))
+GRAMA_TILE = pygame.transform.scale(pygame.image.load('Sprites/Grama_Tile_Menor.png').convert_alpha(), (640, 640))
 BOTAO_VERDE = pygame.image.load('Sprites/UI/botao_verde.png').convert_alpha()
 BOTAO_VERMELHO = pygame.image.load('Sprites/UI/botao_vermelho.png').convert_alpha()
 BOTAO_AZUL = pygame.image.load('Sprites/UI/botao_azul.png').convert_alpha()
@@ -88,31 +92,32 @@ SETA_PRA_CIMA = pygame.image.load('Sprites/UI/setinha pra cima.png').convert_alp
 SETA_PRA_BAIXO = pygame.image.load('Sprites/UI/setinha pra baixo.png').convert_alpha()
 
 # Menu pausa
-CONTINUAR_botao_pausa = Botao(pygame.math.Vector2(200, 700), BOTAO_CINZA.get_width(), BOTAO_CINZA.get_height(), "Continuar", pygame.font.Font(None, 30), cor=None, imagem=BOTAO_CINZA)
-REINICIAR_botao_pausa = Botao(pygame.math.Vector2(567, 700), BOTAO_CINZA.get_width(), BOTAO_CINZA.get_height(), "Reiniciar", pygame.font.Font(None, 30), cor=None, imagem=BOTAO_CINZA)
-MENU_PRINCIPAL_botao = Botao(pygame.math.Vector2(934, 700), BOTAO_CINZA.get_width(), BOTAO_CINZA.get_height(), "Menu Principal", pygame.font.Font(None, 24), cor=None, imagem=BOTAO_CINZA)
+CONTINUAR_botao_pausa = Botao(pygame.math.Vector2(200, 700), BOTAO_CINZA.get_width(), BOTAO_CINZA.get_height(), "Continuar", pygame.font.Font(fonte, 30), cor=None, imagem=BOTAO_CINZA)
+REINICIAR_botao_pausa = Botao(pygame.math.Vector2(567, 700), BOTAO_CINZA.get_width(), BOTAO_CINZA.get_height(), "Reiniciar", pygame.font.Font(fonte, 30), cor=None, imagem=BOTAO_CINZA)
+MENU_PRINCIPAL_botao = Botao(pygame.math.Vector2(934, 700), BOTAO_CINZA.get_width(), BOTAO_CINZA.get_height(), "Menu Principal", pygame.font.Font(fonte, 20), cor=None, imagem=BOTAO_CINZA)
 botoes_menu_pausa = (CONTINUAR_botao_pausa, REINICIAR_botao_pausa, MENU_PRINCIPAL_botao)
 
 # Tela morte
-REINICIAR_botao_morte = Botao(pygame.math.Vector2(200, 700), BOTAO_CINZA.get_width(), BOTAO_CINZA.get_height(), "Reiniciar", pygame.font.Font(None, 30), cor=None, imagem=BOTAO_CINZA)
-MENU_PRINCIPAL_botao_morte = Botao(pygame.math.Vector2(934, 700), BOTAO_CINZA.get_width(), BOTAO_CINZA.get_height(), "Menu Principal", pygame.font.Font(None, 24), cor=None, imagem=BOTAO_CINZA)
+REINICIAR_botao_morte = Botao(pygame.math.Vector2(200, 700), BOTAO_CINZA.get_width(), BOTAO_CINZA.get_height(), "Reiniciar", pygame.font.Font(fonte, 30), cor=None, imagem=BOTAO_CINZA)
+MENU_PRINCIPAL_botao_morte = Botao(pygame.math.Vector2(934, 700), BOTAO_CINZA.get_width(), BOTAO_CINZA.get_height(), "Menu Principal", pygame.font.Font(fonte, 20), cor=None, imagem=BOTAO_CINZA)
 botoes_tela_morte = (REINICIAR_botao_morte, MENU_PRINCIPAL_botao_morte)
+inicio_tela_morte = None
 
 # Menu principal
-JOGAR_botao = Botao(pygame.math.Vector2(568, 347), BOTAO_VERDE.get_width(), BOTAO_VERDE.get_height(), "JOGAR", pygame.font.Font(None, 40), cor=None, imagem=BOTAO_VERDE)
-SAIR_botao = Botao(pygame.math.Vector2(568, 437), BOTAO_VERMELHO.get_width(), BOTAO_VERMELHO.get_height(), "SAIR", pygame.font.Font(None, 40), cor=None, imagem=BOTAO_VERMELHO)
-MAIS_botao = Botao(pygame.math.Vector2(780, 585), SIMBOLO_MAIS.get_width(), SIMBOLO_MAIS.get_height(), "", pygame.font.Font(None, 30), cor=None, imagem=SIMBOLO_MAIS)
-MENOS_botao = Botao(pygame.math.Vector2(450, 540), SIMBOLO_MENOS.get_width(), SIMBOLO_MENOS.get_height(), "", pygame.font.Font(None, 30), cor=None, imagem=SIMBOLO_MENOS)
-SALVAR_botao = Botao(pygame.math.Vector2(5, 740), BOTAO_AZUL.get_width(), BOTAO_AZUL.get_height(), "SALVAR", pygame.font.Font(None, 30), cor=None, imagem=BOTAO_AZUL)
-RESETAR_botao = Botao(pygame.math.Vector2(1129, 740), BOTAO_CINZA.get_width(), BOTAO_CINZA.get_height(), "RESET", pygame.font.Font(None, 30), cor=None, imagem=BOTAO_CINZA)
-SETA_CIMA_botao = Botao(pygame.math.Vector2(741, 653), 15, 15, "", pygame.font.Font(None, 30), cor=None, imagem=SETA_PRA_CIMA)
-SETA_BAIXO_botao = Botao(pygame.math.Vector2(741, 677), 15, 15, "", pygame.font.Font(None, 30), cor=None, imagem=SETA_PRA_BAIXO)
+JOGAR_botao = Botao(pygame.math.Vector2(568, 347), BOTAO_VERDE.get_width(), BOTAO_VERDE.get_height(), "JOGAR", pygame.font.Font(fonte, 40), cor=None, imagem=BOTAO_VERDE)
+SAIR_botao = Botao(pygame.math.Vector2(568, 437), BOTAO_VERMELHO.get_width(), BOTAO_VERMELHO.get_height(), "SAIR", pygame.font.Font(fonte, 40), cor=None, imagem=BOTAO_VERMELHO)
+MAIS_botao = Botao(pygame.math.Vector2(780, 585), SIMBOLO_MAIS.get_width(), SIMBOLO_MAIS.get_height(), "", pygame.font.Font(fonte, 30), cor=None, imagem=SIMBOLO_MAIS)
+MENOS_botao = Botao(pygame.math.Vector2(450, 540), SIMBOLO_MENOS.get_width(), SIMBOLO_MENOS.get_height(), "", pygame.font.Font(fonte, 30), cor=None, imagem=SIMBOLO_MENOS)
+SALVAR_botao = Botao(pygame.math.Vector2(5, 700), BOTAO_AZUL.get_width(), BOTAO_AZUL.get_height(), "SALVAR", pygame.font.Font(fonte, 30), cor=None, imagem=BOTAO_AZUL)
+RESETAR_botao = Botao(pygame.math.Vector2(1129, 700), BOTAO_CINZA.get_width(), BOTAO_CINZA.get_height(), "RESET", pygame.font.Font(fonte, 30), cor=None, imagem=BOTAO_CINZA)
+SETA_CIMA_botao = Botao(pygame.math.Vector2(741, 653), 15, 15, "", pygame.font.Font(fonte, 30), cor=None, imagem=SETA_PRA_CIMA)
+SETA_BAIXO_botao = Botao(pygame.math.Vector2(741, 677), 15, 15, "", pygame.font.Font(fonte, 30), cor=None, imagem=SETA_PRA_BAIXO)
 botoes_menu_principal = (JOGAR_botao, SAIR_botao, MAIS_botao, MENOS_botao, SALVAR_botao, RESETAR_botao, SETA_CIMA_botao, SETA_BAIXO_botao)
 
 
 # Tela de level up
 box_upgrade = pygame.image.load('Sprites/UI/box_level_up.png')
-CONTINUAR_botao_level_up = Botao(pygame.math.Vector2(567, 700), BOTAO_CINZA.get_width(), BOTAO_CINZA.get_height(), "Continuar", pygame.font.Font(None, 30), cor=None, imagem=BOTAO_CINZA)
+CONTINUAR_botao_level_up = Botao(pygame.math.Vector2(567, 700), BOTAO_CINZA.get_width(), BOTAO_CINZA.get_height(), "Continuar", pygame.font.Font(fonte, 30), cor=None, imagem=BOTAO_CINZA)
 botoes_level_up = (CONTINUAR_botao_level_up,)
 
 # Sistema
@@ -123,6 +128,7 @@ clock = pygame.time.Clock()
 personagem_tupla = (BichoChicote, BichoCajado, BichoMachado, BichoAdaga)
 personagems_comprados = [False for i in range(len(personagem_tupla))]
 moedas_acumuladas = 1000
+moedas_ganhas = 0
 
 # Carregar dados salvos
 try:
@@ -194,17 +200,15 @@ def iniciar_jogo(start_ticks, personagem_selecionado, tempo_jogo):
 
         clock.tick(FPS)
         delta_time = clock.get_time() / 20  # Para multiplicar velocidade de objetos para garantir que a velocidade não seja afetada pelo FPS
-
         if not (jogo_pausado or jogo_tela_morte):
             # Timer
+            
             ticks_passados = pygame.time.get_ticks() - start_ticks - tempo_pausado_total
             segundos_passados = ticks_passados // 1000
 
             ############################################################################################################
             # DESENHAR ELEMENTOS GRÁFICOS ##############################################################################
             ############################################################################################################
-
-            TELA.fill(PRETO)
 
             # Desenha sprites
             for group in (tiles, todos_sprites):
@@ -219,13 +223,17 @@ def iniciar_jogo(start_ticks, personagem_selecionado, tempo_jogo):
             # Desenha HUD
             hud(total_moedas, total_cristais, jogador.nivel, jogador.xp, jogador.xp_para_proximo_nivel,
                 jogador.inventario['Poção Cura'], total_inimigos_mortos, segundos_passados,
-                pygame.font.Font(None, 30), BRANCO, TELA, jogador.inventario['Poção Velocidade'],
+                pygame.font.Font(fonte, 30), BRANCO, TELA, jogador.inventario['Poção Velocidade'],
                 jogador.inventario['Bomba'], jogador.inventario['Dobro XP'])
 
             # Mostra tela de morte se o hp do jogador chegar a 0
-            if jogador.hit_points_atuais <= 0 and not jogo_tela_morte:
+            if (jogador.hit_points_atuais <= 0 and not jogo_tela_morte) or jogo_tela_morte:
+                inicio_tela_morte = datetime.now()
                 jogo_tela_morte = True
-                moedas_ganhas = tela_morte(total_inimigos_mortos, total_cristais, total_moedas)
+
+                pygame.mixer_music.load("Audio/death_sound.mp3")
+                pygame.mixer_music.play()
+
 
             ############################################################################################################
             # ATUALIZAR JOGO ###########################################################################################
@@ -239,13 +247,13 @@ def iniciar_jogo(start_ticks, personagem_selecionado, tempo_jogo):
                     break
 
             # ATUALIZAR MODIFICADORES ##################################################################################
-            if ticks_passados - pocao_velocidade_usada < 3000:  # Velocidade dura 3 segundos
+            if ticks_passados - pocao_velocidade_usada < 10000:  # Velocidade dura 10 segundos
                 modificador_player_speed = 3
                 TELA.blit(ARCO_IRIS_QUADRADO, ARCO_IRIS_QUADRADO.get_rect(topleft=(79, 726)))
             else:
                 modificador_player_speed = 1
 
-            if ticks_passados - dobro_xp_usado < 5000:  # Dobro XP dura 5 segundos
+            if ticks_passados - dobro_xp_usado < 10000:  # Dobro XP dura 10 segundos
                 modificador_xp_yield = 2
                 TELA.blit(ARCO_IRIS_QUADRADO, ARCO_IRIS_QUADRADO.get_rect(topleft=(230, 726)))
             else:
@@ -270,7 +278,7 @@ def iniciar_jogo(start_ticks, personagem_selecionado, tempo_jogo):
                             ataque_origem.nivel += 1
 
                             # Atualiza o nível de todas as instâncias dos ataques (Relevante para Chicote e Rotação)
-                            for i in range(2):
+                            for _ in range(2):
                                 for ataques_derivados in ataques_sprite_group:
                                     if isinstance(ataques_derivados, type(ataque_origem)):
                                         ataques_derivados.ajustar_nivel(ataques_sprite_group, todos_sprites)
@@ -347,7 +355,7 @@ def iniciar_jogo(start_ticks, personagem_selecionado, tempo_jogo):
 
                 elif isinstance(item, CristalXp):
                     ganho = item.checar_colisao(jogador)
-                    jogador.xp += int(ganho * modificador_xp_yield)
+                    jogador.xp += ganho * modificador_xp_yield
                     total_cristais += ganho//max(ganho, 1)
 
             # SPAWNS ALEATÓRIOS ########################################################################################
@@ -389,11 +397,24 @@ def iniciar_jogo(start_ticks, personagem_selecionado, tempo_jogo):
             # SPAWNAR ITEMS (Spawna 15 a cada 15 segundos) (Max = 30)
             if ticks_passados - cooldown_spawnar_items >= 15000 and len(items_sprite_group) <= 30:
                 cooldown_spawnar_items = ticks_passados
-                tipos_de_item = random.choices([Moeda, Cura, Bomba, DobroXp, Velocidade], [20, 2, 0.1, 2, 2], k=15)
+                tipos_de_item = random.choices([Moeda, Cura, Bomba, DobroXp, Velocidade], [20, 2, 0.01, 2, 2], k=15)
                 for item_classe in tipos_de_item:
                     item_spawnado = item_classe(pontos_ao_redor(jogador, 900))
                     todos_sprites.add(item_spawnado)
                     items_sprite_group.add(item_spawnado)
+        
+        elif jogo_tela_morte: # para escurecer a tela
+                escurecer_duracao = timedelta(seconds=20)
+                tempo_atual = datetime.now()
+                tempo_decorrido = tempo_atual - inicio_tela_morte
+            
+                if tempo_decorrido < escurecer_duracao:
+                    intensidade = int((tempo_decorrido / escurecer_duracao) * 255)
+                else:
+                    intensidade = 255
+
+                moedas_ganhas = tela_morte(total_inimigos_mortos, total_cristais, total_moedas, intensidade)
+                
 
         ################################################################################################################
         # EVENTOS ######################################################################################################
@@ -426,14 +447,14 @@ def iniciar_jogo(start_ticks, personagem_selecionado, tempo_jogo):
                         if evento.key == pygame.K_z and jogador.usar_item('Poção Cura'):  # Beber poção de cura caso aperte Z
                             jogador.hit_points_atuais = min(jogador.hit_points_atuais + jogador.hit_point_max//4, jogador.hit_point_max)
 
-                        if evento.key == pygame.K_x and ticks_passados - pocao_velocidade_usada >= 3000 and jogador.usar_item('Poção Velocidade'):  # Beber poção de velocidade caso aperte X (Cooldown = 10s)
+                        if evento.key == pygame.K_x and ticks_passados - pocao_velocidade_usada >= 10000 and jogador.usar_item('Poção Velocidade'):  # Beber poção de velocidade caso aperte X (Cooldown = 10s)
                             pocao_velocidade_usada = ticks_passados
 
                         if evento.key == pygame.K_c and jogador.usar_item('Bomba'):  # Usar bomba caso aperte C
                             for inimigo in inimigos_sprite_group:
                                 inimigo.hit_points_atuais = 0
 
-                        if evento.key == pygame.K_v and ticks_passados - dobro_xp_usado >= 5000 and jogador.usar_item('Dobro XP'):  # Usar dobro xp caso aperte V (Cooldown = 10s)
+                        if evento.key == pygame.K_v and ticks_passados - dobro_xp_usado >= 10000 and jogador.usar_item('Dobro XP'):  # Usar dobro xp caso aperte V (Cooldown = 10s)
                                 dobro_xp_usado = ticks_passados
 
             # Apertos de botão na tela de pausa
@@ -521,24 +542,24 @@ def menu_principal(moedas_acumuladas, personagems_comprados):
         # Configuração do tempo de jogo
         quadrado = pygame.rect.Rect(667, 638, 67, 67)
         pygame.draw.rect(TELA, BRANCO, quadrado)
-        tempo_de_jogo_texto = pygame.font.Font(None, 65).render(f"{tempo_de_jogo_minutos}", True, PRETO)
+        tempo_de_jogo_texto = pygame.font.Font(fonte, 65).render(f"{tempo_de_jogo_minutos}", True, PRETO)
         TELA.blit(tempo_de_jogo_texto, tempo_de_jogo_texto.get_rect(center=quadrado.center))
-        limite_de_tempo_texto = pygame.font.Font(None, 21).render(f"LIMITE DE TEMPO", True, BRANCO)
+        limite_de_tempo_texto = pygame.font.Font(fonte, 17).render(f"LIMITE DE TEMPO", True, BRANCO)
         TELA.blit(limite_de_tempo_texto, limite_de_tempo_texto.get_rect(topleft=(530, 666)))
 
         # Barra de Volume
-        volume_texto = pygame.font.Font(None, 45).render(f"VOLUME", True, BRANCO)
+        volume_texto = pygame.font.Font(fonte, 45).render(f"VOLUME", True, BRANCO)
         TELA.blit(volume_texto, volume_texto.get_rect(center=(640, 568)))
         volume_barra.atualizar(pygame.mixer.music.get_volume(), 1, (255, 255, 255))
         TELA.blit(volume_barra.image, volume_barra.rect)
 
         # Titulo do Jogo
-        titulo_texto = pygame.font.Font(None, 100).render(f"VAMPIRO SOBREVIVENTES", True, BRANCO)
-        TELA.blit(titulo_texto, titulo_texto.get_rect(center=(640, 85)))
+        titulo_texto = pygame.font.Font(fonte_titulo, 85).render(f"VAMPIRO  SOBREVIVENTES", True, BRANCO)
+        TELA.blit(titulo_texto, titulo_texto.get_rect(center=(640, 90)))
 
         # Contagem de moedas
         TELA.blit(moedas_conta.convert_alpha(), moedas_conta.get_rect(topleft=(483, 0)))
-        moedas_texto = pygame.font.Font(None, 46).render(f"{moedas_acumuladas}", True, BRANCO)
+        moedas_texto = pygame.font.Font(fonte, 46).render(f"{moedas_acumuladas}", True, BRANCO)
         TELA.blit(moedas_texto, moedas_texto.get_rect(center=(640, 20)))
         TELA.blit(moeda.convert_alpha(), moeda.get_rect(topright=(570, 5)))
 
@@ -593,8 +614,8 @@ def tela_level_up(ataque_lista):
                     return upgrade_selecionado
 
         # Texto grande na tela
-        texto_morte = pygame.font.Font(None, 100).render(f"SUBIU DE NÍVEL", True, BRANCO)
-        TELA.blit(texto_morte, (LARGURA // 2 - texto_morte.get_width() // 2, ALTURA // 2 - 300))
+        texto_morte = pygame.font.Font(fonte, 100).render(f"SUBIU DE NÍVEL", True, BRANCO)
+        TELA.blit(texto_morte, (LARGURA // 2 - texto_morte.get_width() // 2, ALTURA // 2 - 340))
 
         # Caixa com as molduras de ataque
         TELA.blit(box_upgrade, box_upgrade.get_rect(center=(640, 420)))
@@ -618,7 +639,7 @@ def menu_pausa():
     TELA.blit(camada, (0, 0))
 
     # Texto grande no meio da tela
-    texto_pausa = pygame.font.Font(None, 100).render(f"JOGO PAUSADO", False, BRANCO)
+    texto_pausa = pygame.font.Font(fonte, 100).render(f"JOGO PAUSADO", False, BRANCO)
     TELA.blit(texto_pausa, (LARGURA // 2 - texto_pausa.get_width() // 2, ALTURA // 2 - 100))
 
     # Desenha cada botão
@@ -626,26 +647,27 @@ def menu_pausa():
         botao.desenhar(TELA)
 
 # Função para mostrar a tela de morte
-def tela_morte(total_inimigos_mortos, total_cristais, total_moedas):
-    # Função para desenhar todos os elementos da tela de morte
+def tela_morte(total_inimigos_mortos, total_cristais, total_moedas, intensidade):
     camada = pygame.Surface((LARGURA, ALTURA), pygame.SRCALPHA)
-    pygame.draw.rect(camada, (20, 50, 50, 150), (0, 0, LARGURA, ALTURA))
+    TELA.blit(camada, (0, 0))
+
+    pygame.draw.rect(camada, (0, 0, 0, intensidade), (0, 0, LARGURA, ALTURA))
     TELA.blit(camada, (0, 0))
 
     # Texto grande no meio da tela
-    texto_morte = pygame.font.Font(None, 100).render(f"MORTO", True, BRANCO)
+    texto_morte = pygame.font.Font(fonte, 100).render(f"VOCÊ MORREU!", True, (255, 10, 10))
     TELA.blit(texto_morte, (LARGURA // 2 - texto_morte.get_width() // 2, ALTURA // 2 - 300))
 
     # Sumário do jogo
-    inimigos = pygame.font.Font(None, 50).render(f"Inimigos Mortos: {total_inimigos_mortos}", True, BRANCO)
-    cristais = pygame.font.Font(None, 50).render(f"Cristais Coletados: {total_cristais}", True, BRANCO)
-    moedas = pygame.font.Font(None, 50).render(f"Moedas Coletadas: {total_moedas}", True, BRANCO)
+    inimigos = pygame.font.Font(fonte, 30).render(f"Inimigos Mortos: {total_inimigos_mortos}", True, BRANCO)
+    cristais = pygame.font.Font(fonte, 30).render(f"Cristais Coletados: {total_cristais}", True, BRANCO)
+    moedas = pygame.font.Font(fonte, 30).render(f"Moedas Coletadas: {total_moedas}", True, BRANCO)
 
     # Coneversão para moedas
-    contagem_inimigos = pygame.font.Font(None, 50).render(f"{total_inimigos_mortos // 2}", True, BRANCO)
-    contagem_cristais = pygame.font.Font(None, 50).render(f"{total_cristais // 4}", True, BRANCO)
-    contagem_moedas = pygame.font.Font(None, 50).render(f"{total_moedas}", True, BRANCO)
-    total = pygame.font.Font(None, 50).render(f"{total_moedas + total_cristais // 4 + total_inimigos_mortos // 2}", True, BRANCO)
+    contagem_inimigos = pygame.font.Font(fonte, 30).render(f"{total_inimigos_mortos // 2}", True, BRANCO)
+    contagem_cristais = pygame.font.Font(fonte, 30).render(f"{total_cristais // 4}", True, BRANCO)
+    contagem_moedas = pygame.font.Font(fonte, 30).render(f"{total_moedas}", True, BRANCO)
+    total = pygame.font.Font(fonte, 30).render(f"{total_moedas + total_cristais // 4 + total_inimigos_mortos // 2}", True, BRANCO)
 
     # Exibir textos na tela
     TELA.blit(inimigos, inimigos.get_rect(topleft=(300, 250)))
@@ -664,7 +686,7 @@ def tela_morte(total_inimigos_mortos, total_cristais, total_moedas):
     # Desenha cada botão
     for botao in botoes_tela_morte:
         botao.desenhar(TELA)
-
+    
     return total_moedas + total_cristais // 4 + total_inimigos_mortos // 2
 
 

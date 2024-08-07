@@ -3,7 +3,7 @@ import pygame
 class DanoTexto(pygame.sprite.Sprite):
     def __init__(self, pos, dano, tempo):
         super().__init__()
-        self.image = pygame.font.Font(None, 56).render(str(int(dano)), True, (255, 0, 0))
+        self.image = pygame.font.Font("fonte/Silkscreen-Regular.ttf", 56).render(str(int(dano)), True, (255, 0, 0))
         self.rect = self.image.get_rect(center=pos + (random.randrange(-20, 20), random.randrange(-20, 20)))
         self.criado = tempo
 
