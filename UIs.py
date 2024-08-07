@@ -123,7 +123,7 @@ class PersonagemFrame(pygame.sprite.Sprite):
         if self.desbloqueado_variavel:
             tela.blit(pygame.transform.scale(self.personagem.image, (88, 88)), self.personagem.image.get_rect(center=(self.rect.centerx, self.rect.centery-25)))
 
-            NOME = pygame.font.Font(fonte, 19).render(f"{self.personagem.dicionario['Nome']}", False, (255, 255, 255))
+            NOME = pygame.font.Font(fonte, 17).render(f"{self.personagem.dicionario['Nome']}", False, (255, 255, 255))
             HP = pygame.font.Font(fonte, 17).render(f"HP: {self.personagem.dicionario['HP']}", False, (255, 255, 255))
             ATK = pygame.font.Font(fonte, 17).render(f"ATK: {self.personagem.dicionario['ATK']}", False, (255, 255, 255))
             DEF = pygame.font.Font(fonte, 17).render(f"DEF: {self.personagem.dicionario['DEF']}", False, (255, 255, 255))
@@ -200,20 +200,20 @@ def hud(total_moedas, total_cristais, nivel, xp, xp_para_proximo_nivel, pocoes, 
     BOMBAS_ui = fonte.render(f"{bombas}", False, cor)
     DOBRO_XP_ui = fonte.render(f"{dobro_xp}", False, cor)
 
-    tela.blit(caveira.convert_alpha(), caveira.get_rect(topleft=(1025, 34)))
-    tela.blit(cristal.convert_alpha(), cristal.get_rect(topleft=(1100, 29)))
+    tela.blit(caveira.convert_alpha(), caveira.get_rect(topleft=(980, 34)))
+    tela.blit(cristal.convert_alpha(), cristal.get_rect(topleft=(1077, 29)))
     tela.blit(moeda, moeda.get_rect(topleft=(1181, 33)))
 
-    tela.blit(KILLCOUNT_ui, KILLCOUNT_ui.get_rect(topleft=(1065, 38)))
-    tela.blit(CRISTAIS_ui, CRISTAIS_ui.get_rect(topleft=(1140, 38)))
-    tela.blit(MOEDAS_ui, MOEDAS_ui.get_rect(topleft=(1221, 38)))
+    tela.blit(KILLCOUNT_ui, KILLCOUNT_ui.get_rect(topleft=(1020, 28)))
+    tela.blit(CRISTAIS_ui, CRISTAIS_ui.get_rect(topleft=(1117, 28)))
+    tela.blit(MOEDAS_ui, MOEDAS_ui.get_rect(topleft=(1221, 28)))
 
     tela.blit(LEVEL_ui, LEVEL_ui.get_rect(topright=(1270, 0)))
     tela.blit(XP_ui, XP_ui.get_rect(center=(640, 18)))
 
     tela.blit(TIMER_ui, TIMER_ui.get_rect(center=(640, 55)))
 
-    tela.blit(POCOES_CURA_ui, POCOES_CURA_ui.get_rect(topleft=(51, 770)))
-    tela.blit(POCOES_VELOCIDADE_ui, POCOES_VELOCIDADE_ui.get_rect(topleft=(126, 770)))
-    tela.blit(BOMBAS_ui, BOMBAS_ui.get_rect(topleft=(201, 770)))
-    tela.blit(DOBRO_XP_ui, DOBRO_XP_ui.get_rect(topleft=(276, 770)))
+    tela.blit(POCOES_CURA_ui, POCOES_CURA_ui.get_rect(topleft=(51, 760)))
+    tela.blit(POCOES_VELOCIDADE_ui, POCOES_VELOCIDADE_ui.get_rect(topleft=(126, 760)))
+    tela.blit(BOMBAS_ui, BOMBAS_ui.get_rect(topleft=(201, 760)))
+    tela.blit(DOBRO_XP_ui, DOBRO_XP_ui.get_rect(topleft=(276, 760)))
